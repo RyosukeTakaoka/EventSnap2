@@ -116,7 +116,7 @@ class AIFilterService {
 
         if let finalImage = colorFilter?.outputImage,
            let cgImage = context.createCGImage(finalImage, from: finalImage.extent) {
-            return UIImage(cgImage: cgImage)
+            return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
         }
 
         return image
@@ -133,7 +133,7 @@ class AIFilterService {
 
         if let outputImage = filter?.outputImage,
            let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
-            return UIImage(cgImage: cgImage)
+            return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
         }
 
         return image
@@ -151,7 +151,7 @@ class AIFilterService {
 
         if let outputImage = filter?.outputImage,
            let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
-            return UIImage(cgImage: cgImage)
+            return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
         }
 
         return image
@@ -166,7 +166,7 @@ class AIFilterService {
 
         if let outputImage = filter?.outputImage,
            let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
-            return UIImage(cgImage: cgImage)
+            return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
         }
 
         return image
@@ -342,6 +342,7 @@ class AIFilterService {
         guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else {
             return nil
         }
-        return UIImage(cgImage: cgImage)
+        // フロントカメラの場合、画像の向きを補正
+        return UIImage(cgImage: cgImage, scale: 1.0, orientation: .upMirrored)
     }
 }

@@ -102,7 +102,7 @@ struct HomeView: View {
                 QRScannerView(eventViewModel: eventViewModel)
             }
             .fullScreenCover(isPresented: $eventViewModel.hasJoinedEvent) {
-                MainTabView()
+                MainTabView(initialTab: 0)
             }
         }
     }

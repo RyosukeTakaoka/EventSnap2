@@ -22,6 +22,7 @@ struct CameraView: View {
                 Image(uiImage: previewImage)
                     .resizable()
                     .scaledToFill()
+                    .rotationEffect(.degrees(90))
                     .ignoresSafeArea()
             } else {
                 // 通常のカメラプレビュー

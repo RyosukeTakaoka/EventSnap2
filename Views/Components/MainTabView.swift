@@ -1,121 +1,132 @@
 //
-//  MainTabView.swift
-//  EventSnap
-//
+ //  MainTabView.swift
+ //  EventSnap
+ //
 
-import SwiftUI
+ import SwiftUI
 
-struct MainTabView: View {
-    @StateObject private var eventViewModel = EventViewModel()
-    @State private var selectedTab = 1
+ struct MainTabView: View {
+     @StateObject private var eventViewModel = EventViewModel()
+     @State private var selectedTab = 0  // QRコード画面を最初に表示
 
-    var body: some View {
-        TabView(selection: $selectedTab) {
-            QRCodeView(eventViewModel: eventViewModel)
-                .tabItem {
-                    Label("QRコード", systemImage: "qrcode")
-                }
-                .tag(0)
+     // ← この行を追加（外部から初期タブを指定可能にする）
+     var initialTab: Int = 0
 
-            CameraView()
-                .tabItem {
-                    Label("カメラ", systemImage: "camera.fill")
-                }
-                .tag(1)
+     var body: some View {
+         TabView(selection: $selectedTab) {
+             QRCodeView(eventViewModel: eventViewModel)
+                 .tabItem {
+                     Label("QRコード", systemImage: "qrcode")
+                 }
+                 .tag(0)
 
-            AlbumView()
-                .tabItem {
-                    Label("アルバム", systemImage: "photo.on.rectangle")
-                }
-                .tag(2)
+             CameraView()
+                 .tabItem {
+                     Label("カメラ", systemImage: "camera.fill")
+                 }
+                 .tag(1)
 
-            EventSettingsView(eventViewModel: eventViewModel)
-                .tabItem {
-                    Label("設定", systemImage: "gear")
-                }
-                .tag(3)
-        }
-        .accentColor(.blue)
-        .task {
-            // アプリ起動時にイベントがなければ作成
-            if eventViewModel.currentEvent == nil {
-                print("⚠️ イベントがないため、デフォルトイベントを作成します")
-                await eventViewModel.createEvent(name: "マイイベント")
-            }
-        }
-    }
-}
+             AlbumView()
+                 .tabItem {
+                     Label("アルバム", systemImage: "photo.on.rectangle")
+                 }
+                 .tag(2)
 
-// MARK: - イベント設定ビュー
+             EventSettingsView(eventViewModel: eventViewModel)
+                 .tabItem {
+                     Label("設定", systemImage: "gear")
+                 }
+                 .tag(3)
+         }
+         .accentColor(.blue)
+         .onAppear {
+             // ← この行を追加（初回表示時に初期タブを設定）
+             selectedTab = initialTab
+         }
+         .task {
+             // アプリ起動時にイベントがなければ作成
+             if eventViewModel.currentEvent == nil {
+                 print("⚠️ イベントがないため、デフォルトイベントを作成します")
+                 await eventViewModel.createEvent(name: "マイイベント")
+             }
+         }
+     }
+ }
 
-struct EventSettingsView: View {
-    @ObservedObject var eventViewModel: EventViewModel
-    @Environment(\.dismiss) var dismiss
+ // MARK: - イベント設定ビュー
 
-    var body: some View {
-        NavigationView {
-            List {
-                Section("イベント情報") {
-                    HStack {
-                        Text("イベント名")
-                        Spacer()
-                        Text(eventViewModel.currentEvent?.name ?? "読み込み中...")
-                            .foregroundColor(.secondary)
-                    }
+ struct EventSettingsView: View {
+     @ObservedObject var eventViewModel: EventViewModel
+     @Environment(\.dismiss) var dismiss
 
-                    HStack {
-                        Text("参加者")
-                        Spacer()
-                        Text("\(eventViewModel.participants.count)人")
-                            .foregroundColor(.secondary)
-                    }
+     var body: some View {
+         NavigationView {
+             List {
+                 Section("イベント情報") {
+                     HStack {
+                         Text("イベント名")
+                         Spacer()
+                         Text(eventViewModel.currentEvent?.name ??
+ "読み込み中...")
+                             .foregroundColor(.secondary)
+                     }
 
-                    HStack {
-                        Text("作成日時")
-                        Spacer()
-                        if let createdAt = eventViewModel.currentEvent?.createdAt {
-                            Text(createdAt.formatted(date: .abbreviated, time: .shortened))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
+                     HStack {
+                         Text("参加者")
+                         Spacer()
+                         Text("\(eventViewModel.participants.count)人")
+                             .foregroundColor(.secondary)
+                     }
 
-                Section("アクション") {
-                    Button {
-                        Task {
-                            await eventViewModel.refreshEvent()
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.clockwise")
-                            Text("更新")
-                        }
-                    }
-                }
+                     HStack {
+                         Text("作成日時")
+                         Spacer()
+                         if let createdAt =
+ eventViewModel.currentEvent?.createdAt {
+                             Text(createdAt.formatted(date: .abbreviated,
+ time: .shortened))
+                                 .foregroundColor(.secondary)
+                         }
+                     }
+                 }
 
-                Section {
-                    Button(role: .destructive) {
-                        Task {
-                            await eventViewModel.endEvent()
-                            dismiss()
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "xmark.circle")
-                            Text("イベントを終了")
-                        }
-                    }
-                } header: {
-                    Text("危険な操作")
-                } footer: {
-                    Text("イベントを終了すると、新しい写真の追加ができなくなります。")
-                }
-            }
-            .navigationTitle("設定")
-        }
-    }
-}
+                 Section("アクション") {
+                     Button {
+                         Task {
+                             await eventViewModel.refreshEvent()
+                         }
+                     } label: {
+                         HStack {
+                             Image(systemName: "arrow.clockwise")
+                             Text("更新")
+                         }
+                     }
+                 }
 
-#Preview {
-    MainTabView()
-}
+                 Section {
+                     Button(role: .destructive) {
+                         Task {
+                             await eventViewModel.endEvent()
+                             dismiss()
+                         }
+                     } label: {
+                         HStack {
+                             Image(systemName: "xmark.circle")
+                             Text("イベントを終了")
+                         }
+                     }
+                 } header: {
+                     Text("危険な操作")
+                 } footer: {
+
+ Text("イベントを終了すると、新しい写真の追加ができなくなります。")
+                 }
+             }
+             .navigationTitle("設定")
+         }
+     }
+ }
+
+ #Preview {
+     MainTabView()
+ }
