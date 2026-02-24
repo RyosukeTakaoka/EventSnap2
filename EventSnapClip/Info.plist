@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- App Clip用の設定 -->
+	<key>NSAppClip</key>
+	<dict>
+		<!-- App Clip Experience URL -->
+		<key>NSAppClipRequestEphemeralUserNotification</key>
+		<false/>
+		<key>NSAppClipRequestLocationConfirmation</key>
+		<false/>
+	</dict>
+
+	<!-- カメラ使用の許可 -->
+	<key>NSCameraUsageDescription</key>
+	<string>イベントの写真を撮影するためにカメラを使用します</string>
+
+	<!-- フォトライブラリへのアクセス -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>撮影した写真を保存するためにフォトライブラリへのアクセスが必要です</string>
+
+	<!-- Bundle Display Name -->
+	<key>CFBundleDisplayName</key>
+	<string>EventSnap</string>
+
+	<!-- Version -->
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+</dict>
+</plist>

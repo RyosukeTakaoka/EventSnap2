@@ -1,0 +1,29 @@
+{
+  "appclips": {
+    "apps": [
+      "TEAMID.app.takaoka.com.EventSnap2.Clip"
+    ]
+  },
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.app.takaoka.com.EventSnap2",
+        "paths": [
+          "/event/*"
+        ]
+      },
+      {
+        "appID": "TEAMID.app.takaoka.com.EventSnap2.Clip",
+        "paths": [
+          "/event/*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAMID.app.takaoka.com.EventSnap2"
+    ]
+  }
+}
