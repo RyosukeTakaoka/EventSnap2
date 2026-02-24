@@ -16,11 +16,5 @@
 	<array>
 		<string>group.app.takaoka.com.EventSnap2</string>
 	</array>
-	<!-- Associated Domains（Universal Links & App Clip用） -->
-	<key>com.apple.developer.associated-domains</key>
-	<array>
-		<string>appclips:eventsnap.example.com</string>
-		<string>webcredentials:eventsnap.example.com</string>
-	</array>
 </dict>
 </plist>
