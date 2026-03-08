@@ -7,7 +7,30 @@
 		<key>EventSnap2.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+		<key>EventSnapClip.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>7760F8AE2F5D29DB00F18A2E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>7760F8BC2F5D29DD00F18A2E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>7760F8C62F5D29DD00F18A2E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

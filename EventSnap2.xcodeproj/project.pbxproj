@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -17,6 +17,19 @@
 		2A38855153B264258C228C9C /* FilterPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFCAE433E8096D49781D2F3D /* FilterPickerView.swift */; };
 		34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */; };
 		6672E15CA9D7AD5E2FC592FC /* AlbumViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */; };
+		7760F8D12F5D29DD00F18A2E /* EventSnapClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = 7760F8AF2F5D29DB00F18A2E /* EventSnapClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7760F8DF2F5D2B0600F18A2E /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B6F77360BB3B5ED718507C /* Event.swift */; };
+		7760F8E02F5D2B1500F18A2E /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3CB1C550D157424087F6B4 /* Participant.swift */; };
+		7760F8E12F5D2B1B00F18A2E /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */; };
+		7760F8E22F5D2B2700F18A2E /* AIFilterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CB51D1A3000AF3AEC06A1E2 /* AIFilterService.swift */; };
+		7760F8E32F5D2B2C00F18A2E /* EventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C600D3D5C6BB4F411ED1607B /* EventRepository.swift */; };
+		7760F8E42F5D2B3000F18A2E /* PhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */; };
+		7760F8E52F5D2B3400F18A2E /* QRCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38C4572E49ADF53996217172 /* QRCodeService.swift */; };
+		7760F8E62F5D2C8E00F18A2E /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603E3322F12D494691F2AB55 /* CameraViewModel.swift */; };
+		7760F8E72F5D2C9400F18A2E /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */; };
+		7760F8E82F5D2CAA00F18A2E /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0CA4F056D31CD263119C9D8 /* CameraView.swift */; };
+		7760F8E92F5D2CAF00F18A2E /* FilterPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFCAE433E8096D49781D2F3D /* FilterPickerView.swift */; };
+		7760F8EA2F5D2CBC00F18A2E /* assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7760F8AA2F5D236F00F18A2E /* assets.xcassets */; };
 		7C142E68F84DD7505B638AC5 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0CA4F056D31CD263119C9D8 /* CameraView.swift */; };
 		94A53529D607048BD1840E6E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05ED44B24BF30673E712740A /* QRCodeView.swift */; };
 		9B2319CCFD1753657F39F1FE /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1FC9B16BEEE0613D3DEA5D /* MainTabView.swift */; };
@@ -27,6 +40,44 @@
 		F2CAC544E91C5A9FEC4EC5B5 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		7760F8BE2F5D29DD00F18A2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7760F8AE2F5D29DB00F18A2E;
+			remoteInfo = EventSnapClip;
+		};
+		7760F8C82F5D29DD00F18A2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7760F8AE2F5D29DB00F18A2E;
+			remoteInfo = EventSnapClip;
+		};
+		7760F8CF2F5D29DD00F18A2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7760F8AE2F5D29DB00F18A2E;
+			remoteInfo = EventSnapClip;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7760F8D62F5D29DD00F18A2E /* Embed App Clips */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/AppClips";
+			dstSubfolderSpec = 16;
+			files = (
+				7760F8D12F5D29DD00F18A2E /* EventSnapClip.app in Embed App Clips */,
+			);
+			name = "Embed App Clips";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		05ED44B24BF30673E712740A /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		0CB51D1A3000AF3AEC06A1E2 /* AIFilterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIFilterService.swift; sourceTree = "<group>"; };
@@ -36,6 +87,10 @@
 		54C236C172F86BEBC915519F /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
 		5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewModel.swift; sourceTree = "<group>"; };
 		603E3322F12D494691F2AB55 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
+		7760F8AA2F5D236F00F18A2E /* assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = assets.xcassets; sourceTree = "<group>"; };
+		7760F8AF2F5D29DB00F18A2E /* EventSnapClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnapClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7760F8BD2F5D29DD00F18A2E /* EventSnapClipTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventSnapClipTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7760F8C72F5D29DD00F18A2E /* EventSnapClipUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventSnapClipUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A1FC9B16BEEE0613D3DEA5D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		8257853D0F117AD23C2561B6 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		A2D16059709C44664F34BE80 /* EventSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapApp.swift; sourceTree = "<group>"; };
@@ -48,6 +103,46 @@
 		F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewModel.swift; sourceTree = "<group>"; };
 		FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		7760F8D22F5D29DD00F18A2E /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 7760F8AE2F5D29DB00F18A2E /* EventSnapClip */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		7760F8B02F5D29DB00F18A2E /* EventSnapClip */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (7760F8D22F5D29DD00F18A2E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = EventSnapClip; sourceTree = "<group>"; };
+		7760F8C02F5D29DD00F18A2E /* EventSnapClipTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = EventSnapClipTests; sourceTree = "<group>"; };
+		7760F8CA2F5D29DD00F18A2E /* EventSnapClipUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = EventSnapClipUITests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7760F8AC2F5D29DB00F18A2E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7760F8BA2F5D29DD00F18A2E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7760F8C42F5D29DD00F18A2E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		1E58259F9C4ED7C03B68737C /* ViewModels */ = {
@@ -110,6 +205,9 @@
 			isa = PBXGroup;
 			children = (
 				BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */,
+				7760F8AF2F5D29DB00F18A2E /* EventSnapClip.app */,
+				7760F8BD2F5D29DD00F18A2E /* EventSnapClipTests.xctest */,
+				7760F8C72F5D29DD00F18A2E /* EventSnapClipUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -138,11 +236,15 @@
 		EE37BEE979FB00FB2D8DFAF6 = {
 			isa = PBXGroup;
 			children = (
+				7760F8AA2F5D236F00F18A2E /* assets.xcassets */,
 				A2D16059709C44664F34BE80 /* EventSnapApp.swift */,
 				BC50DA07C3F6CCC4452B93EF /* Models */,
 				7EADC30A06EEA49AA9CE8AD4 /* Services */,
 				1E58259F9C4ED7C03B68737C /* ViewModels */,
 				B46D40979E843E46E78EE80A /* Views */,
+				7760F8B02F5D29DB00F18A2E /* EventSnapClip */,
+				7760F8C02F5D29DD00F18A2E /* EventSnapClipTests */,
+				7760F8CA2F5D29DD00F18A2E /* EventSnapClipUITests */,
 				AF726F6A46D7E6C672320238 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -150,15 +252,85 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		7760F8AE2F5D29DB00F18A2E /* EventSnapClip */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7760F8D32F5D29DD00F18A2E /* Build configuration list for PBXNativeTarget "EventSnapClip" */;
+			buildPhases = (
+				7760F8AB2F5D29DB00F18A2E /* Sources */,
+				7760F8AC2F5D29DB00F18A2E /* Frameworks */,
+				7760F8AD2F5D29DB00F18A2E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				7760F8B02F5D29DB00F18A2E /* EventSnapClip */,
+			);
+			name = EventSnapClip;
+			packageProductDependencies = (
+			);
+			productName = EventSnapClip;
+			productReference = 7760F8AF2F5D29DB00F18A2E /* EventSnapClip.app */;
+			productType = "com.apple.product-type.application.on-demand-install-capable";
+		};
+		7760F8BC2F5D29DD00F18A2E /* EventSnapClipTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7760F8D72F5D29DD00F18A2E /* Build configuration list for PBXNativeTarget "EventSnapClipTests" */;
+			buildPhases = (
+				7760F8B92F5D29DD00F18A2E /* Sources */,
+				7760F8BA2F5D29DD00F18A2E /* Frameworks */,
+				7760F8BB2F5D29DD00F18A2E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7760F8BF2F5D29DD00F18A2E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				7760F8C02F5D29DD00F18A2E /* EventSnapClipTests */,
+			);
+			name = EventSnapClipTests;
+			packageProductDependencies = (
+			);
+			productName = EventSnapClipTests;
+			productReference = 7760F8BD2F5D29DD00F18A2E /* EventSnapClipTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		7760F8C62F5D29DD00F18A2E /* EventSnapClipUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7760F8DA2F5D29DD00F18A2E /* Build configuration list for PBXNativeTarget "EventSnapClipUITests" */;
+			buildPhases = (
+				7760F8C32F5D29DD00F18A2E /* Sources */,
+				7760F8C42F5D29DD00F18A2E /* Frameworks */,
+				7760F8C52F5D29DD00F18A2E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7760F8C92F5D29DD00F18A2E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				7760F8CA2F5D29DD00F18A2E /* EventSnapClipUITests */,
+			);
+			name = EventSnapClipUITests;
+			packageProductDependencies = (
+			);
+			productName = EventSnapClipUITests;
+			productReference = 7760F8C72F5D29DD00F18A2E /* EventSnapClipUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		A60D9DB389684BE846D04D06 /* EventSnap2 */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 138C64439E8A39F331A152A1 /* Build configuration list for PBXNativeTarget "EventSnap2" */;
 			buildPhases = (
 				6949D50C2CAE67F39314B1AC /* Sources */,
+				7760F8D62F5D29DD00F18A2E /* Embed App Clips */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				7760F8D02F5D29DD00F18A2E /* PBXTargetDependency */,
 			);
 			name = EventSnap2;
 			packageProductDependencies = (
@@ -174,7 +346,21 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					7760F8AE2F5D29DB00F18A2E = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
+					7760F8BC2F5D29DD00F18A2E = {
+						CreatedOnToolsVersion = 26.1.1;
+						TestTargetID = 7760F8AE2F5D29DB00F18A2E;
+					};
+					7760F8C62F5D29DD00F18A2E = {
+						CreatedOnToolsVersion = 26.1.1;
+						TestTargetID = 7760F8AE2F5D29DB00F18A2E;
+					};
+				};
 			};
 			buildConfigurationList = 1CE129AC6942FFA347D9BBE2 /* Build configuration list for PBXProject "EventSnap2" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -190,9 +376,37 @@
 			projectRoot = "";
 			targets = (
 				A60D9DB389684BE846D04D06 /* EventSnap2 */,
+				7760F8AE2F5D29DB00F18A2E /* EventSnapClip */,
+				7760F8BC2F5D29DD00F18A2E /* EventSnapClipTests */,
+				7760F8C62F5D29DD00F18A2E /* EventSnapClipUITests */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7760F8AD2F5D29DB00F18A2E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7760F8EA2F5D2CBC00F18A2E /* assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7760F8BB2F5D29DD00F18A2E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7760F8C52F5D29DD00F18A2E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6949D50C2CAE67F39314B1AC /* Sources */ = {
@@ -220,7 +434,57 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7760F8AB2F5D29DB00F18A2E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7760F8E12F5D2B1B00F18A2E /* Photo.swift in Sources */,
+				7760F8E72F5D2C9400F18A2E /* EventViewModel.swift in Sources */,
+				7760F8E82F5D2CAA00F18A2E /* CameraView.swift in Sources */,
+				7760F8DF2F5D2B0600F18A2E /* Event.swift in Sources */,
+				7760F8E32F5D2B2C00F18A2E /* EventRepository.swift in Sources */,
+				7760F8E52F5D2B3400F18A2E /* QRCodeService.swift in Sources */,
+				7760F8E02F5D2B1500F18A2E /* Participant.swift in Sources */,
+				7760F8E62F5D2C8E00F18A2E /* CameraViewModel.swift in Sources */,
+				7760F8E22F5D2B2700F18A2E /* AIFilterService.swift in Sources */,
+				7760F8E42F5D2B3000F18A2E /* PhotoRepository.swift in Sources */,
+				7760F8E92F5D2CAF00F18A2E /* FilterPickerView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7760F8B92F5D29DD00F18A2E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7760F8C32F5D29DD00F18A2E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7760F8BF2F5D29DD00F18A2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7760F8AE2F5D29DB00F18A2E /* EventSnapClip */;
+			targetProxy = 7760F8BE2F5D29DD00F18A2E /* PBXContainerItemProxy */;
+		};
+		7760F8C92F5D29DD00F18A2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7760F8AE2F5D29DB00F18A2E /* EventSnapClip */;
+			targetProxy = 7760F8C82F5D29DD00F18A2E /* PBXContainerItemProxy */;
+		};
+		7760F8D02F5D29DD00F18A2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7760F8AE2F5D29DB00F18A2E /* EventSnapClip */;
+			targetProxy = 7760F8CF2F5D29DD00F18A2E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		08FE3C3BF15158B2E0E575BF /* Release */ = {
@@ -283,6 +547,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = EventSnap.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
@@ -290,7 +555,7 @@
 				DEVELOPMENT_TEAM = 5B2NQ74986;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -304,10 +569,219 @@
 			};
 			name = Debug;
 		};
+		7760F8D42F5D29DD00F18A2E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EventSnapClip/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EventSnap;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Clip;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7760F8D52F5D29DD00F18A2E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EventSnapClip/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EventSnap;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Clip;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		7760F8D82F5D29DD00F18A2E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3P2VBG45Y8;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.EventSnapClipTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EventSnapClip.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EventSnapClip";
+			};
+			name = Debug;
+		};
+		7760F8D92F5D29DD00F18A2E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3P2VBG45Y8;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.EventSnapClipTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EventSnapClip.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EventSnapClip";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		7760F8DB2F5D29DD00F18A2E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3P2VBG45Y8;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.EventSnapClipUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = EventSnapClip;
+			};
+			name = Debug;
+		};
+		7760F8DC2F5D29DD00F18A2E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3P2VBG45Y8;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.EventSnapClipUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = EventSnapClip;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		AB87C34F5564100CC6E0A3D2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = EventSnap.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
@@ -315,7 +789,7 @@
 				DEVELOPMENT_TEAM = 5B2NQ74986;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -409,6 +883,33 @@
 			buildConfigurations = (
 				F35EFD58DE283D02C8E36F36 /* Debug */,
 				08FE3C3BF15158B2E0E575BF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7760F8D32F5D29DD00F18A2E /* Build configuration list for PBXNativeTarget "EventSnapClip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7760F8D42F5D29DD00F18A2E /* Debug */,
+				7760F8D52F5D29DD00F18A2E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7760F8D72F5D29DD00F18A2E /* Build configuration list for PBXNativeTarget "EventSnapClipTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7760F8D82F5D29DD00F18A2E /* Debug */,
+				7760F8D92F5D29DD00F18A2E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7760F8DA2F5D29DD00F18A2E /* Build configuration list for PBXNativeTarget "EventSnapClipUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7760F8DB2F5D29DD00F18A2E /* Debug */,
+				7760F8DC2F5D29DD00F18A2E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
