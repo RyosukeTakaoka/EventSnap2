@@ -35,7 +35,10 @@ class EventViewModel: ObservableObject {
             self.hasJoinedEvent = true
             print("✅ 既存のイベントを読み込みました: \(currentEvent?.name ?? "")")
         } else {
-            print("⚠️ イベントがまだ作成されていません")
+            print("⚠️ イベントがまだ作成されていません。前回のイベントの復元を試みます")
+            Task {
+                await eventRepository.restoreEvent()
+            }
         }
     }
 

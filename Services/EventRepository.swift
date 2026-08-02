@@ -21,9 +21,34 @@ class EventRepository: ObservableObject {
 
     private let container = CKContainer.default()
     private var database: CKDatabase
+    private let currentEventIDKey = "currentEventID"
 
     init() {
         self.database = container.publicCloudDatabase
+    }
+
+    // MARK: - イベント永続化
+
+    private func saveCurrentEventID(_ id: UUID?) {
+        if let id = id {
+            UserDefaults.standard.set(id.uuidString, forKey: currentEventIDKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: currentEventIDKey)
+        }
+    }
+
+    /// 前回作成・参加したイベントをアプリ起動時に復元
+    func restoreEvent() async {
+        guard currentEvent == nil,
+              let savedID = UserDefaults.standard.string(forKey: currentEventIDKey) else { return }
+
+        do {
+            try await joinEvent(eventID: savedID)
+            print("✅ イベントを復元しました: \(savedID)")
+        } catch {
+            print("⚠️ イベントの復元に失敗（保存済みIDをクリア）: \(error)")
+            saveCurrentEventID(nil)
+        }
     }
 
     // MARK: - イベント作成
@@ -46,6 +71,7 @@ class EventRepository: ObservableObject {
         do {
             _ = try await database.save(record)
             self.currentEvent = event
+            saveCurrentEventID(event.id)
 
             // 作成者を参加者に追加
             let creator = Participant(
@@ -102,6 +128,7 @@ class EventRepository: ObservableObject {
             }
 
             self.currentEvent = event
+            saveCurrentEventID(event.id)
 
             // 参加者情報を作成
             let participant = Participant(
@@ -157,6 +184,7 @@ class EventRepository: ObservableObject {
         do {
             _ = try await database.save(record)
             self.currentEvent = event
+            saveCurrentEventID(nil)
             print("✅ イベント終了")
         } catch {
             print("❌ イベント終了失敗: \(error)")
