@@ -1,0 +1,662 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>EventSnap promo storyboard 9:16</title>
+<style>
+  /* ==========================================================================
+     EventSnap 縦型プロモ 1080x1920 / 16秒 / 30fps
+     すべてのアニメーションは window.seek(t) の純粋関数。
+     capture.mjs が t を進めながら1frameずつスクショする。
+     ========================================================================== */
+  :root {
+    --brand-a: #3b6ff5;
+    --brand-b: #9333ea;
+    --brand-c: #ec4899;
+    --ink: #0b0d17;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  body {
+    font-family: "IPAPGothic", "IPAGothic", "Noto Sans CJK JP", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* IPAGothic に太字が無いので stroke で太らせる */
+  .b  { -webkit-text-stroke: 0.022em currentColor; paint-order: stroke fill; }
+  .bb { -webkit-text-stroke: 0.042em currentColor; paint-order: stroke fill; }
+
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  .scene { position: absolute; inset: 0; opacity: 0; will-change: opacity; }
+
+  /* ---------- 共通パーツ ---------- */
+  .brandbg {
+    position: absolute; inset: -10%;
+    background:
+      radial-gradient(60% 45% at 20% 12%, #5b8def 0%, transparent 60%),
+      radial-gradient(65% 50% at 85% 30%, #a855f7 0%, transparent 62%),
+      radial-gradient(70% 55% at 50% 95%, #ec4899 0%, transparent 60%),
+      linear-gradient(160deg, #2a1c6b 0%, #4c1d95 45%, #831843 100%);
+  }
+  .grain {
+    position: absolute; inset: 0; opacity: .18; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
+  }
+  .vig { position: absolute; inset: 0; background: radial-gradient(70% 55% at 50% 45%, transparent 40%, rgba(0,0,0,.55) 100%); }
+
+  /* ==================== S1 フック 0.0-2.0s ==================== */
+  #s1 { background: #07080f; }
+  #s1 .glow {
+    position: absolute; left: 50%; top: 46%; width: 1400px; height: 1400px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(88,101,242,.28) 0%, transparent 62%);
+  }
+  /* バラバラに散っていく写真カード = 「集まらない」 */
+  .scatter { position: absolute; left: 50%; top: 50%; width: 190px; height: 240px; margin: -120px 0 0 -95px; }
+  .scatter i {
+    position: absolute; inset: 0; display: block; border-radius: 14px;
+    border: 5px solid #fff; background: #2a2f45; box-shadow: 0 24px 60px rgba(0,0,0,.6);
+    overflow: hidden;
+  }
+  .scatter i::after {
+    content: ""; position: absolute; inset: 0;
+    background: var(--ph, linear-gradient(140deg, #6366f1, #ec4899));
+    opacity: .95;
+  }
+  /* 平坦なグラデを「写真」に見せる共通の陰影 */
+  .photoish { position: relative; }
+  .photoish::before {
+    content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background:
+      radial-gradient(130% 95% at 28% 16%, rgba(255,255,255,.34) 0%, transparent 56%),
+      linear-gradient(198deg, transparent 42%, rgba(0,0,0,.42) 100%);
+  }
+  #s1 .copy { position: absolute; left: 0; right: 0; top: 300px; text-align: center; color: #fff; }
+  #s1 .l1 { font-size: 74px; line-height: 1.34; letter-spacing: .01em; }
+  #s1 .l2 { font-size: 92px; line-height: 1.28; margin-top: 14px; }
+  #s1 .l2 em { font-style: normal; color: #ff5d7d; position: relative; display: inline-block; }
+  #s1 .strike {
+    position: absolute; left: -4%; top: 56%; height: 9px; width: 108%;
+    background: #ff5d7d; border-radius: 6px; transform-origin: left center; transform: scaleX(0);
+    box-shadow: 0 0 26px rgba(255,93,125,.9);
+  }
+
+  /* ==================== S2 解決策 2.0-5.0s ==================== */
+  #s2 .wrap { position: absolute; left: 0; right: 0; top: 430px; text-align: center; color: #fff; }
+  #s2 .icon {
+    width: 300px; height: 300px; border-radius: 68px; margin: 0 auto 46px;
+    box-shadow: 0 40px 90px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.14) inset;
+    background-size: cover;
+  }
+  #s2 .name { font-size: 116px; letter-spacing: .012em; }
+  #s2 .tag { font-size: 54px; margin-top: 26px; color: rgba(255,255,255,.94); line-height: 1.45; }
+  #s2 .chips { display: flex; gap: 18px; justify-content: center; margin-top: 66px; }
+  #s2 .chip {
+    font-size: 34px; color: #fff; padding: 20px 30px; border-radius: 999px;
+    background: rgba(255,255,255,.16); border: 2px solid rgba(255,255,255,.34);
+    backdrop-filter: blur(8px); white-space: nowrap;
+  }
+
+  /* ==================== S3 実演 5.0-12.0s ==================== */
+  #s3 { background: #0a0b14; }
+  #s3 .bg { position: absolute; inset: -10%;
+    background: radial-gradient(58% 40% at 50% 16%, rgba(147,51,234,.42) 0%, transparent 64%),
+                radial-gradient(70% 50% at 50% 100%, rgba(59,111,245,.32) 0%, transparent 62%),
+                #0a0b14; }
+  #s3 .cap { position: absolute; left: 0; right: 0; top: 168px; text-align: center; color: #fff; }
+  #s3 .step {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 62px; height: 62px; border-radius: 999px; font-size: 34px;
+    background: #fff; color: #7c3aed; margin-bottom: 20px;
+  }
+  #s3 .ctxt { font-size: 60px; line-height: 1.32; }
+  #s3 .csub { font-size: 34px; margin-top: 14px; color: rgba(255,255,255,.72); }
+  #s3 .capline { position: absolute; left: 0; right: 0; }
+
+  /* ---- 端末モック ---- */
+  .phone {
+    position: absolute; left: 50%; top: 390px; width: 531px; height: 1121px; margin-left: -265.5px;
+    border-radius: 58px; background: #14151c; padding: 13px;
+    box-shadow: 0 50px 110px rgba(0,0,0,.62), 0 0 0 2px rgba(255,255,255,.10);
+  }
+  .phone .screen {
+    position: relative; width: 505px; height: 1095px; border-radius: 46px;
+    overflow: hidden; background: #fff;
+  }
+  /* 393x852(iPhone論理px)で作ったUIを 505/393 倍して実寸に合わせる */
+  .ui {
+    position: absolute; left: 0; top: 0; width: 393px; height: 852px;
+    transform: scale(1.284987); transform-origin: 0 0;
+    background: #fff; color: #000;
+    font-size: 17px; opacity: 0;
+  }
+  .ui.on { opacity: 1; }
+  .ui img.shot { width: 393px; height: 852px; object-fit: cover; }
+
+  /* iOS ステータスバー */
+  .sbar { position: absolute; left: 0; right: 0; top: 0; height: 54px; display: flex;
+          align-items: center; justify-content: space-between; padding: 16px 30px 0;
+          font-size: 15px; z-index: 5; }
+  .sbar .r { display: flex; gap: 6px; align-items: center; }
+  .sbar .bat { width: 25px; height: 12px; border: 1.5px solid currentColor; border-radius: 3px; position: relative; opacity: .95; }
+  .sbar .bat::before { content: ""; position: absolute; inset: 2px; right: 6px; background: currentColor; border-radius: 1px; }
+  .sbar.dark { color: #fff; }
+
+  /* iOS タブバー (MainTabView) */
+  .tabbar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 83px; z-index: 5;
+    background: rgba(249,249,249,.94); border-top: .5px solid rgba(0,0,0,.18);
+    display: flex; align-items: flex-start; padding-top: 8px;
+  }
+  .tabbar div { flex: 1; text-align: center; color: #8e8e93; font-size: 10px; }
+  .tabbar div svg { display: block; margin: 0 auto 3px; width: 26px; height: 24px; fill: currentColor; }
+  .tabbar div.sel { color: #007aff; }
+
+  /* --- QRCodeView --- */
+  .qr-title { text-align: center; font-size: 28px; padding-top: 78px; }
+  .qr-sub { text-align: center; font-size: 17px; color: #8a8a8e; margin-top: 30px; }
+  .qr-card {
+    width: 280px; height: 280px; margin: 30px auto 0; border-radius: 20px; background: #fff;
+    box-shadow: 0 5px 10px rgba(0,0,0,.10); display: flex; align-items: center; justify-content: center;
+  }
+  .qr-card svg, .qr-card img { width: 240px; height: 240px; }
+  .qr-info {
+    width: 337px; margin: 30px auto 0; background: #f2f2f7; border-radius: 16px;
+    padding: 16px; text-align: center;
+  }
+  .qr-info .nm { font-size: 22px; }
+  .qr-info .row { display: flex; gap: 20px; justify-content: center; margin-top: 12px; color: #8a8a8e; font-size: 15px; }
+  .qr-info .row span { display: inline-flex; align-items: center; gap: 5px; }
+  .qr-info .row svg { width: 17px; height: 15px; fill: currentColor; }
+
+  /* --- QRScannerView --- */
+  .scan-ui { background: #101014; }
+  .scan-feed { position: absolute; inset: 0; }
+  .scan-frame {
+    position: absolute; left: 50%; top: 50%; width: 250px; height: 250px; margin: -125px 0 0 -125px;
+    border: 3px solid #fff; border-radius: 20px;
+  }
+  .scan-laser { position: absolute; left: 6px; right: 6px; height: 3px; background: #34d399;
+                box-shadow: 0 0 22px 5px rgba(52,211,153,.85); border-radius: 3px; }
+  .scan-hint {
+    position: absolute; left: 50%; bottom: 132px; transform: translateX(-50%);
+    background: rgba(0,0,0,.7); color: #fff; font-size: 17px; padding: 14px 16px; border-radius: 12px;
+    white-space: nowrap;
+  }
+  .scan-ok {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    text-align: center; color: #fff; opacity: 0;
+  }
+  .scan-ok .ck { width: 108px; height: 108px; border-radius: 999px; background: #34d399;
+                 display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .scan-ok .ck svg { width: 54px; height: 54px; stroke: #fff; stroke-width: 9; fill: none;
+                     stroke-linecap: round; stroke-linejoin: round; }
+  .scan-ok .t { font-size: 22px; white-space: nowrap; text-shadow: 0 2px 12px rgba(0,0,0,.9); }
+
+  /* --- CameraView --- */
+  .cam-ui { background: #000; }
+  .cam-feed { position: absolute; inset: 0; }
+  .cam-top { position: absolute; left: 0; right: 0; top: 62px; display: flex; align-items: center; padding: 0 16px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px; border-radius: 16px;
+    padding: 6px 12px; font-size: 15px;
+  }
+  .pill svg { width: 16px; height: 16px; fill: currentColor; }
+  .pill.rt { background: rgba(255,204,0,.8); color: #000; }
+  .pill.ft { background: rgba(0,0,0,.6); color: #fff; border-radius: 20px; padding: 8px 16px; }
+  .cam-slider {
+    position: absolute; left: 16px; right: 16px; top: 112px; display: flex; align-items: center; gap: 10px;
+    background: rgba(0,0,0,.6); border-radius: 16px; padding: 12px 20px; color: #fff;
+  }
+  .cam-slider .track { flex: 1; height: 4px; border-radius: 3px; background: rgba(255,255,255,.3); position: relative; }
+  .cam-slider .fill { position: absolute; left: 0; top: 0; bottom: 0; background: #ffcc00; border-radius: 3px; }
+  .cam-slider .knob { position: absolute; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+                      background: #fff; border-radius: 999px; box-shadow: 0 1px 4px rgba(0,0,0,.4); }
+  .cam-slider .pc { font-size: 12px; width: 40px; text-align: right; }
+  .cam-slider svg { width: 18px; height: 18px; fill: #fff; }
+  .shutter { position: absolute; left: 50%; bottom: 40px; width: 80px; height: 80px; margin-left: -40px; }
+  .shutter .ring { position: absolute; inset: 0; border: 3px solid #fff; border-radius: 999px; }
+  .shutter .core { position: absolute; left: 5px; top: 5px; width: 70px; height: 70px; background: #fff; border-radius: 999px; }
+  .cam-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+  .cam-toast {
+    position: absolute; left: 50%; bottom: 150px; transform: translateX(-50%);
+    display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+    background: rgba(52,211,153,.94); color: #04231a; font-size: 15px;
+    padding: 10px 16px; border-radius: 999px; opacity: 0;
+  }
+
+  /* --- AlbumView --- */
+  .alb-nav { position: absolute; left: 0; right: 0; top: 54px; height: 44px;
+             display: flex; align-items: center; justify-content: center;
+             border-bottom: .5px solid rgba(0,0,0,.14); font-size: 17px; background: rgba(249,249,249,.94); z-index: 4; }
+  .alb-nav .cnt { position: absolute; right: 16px; font-size: 15px; color: #8a8a8e;
+                  display: inline-flex; align-items: center; gap: 5px; }
+  .alb-nav .cnt svg { width: 17px; height: 15px; fill: currentColor; }
+  .alb-grid { position: absolute; left: 0; right: 0; top: 98px; display: grid;
+              grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .alb-grid b { display: block; aspect-ratio: 1; background: #e5e5ea; opacity: 0; transform: scale(.86); overflow: hidden; }
+
+  /* ==================== S4 CTA 12.0-16.0s ==================== */
+  #s4 .wrap { position: absolute; left: 0; right: 0; top: 372px; text-align: center; color: #fff; }
+  #s4 .icon { width: 224px; height: 224px; border-radius: 51px; margin: 0 auto 44px;
+              box-shadow: 0 30px 70px rgba(0,0,0,.5); background-size: cover; }
+  #s4 .name { font-size: 84px; }
+  #s4 .lead { font-size: 76px; margin-top: 52px; line-height: 1.34; }
+  #s4 .sub { font-size: 38px; margin-top: 26px; color: rgba(255,255,255,.86); line-height: 1.5; }
+  #s4 .badges { display: flex; gap: 22px; justify-content: center; margin-top: 82px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 20px; background: #000; color: #fff;
+    border: 2px solid rgba(255,255,255,.34); border-radius: 24px; padding: 22px 44px;
+  }
+  .badge img { height: 104px; display: block; }
+  .badge .gl { width: 64px; height: 72px; fill: #fff; }
+  .badge .tx { text-align: left; }
+  .badge .tx small { display: block; font-size: 24px; opacity: .9; letter-spacing: .04em; }
+  .badge .tx strong { display: block; font-size: 48px; font-weight: normal; margin-top: 2px; letter-spacing: .01em; }
+  #s4 .handle { position: absolute; left: 0; right: 0; top: 1540px; text-align: center;
+                color: rgba(255,255,255,.9); font-size: 36px; }
+
+  /* 進捗バー(SNSの離脱防止用) */
+  #prog { position: absolute; left: 0; top: 0; height: 7px; background: rgba(255,255,255,.92); width: 0; z-index: 99; }
+</style>
+
+<div id="stage">
+  <!-- ============ S1 フック ============ -->
+  <section class="scene" id="s1">
+    <div class="glow"></div>
+    <div class="scatter" id="scat"></div>
+    <div class="copy">
+      <div class="l1 b" id="s1a">みんなで撮った写真、</div>
+      <div class="l2 bb" id="s1b">結局<em>集まらない<i class="strike" id="s1s"></i></em>。</div>
+    </div>
+    <div class="vig"></div>
+  </section>
+
+  <!-- ============ S2 解決策 ============ -->
+  <section class="scene" id="s2">
+    <div class="brandbg"></div><div class="grain"></div>
+    <div class="wrap">
+      <div class="icon" id="s2icon"></div>
+      <div class="name bb" id="s2name">EventSnap</div>
+      <div class="tag b" id="s2tag">撮った瞬間、<br />その場の全員のアルバムへ。</div>
+      <div class="chips" id="s2chips">
+        <div class="chip">QRでゼロ登録</div>
+        <div class="chip">撮って自動共有</div>
+        <div class="chip">AI美肌</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ S3 実演 ============ -->
+  <section class="scene" id="s3">
+    <div class="bg"></div>
+    <div class="cap">
+      <div class="capline" id="cap1"><div class="step b">1</div><div class="ctxt b">QRコードを見せるだけ</div><div class="csub">イベントを作って画面を向ける</div></div>
+      <div class="capline" id="cap2"><div class="step b">2</div><div class="ctxt b">かざすだけで参加</div><div class="csub">App Clip対応・インストール不要</div></div>
+      <div class="capline" id="cap3"><div class="step b">3</div><div class="ctxt b">いつも通り撮るだけ</div><div class="csub">AI美肌フィルターもリアルタイム</div></div>
+      <div class="capline" id="cap4"><div class="step b">4</div><div class="ctxt b">全員のアルバムに自動で集まる</div><div class="csub">送り合う手間はもう要らない</div></div>
+    </div>
+
+    <!-- 参加する側の端末(スキャナー) -->
+    <div class="phone" id="ph2" style="transform: scale(.82)">
+      <div class="screen">
+        <div class="ui scan-ui on" id="uiScan">
+          <div class="scan-feed" id="scanFeed"></div>
+          <div class="sbar dark"><span>9:41</span><span class="r"><span class="bat"></span></span></div>
+          <div class="scan-frame"><div class="scan-laser" id="laser"></div></div>
+          <div class="scan-hint">QRコードをフレーム内に収めてください</div>
+          <div class="scan-ok" id="scanOk">
+            <div class="ck"><svg viewBox="0 0 60 60"><polyline points="14,32 25,43 46,19" /></svg></div>
+            <div class="t b">イベントに参加しました</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主催者側の端末 -->
+    <div class="phone" id="ph1">
+      <div class="screen">
+        <!-- QRCodeView -->
+        <div class="ui" id="uiQR">
+          <div class="sbar"><span>9:41</span><span class="r"><span class="bat"></span></span></div>
+          <div class="qr-title b">友達を招待</div>
+          <div class="qr-sub">このQRコードを読み取ってもらおう！</div>
+          <div class="qr-card" id="qrSlot"></div>
+          <div class="qr-info">
+            <div class="nm b">夏フェス2026</div>
+            <div class="row">
+              <span><svg viewBox="0 0 20 18"><circle cx="6.5" cy="6" r="4"/><circle cx="14" cy="7" r="3.2"/><path d="M0 17c.6-4 3.2-6 6.5-6S12.4 13 13 17z"/><path d="M13.6 17c-.3-2.6-1.3-4.3-2.6-5.3.9-.5 1.9-.7 3-.7 3 0 5.4 1.8 6 6z"/></svg><b id="pcount">4人</b></span>
+              <span><svg viewBox="0 0 20 18"><rect x="0" y="2" width="20" height="15" rx="2.6"/><circle cx="6" cy="7.5" r="1.9" fill="#f2f2f7"/><path d="M2 15l5-5 3.4 3.4L14 9l4 6z" fill="#f2f2f7"/></svg><b id="qcount">12枚</b></span>
+            </div>
+          </div>
+          <div class="tabbar">
+            <div class="sel"><svg viewBox="0 0 26 24"><rect x="1" y="1" width="9" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="2"/><rect x="16" y="1" width="9" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="2"/><rect x="1" y="14" width="9" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="2"/><rect x="16" y="14" width="4" height="4"/><rect x="21" y="19" width="4" height="4"/></svg>QRコード</div>
+            <div><svg viewBox="0 0 26 24"><path d="M9.4 2h7.2l1.6 3H23a2 2 0 012 2v13a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h4.8z"/><circle cx="13" cy="13.5" r="4.6" fill="#f9f9f9"/></svg>カメラ</div>
+            <div><svg viewBox="0 0 26 24"><rect x="5" y="4" width="20" height="16" rx="2.4"/><rect x="1" y="1" width="20" height="16" rx="2.4" fill="none" stroke="currentColor" stroke-width="2"/></svg>アルバム</div>
+            <div><svg viewBox="0 0 26 24"><path d="M13 8a4 4 0 100 8 4 4 0 000-8zm11 4l-2.2-1.5.5-2.6-2.6-.6-.8-2.5-2.5.9L14 3.6l-1.9 2.1-2.5-.9-.8 2.5-2.6.6.5 2.6L4.5 12l1.7 1.5-.5 2.6 2.6.6.8 2.5 2.5-.9 1.9 2.1 1.9-2.1 2.5.9.8-2.5 2.6-.6-.5-2.6z"/></svg>設定</div>
+          </div>
+        </div>
+
+        <!-- CameraView -->
+        <div class="ui cam-ui" id="uiCam">
+          <div class="cam-feed" id="camFeed"></div>
+          <div class="sbar dark"><span>9:41</span><span class="r"><span class="bat"></span></span></div>
+          <div class="cam-top">
+            <span class="pill rt"><svg viewBox="0 0 16 16"><path d="M9.5 0L2 9h4.2L6 16l8-9H9.2z"/></svg>リアルタイム</span>
+            <span style="flex:1"></span>
+            <span class="pill ft"><svg viewBox="0 0 16 16"><path d="M8 0l1.5 4.3L14 6l-4.5 1.7L8 12 6.5 7.7 2 6l4.5-1.7z"/><path d="M13 10.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>美肌</span>
+          </div>
+          <div class="cam-slider">
+            <svg viewBox="0 0 16 16"><path d="M8 0l1.5 4.3L14 6l-4.5 1.7L8 12 6.5 7.7 2 6l4.5-1.7z"/></svg>
+            <div class="track"><div class="fill" id="beautyFill"></div><div class="knob" id="beautyKnob"></div></div>
+            <div class="pc" id="beautyPc">0%</div>
+          </div>
+          <div class="cam-toast" id="camToast">✓ 全員に共有しました</div>
+          <div class="shutter" id="shutter"><div class="ring"></div><div class="core"></div></div>
+          <div class="cam-flash" id="camFlash"></div>
+        </div>
+
+        <!-- AlbumView -->
+        <div class="ui" id="uiAlb">
+          <div class="sbar"><span>9:41</span><span class="r"><span class="bat"></span></span></div>
+          <div class="alb-nav"><span class="b">アルバム</span>
+            <span class="cnt"><svg viewBox="0 0 20 18"><rect x="0" y="2" width="20" height="15" rx="2.6"/><circle cx="6" cy="7.5" r="1.9" fill="#f9f9f9"/><path d="M2 15l5-5 3.4 3.4L14 9l4 6z" fill="#f9f9f9"/></svg><b id="albCount">0枚</b></span>
+          </div>
+          <div class="alb-grid" id="albGrid"></div>
+          <div class="tabbar">
+            <div><svg viewBox="0 0 26 24"><rect x="1" y="1" width="9" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="2"/><rect x="16" y="1" width="9" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="2"/><rect x="1" y="14" width="9" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="2"/><rect x="16" y="14" width="4" height="4"/><rect x="21" y="19" width="4" height="4"/></svg>QRコード</div>
+            <div><svg viewBox="0 0 26 24"><path d="M9.4 2h7.2l1.6 3H23a2 2 0 012 2v13a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h4.8z"/><circle cx="13" cy="13.5" r="4.6" fill="#f9f9f9"/></svg>カメラ</div>
+            <div class="sel"><svg viewBox="0 0 26 24"><rect x="5" y="4" width="20" height="16" rx="2.4"/><rect x="1" y="1" width="20" height="16" rx="2.4" fill="none" stroke="currentColor" stroke-width="2"/></svg>アルバム</div>
+            <div><svg viewBox="0 0 26 24"><path d="M13 8a4 4 0 100 8 4 4 0 000-8zm11 4l-2.2-1.5.5-2.6-2.6-.6-.8-2.5-2.5.9L14 3.6l-1.9 2.1-2.5-.9-.8 2.5-2.6.6.5 2.6L4.5 12l1.7 1.5-.5 2.6 2.6.6.8 2.5 2.5-.9 1.9 2.1 1.9-2.1 2.5.9.8-2.5 2.6-.6-.5-2.6z"/></svg>設定</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ S4 CTA ============ -->
+  <section class="scene" id="s4">
+    <div class="brandbg"></div><div class="grain"></div>
+    <div class="wrap">
+      <div class="icon" id="s4icon"></div>
+      <div class="name bb" id="s4name">EventSnap</div>
+      <div class="lead bb" id="s4lead">今すぐ無料でダウンロード</div>
+      <div class="sub b" id="s4sub">次のイベントは、<br />もう写真を集めなくていい。</div>
+      <div class="badges" id="s4badges"></div>
+    </div>
+    <div class="handle b" id="s4handle">@eventsnap.app</div>
+  </section>
+
+  <div id="prog"></div>
+</div>
+
+<script>
+/* =========================================================================
+   タイムライン定義 (秒)
+   ========================================================================= */
+const DUR = 16.0;
+const T = {
+  s1: [0.00,  2.00],   // フック
+  s2: [2.00,  5.00],   // 解決策
+  s3: [5.00, 12.00],   // 実演
+  s4: [12.00, 16.00],  // 行動喚起
+};
+const STEP = [
+  [5.00,  6.85],   // ① QRを見せる
+  [6.85,  8.55],   // ② かざして参加
+  [8.55, 10.30],   // ③ 撮る
+  [10.30, 12.00],  // ④ 自動で集まる
+];
+
+/* ---------- 補間ユーティリティ ---------- */
+const cl  = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const p   = (t, a, b) => cl((t - a) / (b - a));
+const eo  = u => 1 - Math.pow(1 - u, 3);                    // easeOutCubic
+const eio = u => u < .5 ? 4*u*u*u : 1 - Math.pow(-2*u+2, 3)/2;
+const eob = u => { const c1=1.9, c3=c1+1; return 1 + c3*Math.pow(u-1,3) + c1*Math.pow(u-1,2); };
+const mix = (a, b, u) => a + (b - a) * u;
+const $   = id => document.getElementById(id);
+
+/** 下からフェードイン */
+function reveal(el, t, t0, dur = .5, dy = 56, s0 = 1) {
+  const u = eo(p(t, t0, t0 + dur));
+  el.style.opacity = u;
+  el.style.transform = `translate3d(0,${mix(dy,0,u)}px,0) scale(${mix(s0,1,u)})`;
+}
+/** シーンの表示区間 (前後のクロスフェード幅を指定) */
+function sceneAt(el, t, [a, b], fIn = .3, fOut = .3) {
+  el.style.opacity = Math.min(p(t, a - fIn, a), 1 - p(t, b - fOut, b));
+}
+
+/* =========================================================================
+   素材差し込み: manifest が無ければモックにフォールバック
+   ========================================================================= */
+const M = window.__MANIFEST__ ?? { photos: [], screens: {}, badge: null, qrUrl: "" };
+const ICON = "../../Assets%202.xcassets/AppIcon.appiconset/1024.png";
+
+// 実写真が無い時のプレースホルダ (イベントっぽい色味のグラデ)
+const MOCK_PH = [
+  "linear-gradient(140deg,#ff9a3c,#ff3c78)", "linear-gradient(140deg,#4facfe,#00f2fe)",
+  "linear-gradient(140deg,#a18cd1,#fbc2eb)", "linear-gradient(140deg,#f6d365,#fda085)",
+  "linear-gradient(140deg,#5ee7df,#66a6ff)", "linear-gradient(140deg,#f093fb,#f5576c)",
+  "linear-gradient(140deg,#30cfd0,#330867)", "linear-gradient(140deg,#ffd26f,#ff7b54)",
+  "linear-gradient(140deg,#84fab0,#8fd3f4)", "linear-gradient(140deg,#e0c3fc,#8ec5fc)",
+  "linear-gradient(140deg,#fa709a,#fee140)", "linear-gradient(140deg,#6a11cb,#2575fc)",
+];
+/** i番目の写真の CSS background 値 */
+const ph = i => M.photos.length
+  ? `center/cover url("${M.photos[i % M.photos.length]}")`
+  : MOCK_PH[i % MOCK_PH.length];
+
+/* ---- アプリアイコン ---- */
+for (const el of [$("s2icon"), $("s4icon")]) el.style.backgroundImage = `url("${ICON}")`;
+
+/* ---- S1: 散らばる写真カード ---- */
+// コピー(y 300-560)を避けて画面下寄りに散らす
+const SCAT = [
+  { x: -350, y: -250, r: -22 }, { x:  360, y: -215, r:  18 },
+  { x: -420, y:  205, r:  14 }, { x:  395, y:  230, r: -16 },
+  { x: -120, y:  480, r:   9 }, { x:  185, y:  505, r: -13 },
+];
+SCAT.forEach((s, i) => {
+  const el = document.createElement("i");
+  el.className = "photoish";
+  el.style.setProperty("--ph", ph(i));
+  $("scat").appendChild(el);
+  s.el = el;
+});
+
+/* ---- S3: QRコード ---- */
+$("qrSlot").innerHTML = window.__QR_SVG__ ?? "";
+
+/* ---- S3: スキャナー / カメラのプレビュー映像 ---- */
+// 実素材があればそれを、無ければ「夜のイベント会場」風のボケ背景を敷く
+function feed(el, seed) {
+  if (M.photos.length) { el.style.background = ph(seed); el.style.backgroundSize = "cover"; return; }
+  // 夜のイベント会場のボケ (実写真を assets/photos/ に置くと差し替わる)
+  el.style.background = `
+    radial-gradient(7% 4.5% at 18% 20%, rgba(255,214,140,1) 0%, transparent 62%),
+    radial-gradient(5% 3.5% at 31% 11%, rgba(255,170,110,.98) 0%, transparent 62%),
+    radial-gradient(6% 4% at 74% 15%, rgba(255,130,180,1) 0%, transparent 62%),
+    radial-gradient(4.5% 3% at 87% 27%, rgba(190,160,255,.96) 0%, transparent 62%),
+    radial-gradient(5% 3.5% at 57% 25%, rgba(255,240,190,.9) 0%, transparent 62%),
+    radial-gradient(8% 5.5% at 63% 70%, rgba(120,180,255,.9) 0%, transparent 66%),
+    radial-gradient(5.5% 4% at 24% 76%, rgba(150,255,210,.88) 0%, transparent 64%),
+    radial-gradient(6% 4.5% at 88% 64%, rgba(255,175,95,.88) 0%, transparent 64%),
+    radial-gradient(4% 3% at 42% 88%, rgba(255,120,160,.85) 0%, transparent 62%),
+    radial-gradient(46% 30% at 50% 46%, rgba(255,222,190,.34) 0%, transparent 66%),
+    radial-gradient(70% 44% at 50% 112%, rgba(0,0,0,.72) 0%, transparent 68%),
+    linear-gradient(165deg,#1f1436 0%,#3d2154 46%,#120c1d 100%)`;
+}
+feed($("scanFeed"), 3);
+feed($("camFeed"), 5);
+
+/* ---- S3: アルバムのグリッド ---- */
+// 5行 x 3列 = 画面をちょうど埋める枚数
+const ALB_N = 15;
+const albCells = [];
+for (let i = 0; i < ALB_N; i++) {
+  const b = document.createElement("b");
+  b.className = "photoish";
+  b.style.background = ph(i);
+  b.style.backgroundSize = "cover";
+  $("albGrid").appendChild(b);
+  albCells.push(b);
+}
+
+/* ---- 実機スクショがある画面はモックUIごと差し替え ---- */
+for (const [key, id] of [["qr","uiQR"],["scan","uiScan"],["camera","uiCam"],["album","uiAlb"]]) {
+  const src = M.screens?.[key];
+  if (src) $(id).innerHTML = `<img class="shot" src="${src}" alt="">`;
+}
+
+/* ---- S4: ストアバッジ ---- */
+// M.badge (Apple公式バッジ画像) があればそれを使う。無ければ暫定バッジを描画。
+$("s4badges").innerHTML = M.badge
+  ? `<span class="badge" style="padding:0;border:0;background:none"><img src="${M.badge}" alt="App Store"></span>`
+  : `<span class="badge">
+       <svg class="gl" viewBox="0 0 32 36"><path d="M25.6 19.2c0-4 3.2-5.9 3.4-6-1.8-2.7-4.7-3-5.7-3.1-2.4-.25-4.8 1.4-6 1.4-1.2 0-3.1-1.4-5.2-1.35-2.6.04-5.1 1.55-6.4 3.9-2.8 4.8-.7 11.9 2 15.8 1.3 1.9 2.9 4.1 4.9 4 2-.08 2.7-1.3 5.1-1.3s3.1 1.3 5.2 1.25c2.1-.04 3.5-2 4.8-3.9 1.5-2.2 2.1-4.3 2.2-4.4-.05-.02-4.2-1.6-4.3-6.35zM21.8 7.5c1.1-1.3 1.8-3.1 1.6-4.9-1.6.06-3.5 1-4.6 2.3-1 1.15-1.9 3-1.6 4.75 1.75.14 3.5-.9 4.6-2.15z"/></svg>
+       <span class="tx"><small>ダウンロードはこちら</small><strong>App&nbsp;Store</strong></span>
+     </span>`;
+
+/* =========================================================================
+   seek(t): 全アニメーションの単一の真実
+   ========================================================================= */
+window.seek = function (t) {
+  /* ---------------- 進捗バー ---------------- */
+  $("prog").style.width = (t / DUR * 1080) + "px";
+
+  /* ---------------- S1 フック ---------------- */
+  sceneAt($("s1"), t, T.s1, 0, .18);           // 出は速いカットで次へ
+  reveal($("s1a"), t, 0.12, .55, 46);
+  reveal($("s1b"), t, 0.55, .55, 46);
+  // 「集まらない」に取り消し線 → 問題提起を刺す
+  $("s1s").style.transform = `scaleX(${eo(p(t, 1.22, 1.62))})`;
+  // 写真カードが中央からバラバラに散る = 集まらない様子
+  SCAT.forEach((s, i) => {
+    const u  = eo(p(t, 0.10 + i * 0.055, 1.5 + i * 0.055));
+    const fu = p(t, 0.10 + i * 0.055, 0.45 + i * 0.055);
+    s.el.style.opacity = fu * mix(1, .5, u);
+    s.el.style.transform =
+      `translate3d(${s.x * u}px, ${s.y * u}px, 0) rotate(${s.r * u}deg) scale(${mix(.6, 1, u)})`;
+  });
+
+  /* ---------------- S2 解決策 ---------------- */
+  sceneAt($("s2"), t, T.s2, .18, .3);
+  // アイコンはバウンドさせて印象づけ
+  {
+    const u = p(t, 2.05, 2.65);
+    $("s2icon").style.opacity = cl(u * 3);
+    $("s2icon").style.transform = `scale(${mix(.55, 1, eob(u))}) rotate(${mix(-14, 0, eo(u))}deg)`;
+  }
+  reveal($("s2name"), t, 2.30, .5, 40, .9);
+  reveal($("s2tag"),  t, 2.62, .5, 34);
+  [...$("s2chips").children].forEach((c, i) => reveal(c, t, 3.42 + i * 0.13, .45, 28, .86));
+
+  /* ---------------- S3 実演 ---------------- */
+  sceneAt($("s3"), t, T.s3, .3, .3);
+  const inStep = i => t >= STEP[i][0] && t < STEP[i][1];
+
+  // キャプション: ステップごとに差し替え
+  [1, 2, 3, 4].forEach((n, i) => {
+    const [a, b] = STEP[i];
+    const u = Math.min(p(t, a, a + .38), 1 - p(t, b - .28, b));
+    const el = $("cap" + n);
+    el.style.opacity = u;
+    el.style.transform = `translate3d(0,${mix(30, 0, eo(p(t, a, a + .38)))}px,0)`;
+  });
+
+  // 画面の切り替え (crossfade)
+  const uiOn = (el, a, b, f = .3) => el.style.opacity = Math.min(p(t, a, a + f), 1 - p(t, b - f, b));
+  uiOn($("uiQR"),  STEP[0][0] - .2, STEP[2][0] + .1);        // ①②の間ずっとQR画面
+  uiOn($("uiCam"), STEP[2][0] - .05, STEP[3][0] + .1);
+  uiOn($("uiAlb"), STEP[3][0] - .05, T.s3[1] + .3);
+
+  // 主催者端末: ②で左に寄り、③④で中央に戻る
+  {
+    const toLeft  = eio(p(t, STEP[1][0] - .18, STEP[1][0] + .42));
+    const back    = eio(p(t, STEP[2][0] - .22, STEP[2][0] + .38));
+    const x  = mix(0, -200, toLeft) * (1 - back);
+    const sc = mix(1, .78, toLeft) * mix(1, 1 / .78, back * toLeft);
+    const intro = eob(p(t, STEP[0][0] - .1, STEP[0][0] + .6));
+    $("ph1").style.transform =
+      `translate3d(${x}px, ${mix(70, 0, intro)}px, 0) scale(${sc * mix(.9, 1, intro)})`;
+    $("ph1").style.opacity = cl(p(t, STEP[0][0] - .25, STEP[0][0] + .25));
+  }
+
+  // 参加者端末: ②だけ右から入って、読み取れたら退場
+  {
+    const inn = eio(p(t, STEP[1][0] - .10, STEP[1][0] + .48));
+    const out = eio(p(t, STEP[1][1] - .34, STEP[1][1] + .04));
+    const x = mix(820, 200, inn);
+    $("ph2").style.opacity = cl(inn * 1.6) * (1 - out);
+    $("ph2").style.transform =
+      `translate3d(${mix(x, x + 170, out)}px, 40px, 0) scale(${mix(.72, .78, inn)})`;
+    // スキャンレーザーの往復
+    const ly = (Math.sin((t - STEP[1][0]) * 4.2) * .5 + .5) * 244;
+    $("laser").style.transform = `translateY(${ly}px)`;
+    $("laser").style.opacity = 1 - p(t, STEP[1][0] + 1.02, STEP[1][0] + 1.18);
+    // 読み取り成功の表示
+    const ok = p(t, STEP[1][0] + 1.06, STEP[1][0] + 1.34);
+    $("scanOk").style.opacity = ok;
+    $("scanOk").style.transform = `translate(-50%,-50%) scale(${mix(.7, 1, eob(ok))})`;
+  }
+
+  // ①②: 参加すると人数カウントが増える演出
+  {
+    const joined = t >= STEP[1][0] + 1.12;
+    $("pcount").textContent = (joined ? 5 : 4) + "人";
+    $("qcount").textContent = (t >= STEP[2][0] + 1.0 ? 13 : 12) + "枚";
+  }
+
+  // ③ カメラ: 美肌スライダー → シャッター → フラッシュ → 共有トースト
+  {
+    const s = STEP[2][0];
+    const bv = mix(0, .72, eio(p(t, s + .30, s + .92)));        // 美肌強度 0→72%
+    $("beautyFill").style.width = (bv * 100) + "%";
+    $("beautyKnob").style.left  = (bv * 100) + "%";
+    $("beautyPc").textContent   = Math.round(bv * 100) + "%";
+    // 美肌ON = プレビューを柔らかく
+    $("camFeed").style.filter = `blur(${bv * 1.0}px) saturate(${1 + bv * .34}) brightness(${1 + bv * .10}) contrast(${1 + bv * .08})`;
+
+    const press = p(t, s + 1.02, s + 1.14);                     // シャッター押下
+    $("shutter").style.transform = `scale(${1 - press * .12 * (1 - p(t, s + 1.14, s + 1.26))})`;
+    $("camFlash").style.opacity  = (1 - p(t, s + 1.10, s + 1.34)) * p(t, s + 1.04, s + 1.10);
+    const toast = Math.min(p(t, s + 1.24, s + 1.44), 1 - p(t, STEP[3][0] - .2, STEP[3][0]));
+    $("camToast").style.opacity = toast;
+    $("camToast").style.transform = `translateX(-50%) translateY(${mix(18, 0, eo(toast))}px)`;
+  }
+
+  // ④ アルバム: 写真が次々に降ってくる = 自動で集まる
+  {
+    const s = STEP[3][0];
+    let shown = 0;
+    albCells.forEach((c, i) => {
+      const u = eo(p(t, s + .18 + i * 0.055, s + .52 + i * 0.055));
+      c.style.opacity = u;
+      c.style.transform = `scale(${mix(.86, 1, u)})`;
+      if (u > .5) shown++;
+    });
+    $("albCount").textContent = shown + "枚";
+  }
+
+  /* ---------------- S4 CTA ---------------- */
+  sceneAt($("s4"), t, T.s4, .3, 0);
+  {
+    const u = p(t, 12.05, 12.5);
+    $("s4icon").style.opacity = u;
+    $("s4icon").style.transform = `scale(${mix(.7, 1, eob(u))})`;
+  }
+  reveal($("s4name"),  t, 12.24, .45, 32);
+  reveal($("s4lead"),  t, 12.48, .5,  40);
+  reveal($("s4sub"),   t, 12.78, .5,  32);
+  reveal($("s4badges"),t, 13.08, .55, 44, .9);
+  reveal($("s4handle"),t, 13.55, .5,  26);
+  // 最後にバッジを軽く脈打たせてタップを誘う
+  {
+    const q = cl((t - 14.1) / .9);
+    const pulse = t > 14.1 ? 1 + Math.sin(q * Math.PI * 2.2) * .035 * (1 - q) : 1;
+    $("s4badges").style.transform += ` scale(${pulse})`;
+  }
+};
+
+window.seek(0);
+document.documentElement.dataset.ready = "1";
+</script>
