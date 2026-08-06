@@ -31,7 +31,7 @@ struct CameraView: View {
                     .ignoresSafeArea()
             } else {
                 // 通常のカメラプレビュー
-                CameraPreview(session: viewModel.captureSession)
+                CameraPreview(session: viewModel.captureSession, mirrored: viewModel.cameraPosition == .front)
                     .ignoresSafeArea()
             }
 
@@ -39,6 +39,20 @@ struct CameraView: View {
             VStack {
                 // トップバー
                 HStack {
+                    // イン/アウトカメラ切り替え
+                    Button {
+                        viewModel.switchCamera()
+                    } label: {
+                        Image(systemName: "arrow.triangle.2.circlepath.camera")
+                            .font(.system(size: 16, weight: .semibold))
+                            .frame(width: 36, height: 36)
+                            .background(Color.black.opacity(0.55))
+                            .foregroundColor(.white)
+                            .clipShape(Circle())
+                    }
+                    .padding(.leading)
+                    .accessibilityLabel("カメラを切り替え")
+
                     // リアルタイムフィルターON/OFFトグル
                     if viewModel.selectedFilter == .beauty {
                         Button {
@@ -54,7 +68,7 @@ struct CameraView: View {
                             .foregroundColor(viewModel.isRealtimeEnabled ? .black : .white)
                             .cornerRadius(16)
                         }
-                        .padding(.leading)
+                        .padding(.leading, 8)
                     }
 
                     Spacer()
@@ -182,6 +196,10 @@ struct CameraView: View {
 
 /// シャッターの上に置く小さなトグル。
 /// どちらも **押していない状態が既定** で、撮影のたびにOFFへ戻る。
+///
+/// アイコンのみの丸ボタンにして画面上の情報量を抑えている（文字ラベルは常時表示しない）。
+/// 機能自体（タップでON/OFF）は変わらず、ONのときだけ下に短いラベルを出して
+/// 何がONになっているか分かるようにする。
 struct CaptureOptionToggle: View {
     @Binding var isOn: Bool
     let icon: String
@@ -193,23 +211,28 @@ struct CaptureOptionToggle: View {
         Button {
             withAnimation(.easeInOut(duration: 0.15)) { isOn.toggle() }
         } label: {
-            HStack(spacing: 6) {
-                // 状態は背景色で示す。SF Symbolsには .fill が存在しない記号もあるため
-                // アイコン名は切り替えない。
+            VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .imageScale(.small)
-                Text(label)
-                    .font(.caption)
-                    .fontWeight(.medium)
+                    .font(.system(size: 17, weight: .semibold))
+                    .frame(width: 44, height: 44)
+                    .background(isOn ? tint.opacity(0.9) : Color.black.opacity(0.55))
+                    .foregroundColor(isOn ? .black : .white)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle().stroke(isOn ? Color.clear : Color.white.opacity(0.35), lineWidth: 1)
+                    )
+
+                if isOn {
+                    Text(label)
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.black.opacity(0.55))
+                        .clipShape(Capsule())
+                }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 9)
-            .background(isOn ? tint.opacity(0.9) : Color.black.opacity(0.55))
-            .foregroundColor(isOn ? .black : .white)
-            .clipShape(Capsule())
-            .overlay(
-                Capsule().stroke(isOn ? Color.clear : Color.white.opacity(0.35), lineWidth: 1)
-            )
             .opacity(isDisabled ? 0.4 : 1)
         }
         .disabled(isDisabled)
@@ -222,6 +245,8 @@ struct CaptureOptionToggle: View {
 
 struct CameraPreview: UIViewRepresentable {
     let session: AVCaptureSession
+    /// インカメラのときだけ鏡像にする（アウトカメラは鏡像にしない）
+    let mirrored: Bool
 
     func makeUIView(context: Context) -> UIView {
         let view = UIView(frame: .zero)
@@ -234,7 +259,7 @@ struct CameraPreview: UIViewRepresentable {
         // 画面ごと物理的に回り、見ている人の目には世界が正しい向きで映る。
         // 写真の向きは CameraViewModel が撮影出力の接続側で合わせる。
         previewLayer.connection?.applyPortrait()
-        previewLayer.connection?.applyMirroring(true)
+        previewLayer.connection?.applyMirroring(mirrored)
 
         view.layer.addSublayer(previewLayer)
 
@@ -245,6 +270,7 @@ struct CameraPreview: UIViewRepresentable {
         DispatchQueue.main.async {
             if let layer = uiView.layer.sublayers?.first as? AVCaptureVideoPreviewLayer {
                 layer.frame = uiView.bounds
+                layer.connection?.applyMirroring(mirrored)
             }
         }
     }

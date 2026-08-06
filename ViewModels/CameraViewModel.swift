@@ -42,12 +42,16 @@ class CameraViewModel: ObservableObject {
     /// 直前の撮影がタイムカプセルになったか（撮影後のフィードバック表示用）
     @Published var lastCaptureWasTimeCapsule = false
 
+    /// 現在使用中のカメラ（インカメラ/アウトカメラ）
+    @Published var cameraPosition: AVCaptureDevice.Position = .front
+
     /// 端末の物理的な向き。横で撮った写真を横のまま保存するために使う。
     let orientation = CameraOrientation()
 
     let captureSession = AVCaptureSession()
     private let photoOutput = AVCapturePhotoOutput()
     private let videoOutput = AVCaptureVideoDataOutput() // ✨ 追加
+    private var videoDeviceInput: AVCaptureDeviceInput?
     private let aiFilterService = AIFilterService()
     private let photoRepository = PhotoRepository.shared
     private let eventRepository = EventRepository.shared
@@ -124,7 +128,7 @@ class CameraViewModel: ObservableObject {
 
         captureSession.sessionPreset = .photo
 
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition),
               let input = try? AVCaptureDeviceInput(device: camera) else {
             print("❌ カメラデバイスが見つかりません")
             return
@@ -132,6 +136,7 @@ class CameraViewModel: ObservableObject {
 
         if captureSession.canAddInput(input) {
             captureSession.addInput(input)
+            videoDeviceInput = input
             print("✅ カメラ入力を追加しました")
         }
 
@@ -167,7 +172,8 @@ class CameraViewModel: ObservableObject {
             videoConnection.applyPortrait()
             // 鏡像化は接続側で行う。以前は UIImage の orientation を .upMirrored に
             // 決め打ちしていたが、それだと横向きのときに破綻していた。
-            videoConnection.applyMirroring(true)
+            // 鏡像にするのはインカメラ（自撮り）のときだけ。アウトカメラは鏡像にしない。
+            videoConnection.applyMirroring(cameraPosition == .front)
         }
 
         // 端末の向きの監視を開始し、写真出力の回転角を追従させる
@@ -180,6 +186,49 @@ class CameraViewModel: ObservableObject {
             self?.captureSession.startRunning()
             print("✅ カメラセッション開始")
         }
+    }
+
+    // MARK: - カメラ切り替え（イン/アウト）
+
+    /// インカメラ・アウトカメラを切り替える
+    func switchCamera() {
+        let newPosition: AVCaptureDevice.Position = cameraPosition == .front ? .back : .front
+
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: newPosition),
+              let newInput = try? AVCaptureDeviceInput(device: camera) else {
+            print("❌ 切り替え先のカメラが見つかりません: \(newPosition)")
+            return
+        }
+
+        cameraQueue.async { [weak self] in
+            guard let self else { return }
+
+            self.captureSession.beginConfiguration()
+
+            if let currentInput = self.videoDeviceInput {
+                self.captureSession.removeInput(currentInput)
+            }
+
+            if self.captureSession.canAddInput(newInput) {
+                self.captureSession.addInput(newInput)
+                self.videoDeviceInput = newInput
+            }
+
+            self.captureSession.commitConfiguration()
+
+            Task { @MainActor in
+                self.cameraPosition = newPosition
+                self.applyMirroringForCurrentPosition()
+                print("🔄 カメラを切り替えました: \(newPosition == .front ? "イン" : "アウト")")
+            }
+        }
+    }
+
+    /// 現在のカメラ（イン/アウト）に応じて鏡像設定をやり直す
+    private func applyMirroringForCurrentPosition() {
+        let mirrored = cameraPosition == .front
+        videoOutput.connection(with: .video)?.applyMirroring(mirrored)
+        photoOutput.connection(with: .video)?.applyMirroring(mirrored)
     }
 
     // MARK: - 向きの追従
@@ -203,8 +252,8 @@ class CameraViewModel: ObservableObject {
             rotationAngle: orientation.captureRotationAngle,
             videoOrientation: orientation.captureVideoOrientation
         )
-        // フロントカメラは見たままに合わせて鏡像で保存する
-        connection.applyMirroring(true)
+        // インカメラは見たままに合わせて鏡像で保存する。アウトカメラは鏡像にしない。
+        connection.applyMirroring(cameraPosition == .front)
 
         print("🔄 撮影の向きを更新: \(orientation.current.rawValue) / \(orientation.captureRotationAngle)°")
     }

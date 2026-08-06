@@ -24,10 +24,6 @@ struct MainTabView: View {
                 .tabItem { Label(AppTab.camera.title, systemImage: AppTab.camera.icon) }
                 .tag(AppTab.camera)
 
-            TimeCapsuleView(eventViewModel: eventViewModel)
-                .tabItem { Label(AppTab.timeCapsule.title, systemImage: AppTab.timeCapsule.icon) }
-                .tag(AppTab.timeCapsule)
-
             QRCodeView(eventViewModel: eventViewModel)
                 .tabItem { Label(AppTab.invite.title, systemImage: AppTab.invite.icon) }
                 .tag(AppTab.invite)

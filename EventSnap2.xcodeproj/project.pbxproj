@@ -37,8 +37,6 @@
 		E52008000000000000000000 /* CollageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51008000000000000000000 /* CollageService.swift */; };
 		E52009000000000000000000 /* ShareCollageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51009000000000000000000 /* ShareCollageStore.swift */; };
 		E5200A000000000000000000 /* ShareCollageBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100A000000000000000000 /* ShareCollageBuilder.swift */; };
-		E5200B000000000000000000 /* TimeCapsuleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100B000000000000000000 /* TimeCapsuleViewModel.swift */; };
-		E5200C000000000000000000 /* TimeCapsuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100C000000000000000000 /* TimeCapsuleView.swift */; };
 		E5200D000000000000000000 /* ShareCollageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100D000000000000000000 /* ShareCollageView.swift */; };
 		E5200E000000000000000000 /* EventSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100E000000000000000000 /* EventSwitcherView.swift */; };
 /* End PBXBuildFile section */
@@ -75,8 +73,6 @@
 		E51008000000000000000000 /* CollageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CollageService.swift"; sourceTree = "<group>"; };
 		E51009000000000000000000 /* ShareCollageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ShareCollageStore.swift"; sourceTree = "<group>"; };
 		E5100A000000000000000000 /* ShareCollageBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ShareCollageBuilder.swift"; sourceTree = "<group>"; };
-		E5100B000000000000000000 /* TimeCapsuleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimeCapsuleViewModel.swift"; sourceTree = "<group>"; };
-		E5100C000000000000000000 /* TimeCapsuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimeCapsuleView.swift"; sourceTree = "<group>"; };
 		E5100D000000000000000000 /* ShareCollageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ShareCollageView.swift"; sourceTree = "<group>"; };
 		E5100E000000000000000000 /* EventSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventSwitcherView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -85,7 +81,6 @@
 		1E58259F9C4ED7C03B68737C /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				E5100B000000000000000000 /* TimeCapsuleViewModel.swift */,
 				F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */,
 				603E3322F12D494691F2AB55 /* CameraViewModel.swift */,
 				5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */,
@@ -160,7 +155,6 @@
 		B46D40979E843E46E78EE80A /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				E5A1000000000000000000A1 /* TimeCapsule */,
 				E5A1000000000000000000A2 /* Share */,
 				46A8C5130577DC7CF9ED6248 /* Album */,
 				1FEADE3FF3298F871B66438A /* Camera */,
@@ -193,14 +187,6 @@
 				B46D40979E843E46E78EE80A /* Views */,
 				AF726F6A46D7E6C672320238 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		E5A1000000000000000000A1 /* TimeCapsule */ = {
-			isa = PBXGroup;
-			children = (
-				E5100C000000000000000000 /* TimeCapsuleView.swift */,
-			);
-			path = TimeCapsule;
 			sourceTree = "<group>";
 		};
 		E5A1000000000000000000A2 /* Share */ = {
@@ -286,8 +272,6 @@
 				E52008000000000000000000 /* CollageService.swift in Sources */,
 				E52009000000000000000000 /* ShareCollageStore.swift in Sources */,
 				E5200A000000000000000000 /* ShareCollageBuilder.swift in Sources */,
-				E5200B000000000000000000 /* TimeCapsuleViewModel.swift in Sources */,
-				E5200C000000000000000000 /* TimeCapsuleView.swift in Sources */,
 				E5200D000000000000000000 /* ShareCollageView.swift in Sources */,
 				E5200E000000000000000000 /* EventSwitcherView.swift in Sources */,
 				15BBE6FE77BB7A7A26C17581 /* AIFilterService.swift in Sources */,

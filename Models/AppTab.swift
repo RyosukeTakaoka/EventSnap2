@@ -15,9 +15,8 @@ import Foundation
 ///
 /// 並びはユーザーテストのフィードバックに合わせて **最もよく見るアルバムを左端**に置く。
 enum AppTab: Int, CaseIterable, Identifiable {
-    case album      // 一番よく開くので左端
+    case album      // 一番よく開くので左端。タイムカプセルのロック枠もここに混ぜて表示する
     case camera     // 中心となる操作
-    case timeCapsule // イベント後に再訪してもらうための枠
     case invite     // QR・招待コード
     case settings
 
@@ -27,7 +26,6 @@ enum AppTab: Int, CaseIterable, Identifiable {
         switch self {
         case .album:       return "アルバム"
         case .camera:      return "カメラ"
-        case .timeCapsule: return "カプセル"
         case .invite:      return "招待"
         case .settings:    return "設定"
         }
@@ -37,7 +35,6 @@ enum AppTab: Int, CaseIterable, Identifiable {
         switch self {
         case .album:       return "photo.on.rectangle"
         case .camera:      return "camera.fill"
-        case .timeCapsule: return "hourglass"
         case .invite:      return "qrcode"
         case .settings:    return "gear"
         }

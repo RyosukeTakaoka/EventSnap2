@@ -24,7 +24,7 @@ struct AlbumView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                if viewModel.photos.isEmpty {
+                if viewModel.items.isEmpty {
                     // 空の状態
                     VStack(spacing: 20) {
                         Spacer()
@@ -46,11 +46,18 @@ struct AlbumView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
                 } else {
-                    // 写真グリッド
+                    // 写真グリッド。タイムカプセルでまだ公開されていない写真は、
+                    // プレビューできないグレーの枠として同じグリッドに混ぜて並べる
+                    // （砂時計マークで見分ける）。
                     LazyVGrid(columns: columns, spacing: 2) {
-                        ForEach(viewModel.photos) { photo in
-                            NavigationLink(destination: PhotoDetailView(photo: photo, viewModel: viewModel)) {
-                                PhotoCell(photo: photo, viewModel: viewModel) // ViewModelを渡す
+                        ForEach(viewModel.items) { item in
+                            switch item {
+                            case .revealed(let photo):
+                                NavigationLink(destination: PhotoDetailView(photo: photo, viewModel: viewModel)) {
+                                    PhotoCell(photo: photo, viewModel: viewModel)
+                                }
+                            case .locked:
+                                LockedPhotoCell()
                             }
                         }
                     }
@@ -145,6 +152,28 @@ struct PhotoCell: View {
         }
         
         isLoading = false
+    }
+}
+
+// MARK: - タイムカプセルのロック枠
+
+/// タイムカプセルでまだ公開されていない写真の枠。
+/// 中身はプレビューできない（タップ不可）。参加者全員が同じ枠を見る。
+struct LockedPhotoCell: View {
+    var body: some View {
+        Rectangle()
+            .fill(Color(.systemGray4))
+            .aspectRatio(1, contentMode: .fit)
+            .overlay(alignment: .topTrailing) {
+                Image(systemName: "hourglass")
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .padding(5)
+                    .background(Color.black.opacity(0.45), in: Circle())
+                    .padding(5)
+            }
+            .clipped()
+            .accessibilityLabel("公開前のタイムカプセル写真")
     }
 }
 
