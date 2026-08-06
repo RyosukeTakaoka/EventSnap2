@@ -159,11 +159,24 @@ struct PhotoCell: View {
 
 /// タイムカプセルでまだ公開されていない写真の枠。
 /// 中身はプレビューできない（タップ不可）。参加者全員が同じ枠を見る。
+///
+/// グレーのまま何も出さないと「画像が正しく読み込めていない」ように見えてしまうため、
+/// 待ってほしい旨の文言を添えている。
 struct LockedPhotoCell: View {
     var body: some View {
         Rectangle()
             .fill(Color(.systemGray4))
             .aspectRatio(1, contentMode: .fit)
+            .overlay {
+                Text("公開まで\nお待ちください")
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.white.opacity(0.9))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
+                    .padding(.horizontal, 6)
+            }
             .overlay(alignment: .topTrailing) {
                 Image(systemName: "hourglass")
                     .font(.caption)
@@ -173,7 +186,7 @@ struct LockedPhotoCell: View {
                     .padding(5)
             }
             .clipped()
-            .accessibilityLabel("公開前のタイムカプセル写真")
+            .accessibilityLabel("公開前のタイムカプセル写真。公開までお待ちください")
     }
 }
 
