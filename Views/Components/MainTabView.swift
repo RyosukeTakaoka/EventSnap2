@@ -144,13 +144,16 @@ struct EventSettingsView: View {
                 }
             }
             .navigationTitle("設定")
-            .confirmationDialog("このイベントを終了しますか？",
-                                isPresented: $showEndConfirmation,
-                                titleVisibility: .visible) {
+            // confirmationDialog はボトムシートで、スクロール位置によって
+            // 出てくる場所が画面内でずれて見えることがあるため、
+            // 常に画面中央に出る alert に変更している。
+            .alert("このイベントを終了しますか？", isPresented: $showEndConfirmation) {
                 Button("終了する", role: .destructive) {
                     Task { await eventViewModel.endEvent() }
                 }
                 Button("キャンセル", role: .cancel) {}
+            } message: {
+                Text("新しい写真の追加ができなくなります。")
             }
         }
     }
