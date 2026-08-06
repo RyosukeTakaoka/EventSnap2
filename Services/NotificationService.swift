@@ -135,6 +135,15 @@ final class NotificationService {
         print("🔕 \(ids.count) 件の公開通知を取り消しました")
     }
 
+    /// 指定した写真の予約だけを取り消す。
+    /// シェア優先でタイムカプセルを解除したときに使う。
+    func cancelReveals(for photoIDs: [UUID]) async {
+        guard !photoIDs.isEmpty else { return }
+        let ids = photoIDs.map { Self.prefix + $0.uuidString }
+        center.removePendingNotificationRequests(withIdentifiers: ids)
+        print("🔕 \(ids.count) 件の公開通知を取り消しました（シェア優先による解除）")
+    }
+
     // MARK: - 文言
 
     private static let prefix = "timecapsule-"

@@ -40,7 +40,6 @@
 		F2CAC544E91C5A9FEC4EC5B5 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */; };
 		E52000000000000000000000 /* AppTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51000000000000000000000 /* AppTab.swift */; };
 		E52001000000000000000000 /* DeviceIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51001000000000000000000 /* DeviceIdentity.swift */; };
-		E52002000000000000000000 /* InviteCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51002000000000000000000 /* InviteCode.swift */; };
 		E52003000000000000000000 /* CameraOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51003000000000000000000 /* CameraOrientation.swift */; };
 		E52004000000000000000000 /* UIImage+Orientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51004000000000000000000 /* UIImage+Orientation.swift */; };
 		E52005000000000000000000 /* TimeCapsuleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51005000000000000000000 /* TimeCapsuleService.swift */; };
@@ -119,7 +118,6 @@
 		FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		E51000000000000000000000 /* AppTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppTab.swift"; sourceTree = "<group>"; };
 		E51001000000000000000000 /* DeviceIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceIdentity.swift"; sourceTree = "<group>"; };
-		E51002000000000000000000 /* InviteCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InviteCode.swift"; sourceTree = "<group>"; };
 		E51003000000000000000000 /* CameraOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraOrientation.swift"; sourceTree = "<group>"; };
 		E51004000000000000000000 /* UIImage+Orientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Orientation.swift"; sourceTree = "<group>"; };
 		E51005000000000000000000 /* TimeCapsuleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimeCapsuleService.swift"; sourceTree = "<group>"; };
@@ -207,7 +205,6 @@
 			isa = PBXGroup;
 			children = (
 				E51001000000000000000000 /* DeviceIdentity.swift */,
-				E51002000000000000000000 /* InviteCode.swift */,
 				E51003000000000000000000 /* CameraOrientation.swift */,
 				E51004000000000000000000 /* UIImage+Orientation.swift */,
 				E51005000000000000000000 /* TimeCapsuleService.swift */,
@@ -476,7 +473,6 @@
 			files = (
 				E52000000000000000000000 /* AppTab.swift in Sources */,
 				E52001000000000000000000 /* DeviceIdentity.swift in Sources */,
-				E52002000000000000000000 /* InviteCode.swift in Sources */,
 				E52003000000000000000000 /* CameraOrientation.swift in Sources */,
 				E52004000000000000000000 /* UIImage+Orientation.swift in Sources */,
 				E52005000000000000000000 /* TimeCapsuleService.swift in Sources */,

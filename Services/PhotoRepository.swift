@@ -183,6 +183,71 @@ class PhotoRepository: ObservableObject {
             .sorted { $0.uploadedAt < $1.uploadedAt }
     }
 
+    // MARK: - タイムカプセルの解除（優先ルール）
+
+    /// シェアOKとタイムカプセルが重複した写真を、通常公開の写真に戻す。
+    ///
+    /// EventSnapには2つの価値がある:
+    ///   - タイムカプセル … 隠すことで未来の価値を作る
+    ///   - シェアコラージュ … 公開することで現在の価値を最大化する
+    ///
+    /// 両立できないので、**イベント終了直後の共有価値を優先する**と決めた。
+    /// 拡散効果が最も高いのはイベント直後であり、その機会を逃さないことを取る。
+    /// ユーザーに二択を迫らず、アプリ側が自動で役割を決める。
+    ///
+    /// - Returns: 実際に解除された写真
+    @discardableResult
+    func releaseSharedTimeCapsules(for eventID: UUID) async -> [Photo] {
+        let targets = allPhotos.filter {
+            $0.eventID == eventID && $0.isShareOK && $0.isTimeCapsule
+        }
+
+        guard !targets.isEmpty else { return [] }
+
+        print("🔓 シェア優先: \(targets.count)枚のタイムカプセルを解除します")
+
+        var released: [Photo] = []
+
+        for photo in targets {
+            let updated = photo.releasedFromTimeCapsule()
+            do {
+                try await save(updated)
+                released.append(updated)
+            } catch {
+                print("❌ タイムカプセルの解除に失敗 (\(photo.id)): \(error)")
+            }
+        }
+
+        guard !released.isEmpty else { return [] }
+
+        // ローカルの状態を差し替える。解除された写真はアルバムにも並ぶようになる。
+        let releasedByID = Dictionary(uniqueKeysWithValues: released.map { ($0.id, $0) })
+        allPhotos = allPhotos.map { releasedByID[$0.id] ?? $0 }
+        photos = TimeCapsuleService.albumPhotos(allPhotos)
+
+        // 公開予定が無くなったので、予約済みの通知も取り消す
+        await NotificationService.shared.cancelReveals(for: released.map(\.id))
+
+        return released
+    }
+
+    /// 写真を保存する（既存があれば上書き、無ければ新規作成）。
+    ///
+    /// 新規に `CKRecord` を作り直すと recordID が変わって複製になるため、
+    /// 更新時は既存レコードを取り直してから書き込む。
+    private func save(_ photo: Photo) async throws {
+        let predicate = NSPredicate(format: "id == %@", photo.id.uuidString)
+        let query = CKQuery(recordType: "Photo", predicate: predicate)
+        let results = try await database.records(matching: query)
+
+        if let (_, result) = results.matchResults.first,
+           let existing = try? result.get() {
+            _ = try await database.save(photo.apply(to: existing))
+        } else {
+            _ = try await database.save(photo.toRecord())
+        }
+    }
+
     // MARK: - リアルタイム更新
 
     /// CloudKit Subscriptionを設定（リアルタイム同期）

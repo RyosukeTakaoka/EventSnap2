@@ -24,6 +24,10 @@ enum ShareCollageBuilder {
         // 最新の状態で判断する。他の人が終了間際にシェアOKを付けている可能性がある。
         try? await repository.fetchPhotos(for: event.id)
 
+        // シェアOKとタイムカプセルが重複している写真は、シェアを優先して解除する。
+        // 解除された写真はこの時点で通常公開になり、コラージュにも使えるようになる。
+        await repository.releaseSharedTimeCapsules(for: event.id)
+
         let approved = repository.shareApprovedPhotos(for: event.id)
 
         guard !approved.isEmpty else {

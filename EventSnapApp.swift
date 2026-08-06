@@ -34,15 +34,12 @@ struct EventSnapApp: App {
 
         print("📥 Universal Link受信: \(incomingURL)")
 
+        // このURLはQRコード（App Clip）にのみ埋め込まれる。
+        // 招待コードのような、その場に居なくても入れる経路は持たせない。
         if let eventID = extractEventID(from: incomingURL) {
             print("✅ イベントID抽出成功: \(eventID)")
             Task {
                 await eventViewModel.joinEvent(eventID: eventID)
-            }
-        } else if let code = extractInviteCode(from: incomingURL) {
-            print("✅ 招待コード抽出成功: \(code)")
-            Task {
-                await eventViewModel.joinEvent(inviteCode: code)
             }
         } else {
             print("❌ イベントIDの抽出に失敗しました")
@@ -63,25 +60,6 @@ struct EventSnapApp: App {
            let eventIDItem = queryItems.first(where: { $0.name == "eventID" }),
            let eventID = eventIDItem.value {
             return eventID
-        }
-
-        return nil
-    }
-
-    /// URLから招待コードを抽出（https://.../join/ABC123 形式）
-    private func extractInviteCode(from url: URL) -> String? {
-        let components = url.pathComponents
-
-        if components.count >= 3, components[1] == "join" {
-            let code = InviteCode.normalize(components[2])
-            return InviteCode.isValid(code) ? code : nil
-        }
-
-        if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
-           let item = urlComponents.queryItems?.first(where: { $0.name == "code" }),
-           let raw = item.value {
-            let code = InviteCode.normalize(raw)
-            return InviteCode.isValid(code) ? code : nil
         }
 
         return nil
@@ -139,7 +117,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
 // MARK: - 同期
 
-/// 写真の取得とタイムカプセル通知の予約をまとめて行う
+/// 写真の同期・タイムカプセル通知の予約・日付変更によるイベント終了をまとめて行う
 enum SyncCoordinator {
     @MainActor
     static func refreshTimeCapsules() async {
@@ -157,5 +135,11 @@ enum SyncCoordinator {
             eventName: event.name,
             viewerID: DeviceIdentity.current
         )
+
+        // 日付をまたいでいたらイベントを終了し、シェアコラージュを作る。
+        // この中で、シェアOKと重複したタイムカプセルが解除される。
+        if let ended = await EventRepository.shared.endEventIfDayChanged() {
+            await ShareCollageBuilder.buildIfPossible(for: ended)
+        }
     }
 }

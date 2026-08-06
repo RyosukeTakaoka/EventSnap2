@@ -17,9 +17,6 @@ struct Event: Identifiable, Codable, Equatable, Hashable {
     var participantIDs: [String]
     var photoCount: Int
     var isActive: Bool
-    /// 遠くにいる人にも口頭・テキストで伝えられる6文字の招待コード。
-    /// v1で作られた既存イベントには存在しないため空文字になりうる。
-    var inviteCode: String
 
     init(
         id: UUID = UUID(),
@@ -29,8 +26,7 @@ struct Event: Identifiable, Codable, Equatable, Hashable {
         creatorID: String,
         participantIDs: [String] = [],
         photoCount: Int = 0,
-        isActive: Bool = true,
-        inviteCode: String = InviteCode.generate()
+        isActive: Bool = true
     ) {
         self.id = id
         self.name = name
@@ -40,15 +36,23 @@ struct Event: Identifiable, Codable, Equatable, Hashable {
         self.participantIDs = participantIDs
         self.photoCount = photoCount
         self.isActive = isActive
-        self.inviteCode = inviteCode
     }
 
-    /// 招待コードを表示してよいか（v1で作られたイベントは持っていない）
-    var hasInviteCode: Bool { !inviteCode.isEmpty }
+    /// 作成日と違う日になっていれば、このイベントはもう終わったとみなす。
+    /// シェアコラージュはこのタイミングで自動生成する。
+    func hasPassedItsDay(asOf now: Date = Date()) -> Bool {
+        !Calendar.current.isDate(createdAt, inSameDayAs: now)
+    }
 
-    // CloudKitレコードへの変換
-    func toRecord() -> CKRecord {
-        let record = CKRecord(recordType: "Event")
+    // MARK: - CloudKit
+
+    /// 既存のレコードに値を書き込む。
+    ///
+    /// 毎回 `CKRecord(recordType:)` で新規レコードを作ると **recordID が新しく振られて
+    /// 別レコードになってしまう**（＝更新のつもりが複製になる）。
+    /// 更新時は取得済みのレコードを渡して、同じ recordID のまま上書きする。
+    @discardableResult
+    func apply(to record: CKRecord) -> CKRecord {
         record["id"] = id.uuidString as CKRecordValue
         record["name"] = name as CKRecordValue
         record["createdAt"] = createdAt as CKRecordValue
@@ -56,16 +60,13 @@ struct Event: Identifiable, Codable, Equatable, Hashable {
         record["participantIDs"] = participantIDs as CKRecordValue
         record["photoCount"] = photoCount as CKRecordValue
         record["isActive"] = (isActive ? 1 : 0) as CKRecordValue
-
-        if !inviteCode.isEmpty {
-            record["inviteCode"] = inviteCode as CKRecordValue
-        }
-
-        if let endedAt = endedAt {
-            record["endedAt"] = endedAt as CKRecordValue
-        }
-
+        record["endedAt"] = endedAt as CKRecordValue?
         return record
+    }
+
+    /// 新規作成用
+    func toRecord() -> CKRecord {
+        apply(to: CKRecord(recordType: "Event"))
     }
 
     // CloudKitレコードからの変換
@@ -83,20 +84,15 @@ struct Event: Identifiable, Codable, Equatable, Hashable {
             return nil
         }
 
-        let endedAt = record["endedAt"] as? Date
-        // v1のレコードにはこのフィールドが無いので、無ければ空文字にしておく
-        let inviteCode = record["inviteCode"] as? String ?? ""
-
         return Event(
             id: id,
             name: name,
             createdAt: createdAt,
-            endedAt: endedAt,
+            endedAt: record["endedAt"] as? Date,
             creatorID: creatorID,
             participantIDs: participantIDs,
             photoCount: photoCount,
-            isActive: isActiveInt == 1,
-            inviteCode: inviteCode
+            isActive: isActiveInt == 1
         )
     }
 }

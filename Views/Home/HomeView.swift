@@ -11,7 +11,6 @@ struct HomeView: View {
     @StateObject private var eventViewModel = EventViewModel()
     @State private var showQRScanner = false
     @State private var showEventCreation = false
-    @State private var showCodeEntry = false
     @State private var eventName = ""
 
     var body: some View {
@@ -83,19 +82,14 @@ struct HomeView: View {
                             )
                         }
 
-                        // 招待コードで参加（その場にいない相手向け）
-                        Button {
-                            showCodeEntry = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "character.cursor.ibeam")
-                                Text("招待コードで参加")
-                                    .fontWeight(.medium)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .foregroundColor(.white.opacity(0.95))
-                        }
+                        // 参加経路はQRコードだけ。その場に居合わせた人しか
+                        // 入れないことがEventSnapの前提なので、コードを
+                        // 伝えるだけで参加できる手段は用意しない。
+                        Text("参加できるのはQRコードを読み取った人だけです")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.85))
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 4)
                     }
                     .padding(.horizontal, 40)
 
@@ -115,11 +109,6 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showQRScanner) {
                 QRScannerView(eventViewModel: eventViewModel)
-            }
-            .sheet(isPresented: $showCodeEntry) {
-                JoinByCodeView(eventViewModel: eventViewModel) {
-                    showCodeEntry = false
-                }
             }
             .fullScreenCover(isPresented: $eventViewModel.hasJoinedEvent) {
                 // 作成直後は招待画面、参加直後はアルバム。
