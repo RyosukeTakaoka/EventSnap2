@@ -14,7 +14,13 @@ import Combine
 class PhotoRepository: ObservableObject {
     static let shared = PhotoRepository()
 
+    /// アルバムに表示する写真（＝公開済みのもの）。
+    /// タイムカプセルで伏せられている写真はここには入らない。
     @Published var photos: [Photo] = []
+
+    /// 取得したすべての写真。タイムカプセルタブが未公開分の枚数を数えるのに使う。
+    @Published var allPhotos: [Photo] = []
+
     @Published var isUploading = false
     @Published var error: Error?
 
@@ -27,25 +33,54 @@ class PhotoRepository: ObservableObject {
 
     // MARK: - 写真アップロード
 
-    /// 写真をアップロード
-    func uploadPhoto(_ image: UIImage, eventID: UUID, filterName: String? = nil) async throws {
+    /// 写真をアップロードする
+    ///
+    /// - Parameters:
+    ///   - isShareOK: 撮影者がSNSシェアを許可したか（既定OFF）
+    ///   - forceTimeCapsule: 撮影者が明示的に「あとで公開」を選んだか
+    /// - Returns: 実際に保存された写真（タイムカプセルになったかどうかを含む）
+    @discardableResult
+    func uploadPhoto(
+        _ image: UIImage,
+        eventID: UUID,
+        filterName: String? = nil,
+        isShareOK: Bool = false,
+        forceTimeCapsule: Bool = false
+    ) async throws -> Photo {
         isUploading = true
         defer { isUploading = false }
 
-        let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        let deviceID = DeviceIdentity.current
+        let capturedAt = Date()
+
+        // 一部の写真を遅延公開に回す（機能A）
+        let revealDate = TimeCapsuleService.decideRevealDate(
+            capturedAt: capturedAt,
+            forcedByUser: forceTimeCapsule
+        )
 
         let photo = Photo(
             eventID: eventID,
             uploaderID: deviceID,
+            uploaderName: DeviceIdentity.displayName,
+            uploadedAt: capturedAt,
             filterName: filterName,
-            aiProcessed: filterName != nil
+            aiProcessed: filterName != nil,
+            isTimeCapsule: revealDate != nil,
+            revealDate: revealDate,
+            isShareOK: isShareOK
         )
 
-        // ローカルキャッシュに即座に追加（UX向上）
-        self.photos.insert(photo, at: 0)
+        // ローカルキャッシュに即座に追加（UX向上）。
+        // ただしタイムカプセルはアルバムに出さない。伏せた本人にも見せない。
+        if !photo.isTimeCapsule {
+            self.photos.insert(photo, at: 0)
+        }
+        self.allPhotos.insert(photo, at: 0)
 
         // 画像をリサイズ（パフォーマンス向上）
         guard let resizedImage = resizeImage(image, maxSize: 1920) else {
+            rollback(photo)
             throw NSError(domain: "PhotoRepository", code: 1, userInfo: [NSLocalizedDescriptionKey: "画像のリサイズに失敗"])
         }
 
@@ -71,39 +106,40 @@ class PhotoRepository: ObservableObject {
         }
 
         do {
-            print(record)
             _ = try await database.save(record)
             print("✅ レコードの保存に成功しました")
+            return photo
         } catch let error as CKError {
+            rollback(photo)
             // CloudKit特有のエラーを処理
             switch error.code {
             case .networkUnavailable, .networkFailure:
                 print("❌ ネットワークエラー: インターネット接続を確認してください")
-                
             case .notAuthenticated:
                 print("❌ iCloudにサインインしていません")
-                
             case .quotaExceeded:
                 print("❌ iCloudストレージの容量が不足しています")
-                
             case .serverRecordChanged:
                 print("❌ サーバー上のレコードが変更されています（競合）")
-                
             case .unknownItem:
                 print("❌ 保存しようとしたレコードが見つかりません")
-                
             default:
                 print("❌ CloudKitエラー: \(error.localizedDescription)")
             }
-        }  catch {
-            // アップロード失敗時はローカルから削除
-            if let index = photos.firstIndex(where: { $0.id == photo.id }) {
-                photos.remove(at: index)
-            }
+            self.error = error
+            throw error
+        } catch {
+            rollback(photo)
             print("❌ 写真アップロード失敗: \(error)")
             self.error = error
             throw error
         }
+    }
+
+    /// アップロードに失敗した写真をローカルキャッシュから取り除く
+    private func rollback(_ photo: Photo) {
+        photos.removeAll { $0.id == photo.id }
+        allPhotos.removeAll { $0.id == photo.id }
     }
 
     // MARK: - 写真取得
@@ -126,13 +162,25 @@ class PhotoRepository: ObservableObject {
                 }
             }
 
-            self.photos = fetchedPhotos
-            print("✅ 写真取得成功: \(fetchedPhotos.count)枚")
+            self.allPhotos = fetchedPhotos
+            // アルバムには公開済みのものだけを流す。
+            // 公開判定は revealDate との比較なので、全端末で同じ結果になる。
+            self.photos = TimeCapsuleService.albumPhotos(fetchedPhotos)
+
+            let locked = fetchedPhotos.count - self.photos.count
+            print("✅ 写真取得成功: 公開済み \(self.photos.count)枚 / 未公開 \(locked)枚")
         } catch {
             print("❌ 写真取得失敗: \(error)")
             self.error = error
             throw error
         }
+    }
+
+    /// シェアが許可された写真だけを取り出す（コラージュ生成用・機能B）
+    func shareApprovedPhotos(for eventID: UUID) -> [Photo] {
+        allPhotos
+            .filter { $0.eventID == eventID && $0.isShareOK }
+            .sorted { $0.uploadedAt < $1.uploadedAt }
     }
 
     // MARK: - リアルタイム更新
@@ -148,6 +196,8 @@ class PhotoRepository: ObservableObject {
         )
 
         let notificationInfo = CKSubscription.NotificationInfo()
+        // サイレントプッシュ。受け取った端末が写真一覧を取り直し、
+        // 未公開のタイムカプセルに対してローカル通知を予約し直す。
         notificationInfo.shouldSendContentAvailable = true
         subscription.notificationInfo = notificationInfo
 
@@ -166,21 +216,21 @@ class PhotoRepository: ObservableObject {
         let size = image.size
         let ratio = min(maxSize / size.width, maxSize / size.height)
 
-        if ratio >= 1 { return image }
+        // 十分小さい場合でも向きだけは確定させてから返す。
+        // ここで生の UIImage を返すと、orientation を持ったまま JPEG 化され、
+        // 経路によっては向きが失われる。
+        if ratio >= 1 { return image.normalizedUp() }
 
         let newSize = CGSize(width: size.width * ratio, height: size.height * ratio)
 
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
-        image.draw(in: CGRect(origin: .zero, size: newSize))
-        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1.0
+        format.opaque = true
 
-        return resizedImage
-    }
-
-    /// イベントの写真カウントを更新
-    private func updateEventPhotoCount(eventID: UUID) async {
-        // EventRepositoryの写真カウントを更新
-        // 実装は EventRepository と連携
+        // draw(in:) は imageOrientation を解釈して描くので、
+        // 出来上がりは常に .up の正しい向きになる。
+        return UIGraphicsImageRenderer(size: newSize, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
     }
 }

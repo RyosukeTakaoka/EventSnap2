@@ -1,132 +1,201 @@
 //
- //  MainTabView.swift
- //  EventSnap
- //
+//  MainTabView.swift
+//  EventSnap
+//
 
- import SwiftUI
+import SwiftUI
 
- struct MainTabView: View {
-     @StateObject private var eventViewModel = EventViewModel()
-     @State private var selectedTab = 0  // QRコード画面を最初に表示
+struct MainTabView: View {
+    @StateObject private var eventViewModel = EventViewModel()
 
-     // ← この行を追加（外部から初期タブを指定可能にする）
-     var initialTab: Int = 0
+    /// 最初に開くタブ。既定は最もよく見るアルバム。
+    var initialTab: AppTab = .album
 
-     var body: some View {
-         TabView(selection: $selectedTab) {
-             QRCodeView(eventViewModel: eventViewModel)
-                 .tabItem {
-                     Label("QRコード", systemImage: "qrcode")
-                 }
-                 .tag(0)
+    @State private var selectedTab: AppTab = .album
+    @State private var showEventSwitcher = false
 
-             CameraView()
-                 .tabItem {
-                     Label("カメラ", systemImage: "camera.fill")
-                 }
-                 .tag(1)
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            AlbumView(eventViewModel: eventViewModel, showEventSwitcher: $showEventSwitcher)
+                .tabItem { Label(AppTab.album.title, systemImage: AppTab.album.icon) }
+                .tag(AppTab.album)
 
-             AlbumView()
-                 .tabItem {
-                     Label("アルバム", systemImage: "photo.on.rectangle")
-                 }
-                 .tag(2)
+            CameraView()
+                .tabItem { Label(AppTab.camera.title, systemImage: AppTab.camera.icon) }
+                .tag(AppTab.camera)
 
-             EventSettingsView(eventViewModel: eventViewModel)
-                 .tabItem {
-                     Label("設定", systemImage: "gear")
-                 }
-                 .tag(3)
-         }
-         .accentColor(.blue)
-         .onAppear {
-             // ← この行を追加（初回表示時に初期タブを設定）
-             selectedTab = initialTab
-         }
-         .task {
-             // アプリ起動時にイベントがなければ作成
-             if eventViewModel.currentEvent == nil {
-                 print("⚠️ イベントがないため、デフォルトイベントを作成します")
-                 await eventViewModel.createEvent(name: "マイイベント")
-             }
-         }
-     }
- }
+            TimeCapsuleView(eventViewModel: eventViewModel)
+                .tabItem { Label(AppTab.timeCapsule.title, systemImage: AppTab.timeCapsule.icon) }
+                .tag(AppTab.timeCapsule)
 
- // MARK: - イベント設定ビュー
+            QRCodeView(eventViewModel: eventViewModel)
+                .tabItem { Label(AppTab.invite.title, systemImage: AppTab.invite.icon) }
+                .tag(AppTab.invite)
 
- struct EventSettingsView: View {
-     @ObservedObject var eventViewModel: EventViewModel
-     @Environment(\.dismiss) var dismiss
+            EventSettingsView(eventViewModel: eventViewModel, showEventSwitcher: $showEventSwitcher)
+                .tabItem { Label(AppTab.settings.title, systemImage: AppTab.settings.icon) }
+                .tag(AppTab.settings)
+        }
+        .accentColor(.blue)
+        .sheet(isPresented: $showEventSwitcher) {
+            EventSwitcherView(eventViewModel: eventViewModel)
+        }
+        .onAppear {
+            selectedTab = initialTab
+        }
+        // イベントを作った直後は招待画面、参加した直後はアルバムへ飛ばす
+        .onReceive(eventViewModel.$pendingTab.compactMap { $0 }) { tab in
+            selectedTab = tab
+            eventViewModel.pendingTab = nil
+        }
+        .task {
+            // アプリ起動時にイベントがなければ作成
+            if eventViewModel.currentEvent == nil {
+                print("⚠️ イベントがないため、デフォルトイベントを作成します")
+                await eventViewModel.createEvent(name: "マイイベント")
+            }
+            // タイムカプセルの公開を知らせるために通知の許可をもらう
+            await NotificationService.shared.requestAuthorization()
+        }
+    }
+}
 
-     var body: some View {
-         NavigationView {
-             List {
-                 Section("イベント情報") {
-                     HStack {
-                         Text("イベント名")
-                         Spacer()
-                         Text(eventViewModel.currentEvent?.name ??
- "読み込み中...")
-                             .foregroundColor(.secondary)
-                     }
+// MARK: - イベント設定ビュー
 
-                     HStack {
-                         Text("参加者")
-                         Spacer()
-                         Text("\(eventViewModel.participants.count)人")
-                             .foregroundColor(.secondary)
-                     }
+struct EventSettingsView: View {
+    @ObservedObject var eventViewModel: EventViewModel
+    @Binding var showEventSwitcher: Bool
 
-                     HStack {
-                         Text("作成日時")
-                         Spacer()
-                         if let createdAt =
- eventViewModel.currentEvent?.createdAt {
-                             Text(createdAt.formatted(date: .abbreviated,
- time: .shortened))
-                                 .foregroundColor(.secondary)
-                         }
-                     }
-                 }
+    @StateObject private var collageStore = ShareCollageStore.shared
+    @State private var showEndConfirmation = false
+    @State private var displayName = DeviceIdentity.displayName
 
-                 Section("アクション") {
-                     Button {
-                         Task {
-                             await eventViewModel.refreshEvent()
-                         }
-                     } label: {
-                         HStack {
-                             Image(systemName: "arrow.clockwise")
-                             Text("更新")
-                         }
-                     }
-                 }
+    var body: some View {
+        NavigationView {
+            List {
+                Section("イベント情報") {
+                    LabeledRow(title: "イベント名",
+                               value: eventViewModel.currentEvent?.name ?? "読み込み中...")
 
-                 Section {
-                     Button(role: .destructive) {
-                         Task {
-                             await eventViewModel.endEvent()
-                             dismiss()
-                         }
-                     } label: {
-                         HStack {
-                             Image(systemName: "xmark.circle")
-                             Text("イベントを終了")
-                         }
-                     }
-                 } header: {
-                     Text("危険な操作")
-                 } footer: {
+                    LabeledRow(title: "参加者",
+                               value: "\(eventViewModel.participants.count)人")
 
- Text("イベントを終了すると、新しい写真の追加ができなくなります。")
-                 }
-             }
-             .navigationTitle("設定")
-         }
-     }
- }
+                    if let event = eventViewModel.currentEvent, event.hasInviteCode {
+                        LabeledRow(title: "招待コード",
+                                   value: InviteCode.formatted(event.inviteCode),
+                                   monospaced: true)
+                    }
 
- #Preview {
-     MainTabView()
- }
+                    if let createdAt = eventViewModel.currentEvent?.createdAt {
+                        LabeledRow(title: "作成日時",
+                                   value: createdAt.formatted(date: .abbreviated, time: .shortened))
+                    }
+                }
+
+                Section {
+                    Button {
+                        showEventSwitcher = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                            Text("イベントを切り替える")
+                            Spacer()
+                            Text("\(eventViewModel.recentEvents.count)件")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                } header: {
+                    Text("グループ")
+                } footer: {
+                    Text("参加したことのあるイベントを行き来できます。切り替えても、それぞれのアルバムはそのまま残ります。")
+                }
+
+                Section("表示名") {
+                    TextField("あなたの表示名", text: $displayName)
+                        .onSubmit { DeviceIdentity.setDisplayName(displayName) }
+                    Text("タイムカプセルの通知で「〇〇さんの新しい思い出」と表示されます。")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Section("シェア") {
+                    if let event = eventViewModel.currentEvent,
+                       collageStore.hasCollage(for: event.id) {
+                        NavigationLink {
+                            ShareCollageView(event: event)
+                        } label: {
+                            Label("シェア画像を見る", systemImage: "square.and.arrow.up.on.square")
+                        }
+                    } else {
+                        Text("撮影時に「シェアOK」を選んだ写真があると、イベント終了時にシェア用のコラージュが作られます。")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Section("アクション") {
+                    Button {
+                        Task { await eventViewModel.refreshEvent() }
+                    } label: {
+                        Label("更新", systemImage: "arrow.clockwise")
+                    }
+                }
+
+                Section {
+                    Button(role: .destructive) {
+                        showEndConfirmation = true
+                    } label: {
+                        Label("イベントを終了", systemImage: "xmark.circle")
+                    }
+                } header: {
+                    Text("危険な操作")
+                } footer: {
+                    Text("イベントを終了すると、新しい写真の追加ができなくなります。シェアOKの写真があれば、このタイミングでコラージュが作られます。")
+                }
+            }
+            .navigationTitle("設定")
+            .confirmationDialog("このイベントを終了しますか？",
+                                isPresented: $showEndConfirmation,
+                                titleVisibility: .visible) {
+                Button("終了する", role: .destructive) {
+                    Task { await eventViewModel.endEvent() }
+                }
+                Button("キャンセル", role: .cancel) {}
+            }
+        }
+    }
+}
+
+// MARK: - 小物
+
+struct LabeledRow: View {
+    let title: String
+    let value: String
+    var monospaced: Bool = false
+
+    var body: some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Text(value)
+                .foregroundColor(.secondary)
+                .modifier(MonospacedIfNeeded(enabled: monospaced))
+        }
+    }
+}
+
+private struct MonospacedIfNeeded: ViewModifier {
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.font(.system(.body, design: .monospaced))
+        } else {
+            content
+        }
+    }
+}
+
+#Preview {
+    MainTabView()
+}

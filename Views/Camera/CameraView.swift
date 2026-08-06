@@ -19,10 +19,15 @@ struct CameraView: View {
                viewModel.isRealtimeEnabled,
                viewModel.selectedFilter == .beauty {
                 // リアルタイムフィルタープレビュー
+                //
+                // 以前はここで .rotationEffect(.degrees(90)) を掛けていたが、
+                // これは「美肌をONにすると画が横に倒れる」のを力技で戻していたもので、
+                // 端末を横にすると逆に破綻していた。
+                // 回転と鏡像は AVCaptureConnection 側で処理するようにしたので、
+                // ここでは何も回さずそのまま表示する。
                 Image(uiImage: previewImage)
                     .resizable()
                     .scaledToFill()
-                    .rotationEffect(.degrees(90))
                     .ignoresSafeArea()
             } else {
                 // 通常のカメラプレビュー
@@ -93,6 +98,24 @@ struct CameraView: View {
 
                 Spacer()
 
+                // 撮影オプション（シェア許可・タイムカプセル）
+                HStack(spacing: 12) {
+                    CaptureOptionToggle(
+                        isOn: $viewModel.shareOK,
+                        icon: "square.and.arrow.up",
+                        label: "シェアOK",
+                        tint: .green
+                    )
+
+                    CaptureOptionToggle(
+                        isOn: $viewModel.saveAsTimeCapsule,
+                        icon: "hourglass",
+                        label: "あとで公開",
+                        tint: .orange
+                    )
+                }
+                .padding(.bottom, 18)
+
                 // ボトムコントロール
                 VStack(spacing: 20) {
                     // 処理中インジケーター
@@ -154,6 +177,43 @@ struct CameraView: View {
     }
 }
 
+// MARK: - 撮影オプションのトグル
+
+/// シャッターの上に置く小さなトグル。
+/// どちらも **押していない状態が既定** で、撮影のたびにOFFへ戻る。
+struct CaptureOptionToggle: View {
+    @Binding var isOn: Bool
+    let icon: String
+    let label: String
+    let tint: Color
+
+    var body: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.15)) { isOn.toggle() }
+        } label: {
+            HStack(spacing: 6) {
+                // 状態は背景色で示す。SF Symbolsには .fill が存在しない記号もあるため
+                // アイコン名は切り替えない。
+                Image(systemName: icon)
+                    .imageScale(.small)
+                Text(label)
+                    .font(.caption)
+                    .fontWeight(.medium)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
+            .background(isOn ? tint.opacity(0.9) : Color.black.opacity(0.55))
+            .foregroundColor(isOn ? .black : .white)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule().stroke(isOn ? Color.clear : Color.white.opacity(0.35), lineWidth: 1)
+            )
+        }
+        .accessibilityLabel(label)
+        .accessibilityValue(isOn ? "オン" : "オフ")
+    }
+}
+
 // MARK: - カメラプレビュー
 
 struct CameraPreview: UIViewRepresentable {
@@ -165,6 +225,13 @@ struct CameraPreview: UIViewRepresentable {
         let previewLayer = AVCaptureVideoPreviewLayer(session: session)
         previewLayer.videoGravity = .resizeAspectFill
         previewLayer.frame = view.bounds
+
+        // プレビューは縦固定にする。UIが縦固定なので、端末を横にすると
+        // 画面ごと物理的に回り、見ている人の目には世界が正しい向きで映る。
+        // 写真の向きは CameraViewModel が撮影出力の接続側で合わせる。
+        previewLayer.connection?.applyPortrait()
+        previewLayer.connection?.applyMirroring(true)
+
         view.layer.addSublayer(previewLayer)
 
         return view

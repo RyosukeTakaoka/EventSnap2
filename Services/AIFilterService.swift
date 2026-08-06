@@ -338,11 +338,15 @@ class AIFilterService {
     }
 
     /// PixelBufferからUIImageへ高速変換
-    func convertToUIImage(from ciImage: CIImage) -> UIImage? {
+    ///
+    /// 以前はここで `.upMirrored` を決め打ちしていたが、それだと端末を横にしたときに
+    /// 破綻していた。鏡像化と回転は `AVCaptureConnection` 側で済ませる方針にしたので、
+    /// ここでは既定で `.up`（＝バッファそのまま）を使う。
+    func convertToUIImage(from ciImage: CIImage,
+                          orientation: UIImage.Orientation = .up) -> UIImage? {
         guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else {
             return nil
         }
-        // フロントカメラの場合、画像の向きを補正
-        return UIImage(cgImage: cgImage, scale: 1.0, orientation: .upMirrored)
+        return UIImage(cgImage: cgImage, scale: 1.0, orientation: orientation)
     }
 }

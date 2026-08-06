@@ -13,15 +13,23 @@ struct QRCodeView: View {
     @State private var isGenerating = true
     @State private var generationFailed = false
     @State private var errorMessage = ""
+    @State private var didCopyCode = false
 
     var body: some View {
-        VStack(spacing: 30) {
+        ScrollView {
+            content
+        }
+    }
+
+    private var content: some View {
+        VStack(spacing: 24) {
             Text("友達を招待")
                 .font(.title)
                 .fontWeight(.bold)
+                .padding(.top, 12)
 
-            Text("このQRコードを読み取ってもらおう！")
-                .font(.headline)
+            Text("その場にいる人はQRコードで、\n離れている人は招待コードで参加できます")
+                .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
@@ -92,6 +100,11 @@ struct QRCodeView: View {
             .animation(.easeInOut(duration: 0.3), value: isGenerating)
             .animation(.easeInOut(duration: 0.3), value: qrCodeImage != nil)
 
+            // 招待コード（離れている相手に伝えるため）
+            if let event = eventViewModel.currentEvent, event.hasInviteCode {
+                inviteCodeCard(for: event)
+            }
+
             // イベント情報
             VStack(spacing: 12) {
                 Text(eventViewModel.currentEvent?.name ?? "イベント名なし")
@@ -104,7 +117,7 @@ struct QRCodeView: View {
                 }
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-                
+
                 // デバッグ情報（開発中のみ表示）
                 #if DEBUG
                 Text("イベントID: \(eventViewModel.currentEvent?.id.uuidString ?? "なし")")
@@ -117,13 +130,76 @@ struct QRCodeView: View {
             .background(Color(.systemGray6))
             .cornerRadius(16)
 
-            Spacer()
+            Spacer(minLength: 20)
         }
         .padding()
         .onAppear {
             debugEventViewModel()
             generateQRCode()
         }
+    }
+
+    // MARK: - 招待コード
+
+    /// 離れている相手にも伝えられる6文字のコード。
+    /// QRコードはその場にいる人にしか使えないため、口頭やメッセージで
+    /// 渡せる経路を用意する。
+    @ViewBuilder
+    private func inviteCodeCard(for event: Event) -> some View {
+        VStack(spacing: 12) {
+            Text("招待コード")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            Text(InviteCode.formatted(event.inviteCode))
+                .font(.system(size: 40, weight: .bold, design: .monospaced))
+                .kerning(3)
+                .textSelection(.enabled)
+
+            HStack(spacing: 10) {
+                Button {
+                    UIPasteboard.general.string = event.inviteCode
+                    withAnimation { didCopyCode = true }
+                    Task {
+                        try? await Task.sleep(nanoseconds: 1_600_000_000)
+                        withAnimation { didCopyCode = false }
+                    }
+                } label: {
+                    Label(didCopyCode ? "コピーしました" : "コピー",
+                          systemImage: didCopyCode ? "checkmark" : "doc.on.doc")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                ShareLink(item: shareMessage(for: event)) {
+                    Label("送る", systemImage: "square.and.arrow.up")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(
+            LinearGradient(
+                colors: [Color.blue.opacity(0.12), Color.purple.opacity(0.12)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .cornerRadius(16)
+    }
+
+    /// メッセージアプリ等に貼れる案内文
+    private func shareMessage(for event: Event) -> String {
+        """
+        「\(event.name)」の写真をEventSnapで共有しています。
+        招待コード: \(InviteCode.formatted(event.inviteCode))
+
+        アプリで「招待コードで参加」からコードを入力すると参加できます。
+        """
     }
 
     /// EventViewModelの状態をデバッグ
