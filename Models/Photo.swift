@@ -87,10 +87,24 @@ struct Photo: Identifiable, Codable, Equatable, Hashable {
         return max(1, Int(ceil(seconds / 86_400)))
     }
 
+    /// タイムカプセル状態を解除して通常公開の写真にする。
+    ///
+    /// シェアOKとタイムカプセルが重複したときに使う。
+    /// 「未来の再訪価値より、イベント終了直後の共有価値を優先する」という判断。
+    func releasedFromTimeCapsule() -> Photo {
+        var released = self
+        released.isTimeCapsule = false
+        released.revealDate = nil
+        return released
+    }
+
     // MARK: - CloudKit
 
-    func toRecord() -> CKRecord {
-        let record = CKRecord(recordType: "Photo")
+    /// 既存レコードへの書き込み。
+    /// 新規 `CKRecord` を作り直すと recordID が変わって複製になるため、
+    /// 更新時は取得済みのレコードを渡すこと。
+    @discardableResult
+    func apply(to record: CKRecord) -> CKRecord {
         record["id"] = id.uuidString as CKRecordValue
         record["eventID"] = eventID.uuidString as CKRecordValue
         record["uploaderID"] = uploaderID as CKRecordValue
@@ -98,20 +112,15 @@ struct Photo: Identifiable, Codable, Equatable, Hashable {
         record["aiProcessed"] = (aiProcessed ? 1 : 0) as CKRecordValue
         record["isTimeCapsule"] = (isTimeCapsule ? 1 : 0) as CKRecordValue
         record["isShareOK"] = (isShareOK ? 1 : 0) as CKRecordValue
-
-        if let filterName = filterName {
-            record["filterName"] = filterName as CKRecordValue
-        }
-
-        if let uploaderName = uploaderName {
-            record["uploaderName"] = uploaderName as CKRecordValue
-        }
-
-        if let revealDate = revealDate {
-            record["revealDate"] = revealDate as CKRecordValue
-        }
-
+        record["filterName"] = filterName as CKRecordValue?
+        record["uploaderName"] = uploaderName as CKRecordValue?
+        // 解除時に nil を入れて消せるよう、条件分岐せず常に代入する
+        record["revealDate"] = revealDate as CKRecordValue?
         return record
+    }
+
+    func toRecord() -> CKRecord {
+        apply(to: CKRecord(recordType: "Photo"))
     }
 
     static func from(record: CKRecord) -> Photo? {

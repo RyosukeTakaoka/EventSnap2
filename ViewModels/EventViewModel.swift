@@ -63,22 +63,17 @@ class EventViewModel: ObservableObject {
 
     // MARK: - イベント参加
 
-    /// QRコード・ユニバーサルリンクから参加
+    /// イベントに参加する。
+    ///
+    /// 呼ばれるのは **QRコードの読み取りとApp Clip / Universal Link だけ**。
+    /// その場に居合わせた人しか入れない、というEventSnapの前提を守るため、
+    /// コードを伝えるだけで参加できる経路は用意しない。
     func joinEvent(eventID: String) async {
-        await join { try await self.eventRepository.joinEvent(eventID: eventID) }
-    }
-
-    /// 招待コードから参加（遠くにいる人向け）
-    func joinEvent(inviteCode: String) async {
-        await join { try await self.eventRepository.joinEvent(inviteCode: inviteCode) }
-    }
-
-    private func join(_ operation: () async throws -> Void) async {
         isLoading = true
         error = nil
 
         do {
-            try await operation()
+            try await eventRepository.joinEvent(eventID: eventID)
             self.hasJoinedEvent = true
             // 参加した側はまず何が撮られているか見たいはずなのでアルバムへ
             self.pendingTab = .album

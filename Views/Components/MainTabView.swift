@@ -80,12 +80,6 @@ struct EventSettingsView: View {
                     LabeledRow(title: "参加者",
                                value: "\(eventViewModel.participants.count)人")
 
-                    if let event = eventViewModel.currentEvent, event.hasInviteCode {
-                        LabeledRow(title: "招待コード",
-                                   value: InviteCode.formatted(event.inviteCode),
-                                   monospaced: true)
-                    }
-
                     if let createdAt = eventViewModel.currentEvent?.createdAt {
                         LabeledRow(title: "作成日時",
                                    value: createdAt.formatted(date: .abbreviated, time: .shortened))

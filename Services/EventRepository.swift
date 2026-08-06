@@ -56,7 +56,6 @@ class EventRepository: ObservableObject {
         }
     }
 
-    /// 履歴の先頭に持ち上げる（重複は取り除く）
     private func rememberEvent(_ id: UUID) {
         var ids = joinedEventIDs
         ids.removeAll { $0 == id.uuidString }
@@ -72,9 +71,8 @@ class EventRepository: ObservableObject {
 
     /// 前回開いていたイベントを復元する。
     ///
-    /// 以前は `joinEvent` を呼び直していたが、それだと起動のたびに
-    /// 参加処理（participantIDsの書き込み）が走ってしまう。
-    /// 復元は **読み取りのみ** で行い、参加者リストは触らない。
+    /// 参加処理を走らせ直すと participantIDs を毎回書き換えてしまうので、
+    /// 復元は **読み取りのみ** で行う。
     func restoreEvent() async {
         guard currentEvent == nil, let savedID = savedCurrentEventID else { return }
 
@@ -110,15 +108,13 @@ class EventRepository: ObservableObject {
             participantIDs: [deviceID]
         )
 
-        let record = event.toRecord()
-
         do {
-            _ = try await database.save(record)
+            _ = try await database.save(event.toRecord())
             applyCurrent(event)
             rememberEvent(event.id)
             await loadRecentEvents()
 
-            print("✅ イベント作成成功: \(event.id) / コード: \(event.inviteCode)")
+            print("✅ イベント作成成功: \(event.id)")
             return event
         } catch {
             print("❌ イベント作成失敗: \(error)")
@@ -129,7 +125,11 @@ class EventRepository: ObservableObject {
 
     // MARK: - イベント参加
 
-    /// イベントIDで参加（QRコード・ユニバーサルリンク経由）
+    /// イベントIDで参加する。
+    ///
+    /// 参加経路は **QRコードの読み取り（およびApp Clip / Universal Link）だけ**。
+    /// 「その場に居合わせた人だけが入れる」というEventSnapの前提を守るため、
+    /// 文字列を伝えるだけで入れる招待コードのような経路は用意しない。
     func joinEvent(eventID: String) async throws {
         isLoading = true
         defer { isLoading = false }
@@ -142,35 +142,13 @@ class EventRepository: ObservableObject {
             throw EventError.notFound
         }
 
-        try await join(event)
-    }
-
-    /// 招待コードで参加（その場にいない相手向け）
-    func joinEvent(inviteCode rawCode: String) async throws {
-        isLoading = true
-        defer { isLoading = false }
-
-        let code = InviteCode.normalize(rawCode)
-        guard InviteCode.isValid(code) else {
-            throw EventError.invalidCode
-        }
-
-        guard let event = try await fetchEvent(inviteCode: code) else {
-            throw EventError.codeNotFound
-        }
-
-        try await join(event)
-    }
-
-    /// 参加者リストに自分を加えて現在のイベントにする
-    private func join(_ event: Event) async throws {
-        var event = event
+        var updated = event
         let deviceID = DeviceIdentity.current
 
-        if !event.participantIDs.contains(deviceID) {
-            event.participantIDs.append(deviceID)
+        if !updated.participantIDs.contains(deviceID) {
+            updated.participantIDs.append(deviceID)
             do {
-                _ = try await database.save(event.toRecord())
+                try await save(updated)
             } catch {
                 print("❌ 参加者リストの更新に失敗: \(error)")
                 self.error = error
@@ -178,11 +156,11 @@ class EventRepository: ObservableObject {
             }
         }
 
-        applyCurrent(event)
-        rememberEvent(event.id)
+        applyCurrent(updated)
+        rememberEvent(updated.id)
         await loadRecentEvents()
 
-        print("✅ イベント参加成功: \(event.name)")
+        print("✅ イベント参加成功: \(updated.name)")
     }
 
     // MARK: - グループ切り替え
@@ -206,12 +184,10 @@ class EventRepository: ObservableObject {
                     missing.append(id)
                 }
             } catch {
-                // 通信エラーは無視する。取得できたものだけ並べる。
                 print("⚠️ 履歴イベントの取得に失敗: \(id)")
             }
         }
 
-        // 消えていたイベントは履歴から外す
         if !missing.isEmpty {
             joinedEventIDs = joinedEventIDs.filter { !missing.contains($0) }
         }
@@ -220,11 +196,10 @@ class EventRepository: ObservableObject {
     }
 
     /// 別のイベントに切り替える。
-    /// すでに参加済みのイベントなので、参加者リストへの書き込みは行わない。
+    /// すでに参加済みなので、参加者リストへの書き込みは行わない。
     func switchEvent(to event: Event) async {
         guard event.id != currentEvent?.id else { return }
 
-        // 表示を即座に切り替えたうえで、最新の状態を取り直す
         applyCurrent(event)
         rememberEvent(event.id)
 
@@ -239,6 +214,7 @@ class EventRepository: ObservableObject {
     /// 履歴から外す（CloudKit上のイベントは消さない）
     func leaveEvent(_ event: Event) async {
         forgetEvent(event.id)
+        await NotificationService.shared.cancelReveals(for: event.id)
 
         if currentEvent?.id == event.id {
             saveCurrentEventID(nil)
@@ -248,7 +224,6 @@ class EventRepository: ObservableObject {
 
         await loadRecentEvents()
 
-        // 他に参加中のイベントがあれば自動で切り替える
         if currentEvent == nil, let next = recentEvents.first {
             await switchEvent(to: next)
         }
@@ -268,49 +243,73 @@ class EventRepository: ObservableObject {
     }
 
     private func fetchEvent(id: String) async throws -> Event? {
+        try await fetchRecord(id: id).flatMap(Event.from(record:))
+    }
+
+    /// 更新に使う CKRecord を取得する。
+    /// `save()` で複製を作らないよう、必ず既存レコードを取り直してから書き込む。
+    private func fetchRecord(id: String) async throws -> CKRecord? {
         let predicate = NSPredicate(format: "id == %@", id)
-        return try await fetchEvent(matching: predicate)
-    }
-
-    private func fetchEvent(inviteCode: String) async throws -> Event? {
-        let predicate = NSPredicate(format: "inviteCode == %@", inviteCode)
-        return try await fetchEvent(matching: predicate)
-    }
-
-    private func fetchEvent(matching predicate: NSPredicate) async throws -> Event? {
         let query = CKQuery(recordType: "Event", predicate: predicate)
         let results = try await database.records(matching: query)
 
-        guard let (_, result) = results.matchResults.first,
-              let record = try? result.get() else {
-            return nil
-        }
+        guard let (_, result) = results.matchResults.first else { return nil }
+        return try? result.get()
+    }
 
-        return Event.from(record: record)
+    /// イベントを保存する（既存があれば上書き、無ければ新規作成）
+    private func save(_ event: Event) async throws {
+        if let existing = try await fetchRecord(id: event.id.uuidString) {
+            _ = try await database.save(event.apply(to: existing))
+        } else {
+            _ = try await database.save(event.toRecord())
+        }
     }
 
     // MARK: - イベント終了
 
-    /// イベントを終了
-    func endEvent() async throws {
-        guard var event = currentEvent else { return }
+    /// イベントを終了する。
+    ///
+    /// 終了しても写真は一切消えない。**タイムカプセルの公開予定もそのまま残る**。
+    /// イベントの終了はシェアコラージュを作るきっかけであって、
+    /// 伏せてある思い出を片付けるための操作ではない。
+    /// （シェアOKが付いた写真だけは、コラージュ生成時に公開へ回される）
+    @discardableResult
+    func endEvent() async throws -> Event? {
+        guard var event = currentEvent, event.isActive else { return nil }
 
         event.endedAt = Date()
         event.isActive = false
 
         do {
-            _ = try await database.save(event.toRecord())
+            try await save(event)
             applyCurrent(event)
             print("✅ イベント終了")
+            return event
         } catch {
             print("❌ イベント終了失敗: \(error)")
             throw error
         }
     }
 
+    /// 日付が変わっていたら自動でイベントを終了する。
+    ///
+    /// イベントは1日単位の集まりを想定しているので、日付をまたいだら
+    /// 終了とみなしてシェアコラージュを作るきっかけにする。
+    ///
+    /// - Returns: 実際に終了させたイベント。終了しなかった場合は nil
+    @discardableResult
+    func endEventIfDayChanged() async -> Event? {
+        guard let event = currentEvent, event.isActive, event.hasPassedItsDay() else {
+            return nil
+        }
+
+        print("📅 日付が変わったのでイベントを自動終了します: \(event.name)")
+        return try? await endEvent()
+    }
+
     // MARK: - 内部
 
-    /// 現在のイベントを差し替え、付随する状態も揃える
     private func applyCurrent(_ event: Event) {
         currentEvent = event
         saveCurrentEventID(event.id)
@@ -338,15 +337,11 @@ class EventRepository: ObservableObject {
 enum EventError: LocalizedError {
     case invalidID
     case notFound
-    case invalidCode
-    case codeNotFound
 
     var errorDescription: String? {
         switch self {
-        case .invalidID:    return "無効なイベントIDです"
-        case .notFound:     return "イベントが見つかりません"
-        case .invalidCode:  return "招待コードは6文字で入力してください"
-        case .codeNotFound: return "この招待コードのイベントは見つかりませんでした"
+        case .invalidID: return "無効なイベントIDです"
+        case .notFound:  return "イベントが見つかりません"
         }
     }
 }
