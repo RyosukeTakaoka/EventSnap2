@@ -17,7 +17,7 @@ enum TimeCapsuleService {
 
     /// 自動でタイムカプセルに選ばれる確率。
     /// 高すぎるとその場で見られる写真が減ってアプリの基本体験が壊れるので控えめにする。
-    static let autoSelectionRate: Double = 0.2
+    static let autoSelectionRate: Double = 0.1
 
     /// 公開までの最短時間。
     /// あまり早いと「遅延公開」の意味が無く、その場で見えるのと変わらなくなる。
