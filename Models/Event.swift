@@ -8,7 +8,7 @@
 import Foundation
 import CloudKit
 
-struct Event: Identifiable, Codable {
+struct Event: Identifiable, Codable, Equatable, Hashable {
     let id: UUID
     var name: String
     let createdAt: Date
@@ -17,6 +17,9 @@ struct Event: Identifiable, Codable {
     var participantIDs: [String]
     var photoCount: Int
     var isActive: Bool
+    /// 遠くにいる人にも口頭・テキストで伝えられる6文字の招待コード。
+    /// v1で作られた既存イベントには存在しないため空文字になりうる。
+    var inviteCode: String
 
     init(
         id: UUID = UUID(),
@@ -26,7 +29,8 @@ struct Event: Identifiable, Codable {
         creatorID: String,
         participantIDs: [String] = [],
         photoCount: Int = 0,
-        isActive: Bool = true
+        isActive: Bool = true,
+        inviteCode: String = InviteCode.generate()
     ) {
         self.id = id
         self.name = name
@@ -36,7 +40,11 @@ struct Event: Identifiable, Codable {
         self.participantIDs = participantIDs
         self.photoCount = photoCount
         self.isActive = isActive
+        self.inviteCode = inviteCode
     }
+
+    /// 招待コードを表示してよいか（v1で作られたイベントは持っていない）
+    var hasInviteCode: Bool { !inviteCode.isEmpty }
 
     // CloudKitレコードへの変換
     func toRecord() -> CKRecord {
@@ -48,6 +56,10 @@ struct Event: Identifiable, Codable {
         record["participantIDs"] = participantIDs as CKRecordValue
         record["photoCount"] = photoCount as CKRecordValue
         record["isActive"] = (isActive ? 1 : 0) as CKRecordValue
+
+        if !inviteCode.isEmpty {
+            record["inviteCode"] = inviteCode as CKRecordValue
+        }
 
         if let endedAt = endedAt {
             record["endedAt"] = endedAt as CKRecordValue
@@ -72,6 +84,8 @@ struct Event: Identifiable, Codable {
         }
 
         let endedAt = record["endedAt"] as? Date
+        // v1のレコードにはこのフィールドが無いので、無ければ空文字にしておく
+        let inviteCode = record["inviteCode"] as? String ?? ""
 
         return Event(
             id: id,
@@ -81,7 +95,8 @@ struct Event: Identifiable, Codable {
             creatorID: creatorID,
             participantIDs: participantIDs,
             photoCount: photoCount,
-            isActive: isActiveInt == 1
+            isActive: isActiveInt == 1,
+            inviteCode: inviteCode
         )
     }
 }

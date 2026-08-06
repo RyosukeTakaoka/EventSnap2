@@ -9,7 +9,11 @@ import SwiftUI
 
 struct AlbumView: View {
     @StateObject private var viewModel = AlbumViewModel()
-    @StateObject private var eventViewModel = EventViewModel()
+    /// MainTabView から共有されるインスタンスを受け取る。
+    /// 以前はここで @StateObject を作っていたため、タブごとに別のイベント状態を
+    /// 持ってしまい、グループを切り替えても反映されなかった。
+    @ObservedObject var eventViewModel: EventViewModel
+    @Binding var showEventSwitcher: Bool
 
     let columns = [
         GridItem(.flexible(), spacing: 2),
@@ -52,15 +56,29 @@ struct AlbumView: View {
                     }
                 }
             }
-            .navigationTitle("アルバム")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        Label("\(viewModel.photos.count)枚", systemImage: "photo.fill")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                // タイトルをタップするとイベントを切り替えられる
+                ToolbarItem(placement: .principal) {
+                    Button {
+                        showEventSwitcher = true
+                    } label: {
+                        HStack(spacing: 5) {
+                            Text(eventViewModel.currentEvent?.name ?? "アルバム")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                                .lineLimit(1)
+                            Image(systemName: "chevron.down")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundColor(.secondary)
+                        }
                     }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Label("\(viewModel.photos.count)枚", systemImage: "photo.fill")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
             }
             .refreshable {
@@ -240,5 +258,5 @@ struct PhotoDetailView: View {
 }
 
 #Preview {
-    AlbumView()
+    AlbumView(eventViewModel: EventViewModel(), showEventSwitcher: .constant(false))
 }

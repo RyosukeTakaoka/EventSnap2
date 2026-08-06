@@ -23,6 +23,20 @@ class CameraViewModel: ObservableObject {
     @Published var isRealtimeEnabled = true
     @Published var beautyIntensity: Double = 0.5
 
+    /// この写真をSNSシェア用のコラージュに使ってよいか（機能B）。
+    /// **既定はOFF**。撮るたびにOFFへ戻し、意図しない拡散が起きないようにする。
+    @Published var shareOK = false
+
+    /// この写真をタイムカプセル（遅延公開）にするか（機能A）。
+    /// 撮影者本人による明示的な指定。OFFでも一定確率で自動選定される。
+    @Published var saveAsTimeCapsule = false
+
+    /// 直前の撮影がタイムカプセルになったか（撮影後のフィードバック表示用）
+    @Published var lastCaptureWasTimeCapsule = false
+
+    /// 端末の物理的な向き。横で撮った写真を横のまま保存するために使う。
+    let orientation = CameraOrientation()
+
     let captureSession = AVCaptureSession()
     private let photoOutput = AVCapturePhotoOutput()
     private let videoOutput = AVCaptureVideoDataOutput() // ✨ 追加
@@ -41,6 +55,9 @@ class CameraViewModel: ObservableObject {
     // ✨ フレームスロットリング用
     private var lastFrameProcessedTime: Date = .distantPast
     private let frameProcessingInterval: TimeInterval = 0.1 // 10 FPS
+
+    // 端末の向きの購読
+    private var orientationCancellable: AnyCancellable?
 
     enum FilterType: String, CaseIterable, Identifiable {
         case none = "なし"
@@ -136,11 +153,52 @@ class CameraViewModel: ObservableObject {
             print("✅ ビデオデリゲートを設定しました")
         }
 
+        // 🔄 プレビュー用の出力は「縦固定」にする。
+        // 画面自体が端末と一緒に物理的に回るので、これで見た目は常に正しくなる。
+        if let videoConnection = videoOutput.connection(with: .video) {
+            videoConnection.applyPortrait()
+            // 鏡像化は接続側で行う。以前は UIImage の orientation を .upMirrored に
+            // 決め打ちしていたが、それだと横向きのときに破綻していた。
+            videoConnection.applyMirroring(true)
+        }
+
+        // 端末の向きの監視を開始し、写真出力の回転角を追従させる
+        orientation.start()
+        observeOrientation()
+        updatePhotoOutputOrientation()
+
         // ✅ バックグラウンドスレッドで実行
         cameraQueue.async { [weak self] in
             self?.captureSession.startRunning()
             print("✅ カメラセッション開始")
         }
+    }
+
+    // MARK: - 向きの追従
+
+    private func observeOrientation() {
+        orientationCancellable = orientation.$current
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updatePhotoOutputOrientation()
+            }
+    }
+
+    /// 写真出力の接続だけを端末の物理的な向きに合わせる。
+    ///
+    /// プレビューは縦固定のままにしておく（画面ごと回るので見た目は正しい）。
+    /// ここを追従させることで「横に構えて撮った写真が横のまま保存される」ようになる。
+    private func updatePhotoOutputOrientation() {
+        guard let connection = photoOutput.connection(with: .video) else { return }
+
+        connection.apply(
+            rotationAngle: orientation.captureRotationAngle,
+            videoOrientation: orientation.captureVideoOrientation
+        )
+        // フロントカメラは見たままに合わせて鏡像で保存する
+        connection.applyMirroring(true)
+
+        print("🔄 撮影の向きを更新: \(orientation.current.rawValue) / \(orientation.captureRotationAngle)°")
     }
 
     // MARK: - 撮影
@@ -189,7 +247,13 @@ class CameraViewModel: ObservableObject {
 
             Task { @MainActor in
                 print("\n【メインスレッド】画像処理を開始します")
-                
+
+                // 🔄 向きをピクセルに焼き込んでから処理する。
+                // CIImage と Vision は imageOrientation を見てくれないので、
+                // ここで .up に正規化しておかないと横向きの写真が崩れる。
+                let image = image.normalizedUp()
+                print("📐 正規化後のサイズ: \(image.size) (横向き: \(image.isLandscape))")
+
                 // フィルター適用
                 print("🎨 フィルター適用開始: \(self.selectedFilter.rawValue)")
                 let filterStartTime = Date()
@@ -270,12 +334,25 @@ class CameraViewModel: ObservableObject {
 
         do {
             print("  🔄 PhotoRepositoryにアップロード中...")
-            try await photoRepository.uploadPhoto(
+            let uploaded = try await photoRepository.uploadPhoto(
                 image,
                 eventID: eventID,
-                filterName: selectedFilter != .none ? selectedFilter.rawValue : nil
+                filterName: selectedFilter != .none ? selectedFilter.rawValue : nil,
+                isShareOK: shareOK,
+                forceTimeCapsule: saveAsTimeCapsule
             )
-            print("  ✅ 写真を自動共有しました")
+
+            lastCaptureWasTimeCapsule = uploaded.isTimeCapsule
+
+            // 次の撮影に持ち越さない。特にシェア許可は既定OFFに戻すのが重要。
+            shareOK = false
+            saveAsTimeCapsule = false
+
+            if uploaded.isTimeCapsule {
+                print("  ⏳ タイムカプセルとして保存しました（公開予定: \(uploaded.revealDate.map(String.init(describing:)) ?? "不明")）")
+            } else {
+                print("  ✅ 写真を自動共有しました")
+            }
         } catch {
             print("  ❌ アップロード失敗: \(error.localizedDescription)")
             print("  🔍 エラー詳細: \(error)")
@@ -286,6 +363,8 @@ class CameraViewModel: ObservableObject {
 
     func startSession() {
         print("▶️ カメラセッション開始をリクエスト")
+        orientation.start()
+        updatePhotoOutputOrientation()
         // ✅ バックグラウンドスレッドで実行
         cameraQueue.async { [weak self] in
             guard let self = self else { return }
@@ -300,6 +379,7 @@ class CameraViewModel: ObservableObject {
 
     func stopSession() {
         print("⏸️ カメラセッション停止をリクエスト")
+        orientation.stop()
         // ✅ バックグラウンドスレッドで実行
         cameraQueue.async { [weak self] in
             guard let self = self else { return }
