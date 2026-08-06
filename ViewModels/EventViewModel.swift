@@ -115,26 +115,17 @@ class EventViewModel: ObservableObject {
 
     // MARK: - イベント終了
 
-    /// 終了直後にコラージュが作れたか（シェア導線の出し分けに使う）
-    @Published var didGenerateCollage = false
-
+    /// イベントを終了する。
+    ///
+    /// Event Reelはイベント中に随時作られているため、終了をきっかけに
+    /// 何かを生成する必要はない（`ShareCollageBuilder.buildIfNeeded` 参照）。
     func endEvent() async {
-        let event = currentEvent
-
         do {
             try await eventRepository.endEvent()
             print("✅ イベント終了")
         } catch {
             self.error = "イベントの終了に失敗しました"
             print("❌ イベント終了エラー: \(error)")
-            return
-        }
-
-        // イベントが終わったタイミングでシェア用コラージュを作る（機能B）。
-        // シェアOKの写真が0枚なら nil が返り、シェア導線自体を出さない。
-        if let event {
-            let ended = eventRepository.currentEvent ?? event
-            didGenerateCollage = await ShareCollageBuilder.buildIfPossible(for: ended) != nil
         }
     }
 

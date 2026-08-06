@@ -2,7 +2,8 @@
 //  TimeCapsuleView.swift
 //  EventSnap
 //
-//  タイムカプセル（遅延公開）タブ
+//  タイムカプセル（遅延公開）タブ。
+//  参加者全員が同じ枚数・同じ待ち時間を共有する（個人単位の機能ではない）
 //
 
 import SwiftUI
@@ -40,7 +41,7 @@ struct TimeCapsuleView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if let shareEntry = eventViewModel.currentEvent,
-                       collageStore.hasCollage(for: shareEntry.id) {
+                       collageStore.hasAnyReel(for: shareEntry.id) {
                         NavigationLink {
                             ShareCollageView(event: shareEntry)
                         } label: {
@@ -57,6 +58,8 @@ struct TimeCapsuleView: View {
 
     // MARK: - 未公開のお知らせ
 
+    /// 参加者全員が同じ枚数を共有する。誰が撮ったかに関わらず、
+    /// 中身は revealDate が来るまで**誰にも**見えない。
     private var lockedBanner: some View {
         VStack(spacing: 14) {
             ZStack {
@@ -77,6 +80,10 @@ struct TimeCapsuleView: View {
 
             Text("\(viewModel.lockedCount)枚の思い出が眠っています")
                 .font(.headline)
+
+            Text("参加者みんなで、公開の瞬間を待っています")
+                .font(.caption)
+                .foregroundColor(.secondary)
 
             // 正確な公開日時は見せない。「いつ来るか分からない」ことが
             // アプリを開く理由になるため、ぼかした表現に留める。
@@ -129,7 +136,7 @@ struct TimeCapsuleView: View {
 
             Text(viewModel.lockedCount > 0
                  ? "公開まで楽しみに待ちましょう"
-                 : "撮影時に「あとで公開」を選ぶと、\nしばらく経ってから公開される思い出になります")
+                 : "撮影時に「あとで公開」を選ぶと、\nしばらく経ってから参加者全員に公開される思い出になります")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

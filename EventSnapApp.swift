@@ -117,7 +117,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
 // MARK: - 同期
 
-/// 写真の同期・タイムカプセル通知の予約・日付変更によるイベント終了をまとめて行う
+/// 写真の同期・タイムカプセル通知の予約・Event Reelの生成チェックをまとめて行う
 enum SyncCoordinator {
     @MainActor
     static func refreshTimeCapsules() async {
@@ -136,10 +136,8 @@ enum SyncCoordinator {
             viewerID: DeviceIdentity.current
         )
 
-        // 日付をまたいでいたらイベントを終了し、シェアコラージュを作る。
-        // この中で、シェアOKと重複したタイムカプセルが解除される。
-        if let ended = await EventRepository.shared.endEventIfDayChanged() {
-            await ShareCollageBuilder.buildIfPossible(for: ended)
-        }
+        // イベント中でも、シェアOKの新着写真が5枚集まっていれば
+        // 新しいEvent Reelを作る（イベント終了を待たない）
+        await ShareCollageBuilder.buildIfNeeded(for: event)
     }
 }

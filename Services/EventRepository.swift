@@ -268,12 +268,15 @@ class EventRepository: ObservableObject {
 
     // MARK: - イベント終了
 
-    /// イベントを終了する。
+    /// イベントを終了する（ユーザーの明示的な操作でのみ呼ばれる）。
+    ///
+    /// 旅行・合宿など複数日にまたがるイベントを想定し、**日付が変わるだけでは
+    /// 終了しない**。終了はユーザーが自分で判断して行う操作。
     ///
     /// 終了しても写真は一切消えない。**タイムカプセルの公開予定もそのまま残る**。
-    /// イベントの終了はシェアコラージュを作るきっかけであって、
-    /// 伏せてある思い出を片付けるための操作ではない。
-    /// （シェアOKが付いた写真だけは、コラージュ生成時に公開へ回される）
+    /// Event Reelもここでは作らない。シェアOKの写真が5枚集まるたびに
+    /// イベント中随時作られている（`ShareCollageBuilder.buildIfNeeded`）ため、
+    /// 終了をきっかけに何かを生成する必要はない。
     @discardableResult
     func endEvent() async throws -> Event? {
         guard var event = currentEvent, event.isActive else { return nil }
@@ -290,22 +293,6 @@ class EventRepository: ObservableObject {
             print("❌ イベント終了失敗: \(error)")
             throw error
         }
-    }
-
-    /// 日付が変わっていたら自動でイベントを終了する。
-    ///
-    /// イベントは1日単位の集まりを想定しているので、日付をまたいだら
-    /// 終了とみなしてシェアコラージュを作るきっかけにする。
-    ///
-    /// - Returns: 実際に終了させたイベント。終了しなかった場合は nil
-    @discardableResult
-    func endEventIfDayChanged() async -> Event? {
-        guard let event = currentEvent, event.isActive, event.hasPassedItsDay() else {
-            return nil
-        }
-
-        print("📅 日付が変わったのでイベントを自動終了します: \(event.name)")
-        return try? await endEvent()
     }
 
     // MARK: - 内部

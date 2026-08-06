@@ -2,7 +2,7 @@
 //  TimeCapsuleViewModel.swift
 //  EventSnap
 //
-//  タイムカプセルタブのViewModel
+//  タイムカプセルタブのViewModel（イベント参加者全員で共有する状態を表示する）
 //
 
 import Foundation
@@ -11,7 +11,8 @@ import Combine
 
 @MainActor
 final class TimeCapsuleViewModel: ObservableObject {
-    /// まだ公開されていない写真（枚数とぼかした残り時間だけ見せる）
+    /// まだ公開されていない写真（枚数とぼかした残り時間だけ見せる）。
+    /// 誰が撮ったかに関わらず、参加者全員が同じ枚数・同じ待ち時間を共有する。
     @Published var locked: [Photo] = []
     /// 公開済みのタイムカプセル写真（新しく公開されたものが上）
     @Published var revealed: [Photo] = []

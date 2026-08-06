@@ -111,7 +111,8 @@ struct CameraView: View {
                         isOn: $viewModel.saveAsTimeCapsule,
                         icon: "hourglass",
                         label: "あとで公開",
-                        tint: .orange
+                        tint: .orange,
+                        isDisabled: viewModel.shareOK
                     )
                 }
                 .padding(.bottom, 18)
@@ -186,6 +187,7 @@ struct CaptureOptionToggle: View {
     let icon: String
     let label: String
     let tint: Color
+    var isDisabled: Bool = false
 
     var body: some View {
         Button {
@@ -208,7 +210,9 @@ struct CaptureOptionToggle: View {
             .overlay(
                 Capsule().stroke(isOn ? Color.clear : Color.white.opacity(0.35), lineWidth: 1)
             )
+            .opacity(isDisabled ? 0.4 : 1)
         }
+        .disabled(isDisabled)
         .accessibilityLabel(label)
         .accessibilityValue(isOn ? "オン" : "オフ")
     }

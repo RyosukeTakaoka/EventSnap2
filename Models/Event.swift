@@ -38,12 +38,6 @@ struct Event: Identifiable, Codable, Equatable, Hashable {
         self.isActive = isActive
     }
 
-    /// 作成日と違う日になっていれば、このイベントはもう終わったとみなす。
-    /// シェアコラージュはこのタイミングで自動生成する。
-    func hasPassedItsDay(asOf now: Date = Date()) -> Bool {
-        !Calendar.current.isDate(createdAt, inSameDayAs: now)
-    }
-
     // MARK: - CloudKit
 
     /// 既存のレコードに値を書き込む。

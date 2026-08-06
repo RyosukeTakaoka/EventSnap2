@@ -2,29 +2,37 @@
 //  TimeCapsuleService.swift
 //  EventSnap
 //
-//  写真の遅延公開（タイムカプセル）の選定と判定
+//  写真の遅延公開（タイムカプセル）の選定と判定。
+//  イベント参加者全員で共有する体験として扱う（個人単位の機能ではない）
 //
 
 import Foundation
 
-/// イベントが終わってもアプリを開く理由を作るための遅延公開の仕組み。
+/// イベント参加者全員で共有する、遅延公開の仕組み。
 ///
-/// 撮った写真の一部を「まだ見られない写真」として伏せておき、
-/// 2週間かけて小分けに公開していく。
+/// 撮った写真の一部を「まだ誰にも見えない写真」として伏せておき、
+/// 2週間かけて小分けに公開していく。**個人が自分の写真を隠す機能ではなく、
+/// イベント参加者全員が同じ条件で待つ、共有の体験**である。
+/// 公開された瞬間、参加者全員に「LINE通知のように突然思い出が届く」ことを狙う。
 ///
 /// ## この機能で守るべきこと
 ///
-/// タイムカプセルは **「一定期間後に開く思い出」** であって、
-/// 一定時間で消える一時的なものではない。以下は仕様である。
+/// タイムカプセルは **「一定期間後に、参加者全員へ一斉に開く思い出」** であって、
+/// 一定時間で消える一時的なものでも、撮影者だけが見られるものでもない。
+/// 以下は仕様である。
 ///
 /// - タイムカプセル写真は **削除しない**。`revealDate` まで保持する
+/// - `revealDate` までは **撮影者本人を含め、誰にも表示しない**
+///   （アルバムにもタイムカプセルタブにも出さない）
 /// - **イベントが終了してもタイムカプセル状態は維持する**。
-///   イベントの終了は公開のトリガーではない
-/// - 公開は `revealDate <= 現在時刻` になった時点。予約された通知で知らせる
+///   イベントの終了・日付変更は公開のトリガーではない
+/// - 公開は `revealDate <= 現在時刻` になった時点。参加者全員に通知される
+/// - 手動で早めて公開する経路は無い。伏せた写真を捨てたり、
+///   個人の判断で公開を早めたりしてはいけない
 ///
-/// 唯一の例外は、シェアOKが付いた写真をコラージュ生成時に解除する場合だけ
-/// （`PhotoRepository.releaseSharedTimeCapsules`）。
-/// それ以外の理由で公開を早めたり、伏せた写真を捨てたりしてはいけない。
+/// なお、**シェアOKの写真はそもそもタイムカプセルの選定対象にならない**
+/// （`decideRevealDate` 参照）。シェアOK＝今すぐ共有したい写真、タイムカプセル＝
+/// イベント全員が未来に受け取る思い出、という役割分担のため。
 enum TimeCapsuleService {
 
     // MARK: - 調整パラメータ
@@ -45,13 +53,19 @@ enum TimeCapsuleService {
     /// この写真をタイムカプセルにするか決める。
     ///
     /// - Parameters:
+    ///   - isShareOK: 撮影者が「シェアOK」を選んだか。**true ならタイムカプセルの
+    ///                対象外**。シェアOK＝今共有したい写真であり、後で公開する
+    ///                候補にはしない（`forcedByUser` が true でもこちらが優先）。
     ///   - forcedByUser: 撮影者本人が明示的に「あとで公開」を選んだか。
-    ///                   選んでいれば必ずタイムカプセルになる。
+    ///                   選んでいれば（シェアOKでない限り）必ずタイムカプセルになる。
     /// - Returns: タイムカプセルなら公開予定日時、そうでなければ nil
     static func decideRevealDate(
         capturedAt: Date = Date(),
+        isShareOK: Bool = false,
         forcedByUser: Bool = false
     ) -> Date? {
+        guard !isShareOK else { return nil }
+
         let selected = forcedByUser || Double.random(in: 0..<1) < autoSelectionRate
         guard selected else { return nil }
 
@@ -63,33 +77,8 @@ enum TimeCapsuleService {
 
     // MARK: - 振り分け
 
-    /// 写真を「今すぐ見えるもの」と「まだ見えないもの」に分ける。
-    ///
-    /// 未公開のタイムカプセル写真は、**撮影者本人にだけ**見えるようにする
-    /// （自分が何を伏せたかは分かってよい）。
-    static func partition(
-        _ photos: [Photo],
-        viewerID: String,
-        now: Date = Date()
-    ) -> (visible: [Photo], locked: [Photo]) {
-        var visible: [Photo] = []
-        var locked: [Photo] = []
-
-        for photo in photos {
-            if photo.isRevealed(asOf: now) {
-                visible.append(photo)
-            } else if photo.uploaderID == viewerID {
-                // 自分が伏せた写真。アルバムには出さず、カプセルタブでロック表示する。
-                locked.append(photo)
-            } else {
-                locked.append(photo)
-            }
-        }
-
-        return (visible, locked)
-    }
-
-    /// 通常のアルバムに出すべき写真（＝公開済み）
+    /// 通常のアルバムに出すべき写真（＝公開済み）。
+    /// 誰が撮ったかに関わらず、参加者全員に同じ結果になる。
     static func albumPhotos(_ photos: [Photo], now: Date = Date()) -> [Photo] {
         photos.filter { $0.isRevealed(asOf: now) }
     }
@@ -101,7 +90,8 @@ enum TimeCapsuleService {
             .sorted { ($0.revealDate ?? $0.uploadedAt) > ($1.revealDate ?? $1.uploadedAt) }
     }
 
-    /// まだロックされている写真（公開が近い順）
+    /// まだロックされている写真（公開が近い順）。
+    /// 誰が撮ったかは問わない。参加者は全員、同じ枚数・同じ待ち時間を共有する。
     static func lockedCapsules(_ photos: [Photo], now: Date = Date()) -> [Photo] {
         photos
             .filter { $0.isTimeCapsule && !$0.isRevealed(asOf: now) }

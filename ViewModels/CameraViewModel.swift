@@ -23,12 +23,20 @@ class CameraViewModel: ObservableObject {
     @Published var isRealtimeEnabled = true
     @Published var beautyIntensity: Double = 0.5
 
-    /// この写真をSNSシェア用のコラージュに使ってよいか（機能B）。
+    /// この写真をEvent Reel（SNSシェア用のコラージュ）に使ってよいか（機能B）。
     /// **既定はOFF**。撮るたびにOFFへ戻し、意図しない拡散が起きないようにする。
-    @Published var shareOK = false
+    ///
+    /// シェアOK＝今共有したい写真なので、ONにした瞬間「あとで公開」は解除する
+    /// （シェアOKの写真はタイムカプセルの対象外というルールをUIでも表す）
+    @Published var shareOK = false {
+        didSet {
+            if shareOK { saveAsTimeCapsule = false }
+        }
+    }
 
     /// この写真をタイムカプセル（遅延公開）にするか（機能A）。
     /// 撮影者本人による明示的な指定。OFFでも一定確率で自動選定される。
+    /// シェアOKがONのときは選べない（シェアOKの写真は必ず即時共有になる）。
     @Published var saveAsTimeCapsule = false
 
     /// 直前の撮影がタイムカプセルになったか（撮影後のフィードバック表示用）
@@ -352,6 +360,12 @@ class CameraViewModel: ObservableObject {
                 print("  ⏳ タイムカプセルとして保存しました（公開予定: \(uploaded.revealDate.map(String.init(describing:)) ?? "不明")）")
             } else {
                 print("  ✅ 写真を自動共有しました")
+            }
+
+            // シェアOKの写真が増えたので、新しいEvent Reelの生成条件を満たしていないか確認する。
+            // イベント終了を待たず、5枚集まった時点でイベント中に作る。
+            if uploaded.isShareOK, let event = eventRepository.currentEvent {
+                await ShareCollageBuilder.buildIfNeeded(for: event)
             }
         } catch {
             print("  ❌ アップロード失敗: \(error.localizedDescription)")

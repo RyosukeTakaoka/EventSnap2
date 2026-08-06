@@ -112,16 +112,16 @@ struct EventSettingsView: View {
                         .foregroundColor(.secondary)
                 }
 
-                Section("シェア") {
+                Section("Event Reel") {
                     if let event = eventViewModel.currentEvent,
-                       collageStore.hasCollage(for: event.id) {
+                       collageStore.hasAnyReel(for: event.id) {
                         NavigationLink {
                             ShareCollageView(event: event)
                         } label: {
-                            Label("シェア画像を見る", systemImage: "square.and.arrow.up.on.square")
+                            Label("Event Reelを見る", systemImage: "square.and.arrow.up.on.square")
                         }
                     } else {
-                        Text("撮影時に「シェアOK」を選んだ写真があると、イベント終了時にシェア用のコラージュが作られます。")
+                        Text("撮影時に「シェアOK」を選んだ写真が\(ShareCollageBuilder.photosPerReel)枚集まるごとに、イベント中に自動でEvent Reelが作られます。")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -144,7 +144,7 @@ struct EventSettingsView: View {
                 } header: {
                     Text("危険な操作")
                 } footer: {
-                    Text("イベントを終了すると、新しい写真の追加ができなくなります。シェアOKの写真があれば、このタイミングでコラージュが作られます。")
+                    Text("イベントを終了すると、新しい写真の追加ができなくなります。旅行や合宿など複数日にまたがるイベントでは、日付が変わっても自動では終了しません。")
                 }
             }
             .navigationTitle("設定")

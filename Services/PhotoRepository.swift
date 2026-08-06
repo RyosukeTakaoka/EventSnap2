@@ -53,9 +53,11 @@ class PhotoRepository: ObservableObject {
         let deviceID = DeviceIdentity.current
         let capturedAt = Date()
 
-        // 一部の写真を遅延公開に回す（機能A）
+        // 一部の写真を遅延公開に回す（機能A）。
+        // シェアOKの写真は対象外（シェアOK＝今共有したい写真を優先する）
         let revealDate = TimeCapsuleService.decideRevealDate(
             capturedAt: capturedAt,
+            isShareOK: isShareOK,
             forcedByUser: forceTimeCapsule
         )
 
@@ -176,70 +178,73 @@ class PhotoRepository: ObservableObject {
         }
     }
 
-    /// シェアが許可された写真だけを取り出す（コラージュ生成用・機能B）
+    /// シェアが許可された写真だけを、撮影順（古い順）に取り出す（Event Reel生成用）。
+    ///
+    /// タイムカプセルは撮影時点でシェアOKの写真を対象外にしているため
+    /// 基本的には重複しないが、念のためタイムカプセル中の写真は除外しておく。
+    /// 古い順に並んでいるのは、Event Reelが5枚ずつの塊で生成順に区切られるため。
     func shareApprovedPhotos(for eventID: UUID) -> [Photo] {
         allPhotos
-            .filter { $0.eventID == eventID && $0.isShareOK }
+            .filter { $0.eventID == eventID && $0.isShareOK && !$0.isTimeCapsule }
             .sorted { $0.uploadedAt < $1.uploadedAt }
     }
 
-    // MARK: - タイムカプセルの解除（優先ルール）
+    // MARK: - シェアOK状態の変更
 
-    /// シェアOKとタイムカプセルが重複した写真を、通常公開の写真に戻す。
+    /// 撮影後に「シェアOK」の状態を変更する。
     ///
-    /// EventSnapには2つの価値がある:
-    ///   - タイムカプセル … 隠すことで未来の価値を作る
-    ///   - シェアコラージュ … 公開することで現在の価値を最大化する
+    /// 想定ケース: 間違えてONにした／写っている人から削除希望があった／
+    /// SNS共有を取り消したい、など。**タイムカプセルの状態
+    /// （`isTimeCapsule`・`revealDate`）には一切影響しない**。
     ///
-    /// 両立できないので、**イベント終了直後の共有価値を優先する**と決めた。
-    /// 拡散効果が最も高いのはイベント直後であり、その機会を逃さないことを取る。
-    /// ユーザーに二択を迫らず、アプリ側が自動で役割を決める。
+    /// - OFFにした場合: 既存のEvent Reelからもこの写真を取り除き、画像を作り直す
+    ///   （`ShareCollageBuilder.removeFromReels`）。以後の`shareApprovedPhotos`にも
+    ///   出てこなくなるため、今後生成されるReelにも一切使われない
+    /// - ONにした場合: 次回以降のEvent Reel生成の対象に加わる
+    ///   （`ShareCollageBuilder.buildIfNeeded`）
     ///
-    /// **解除するのはシェアOKが付いたものだけ**。それ以外のタイムカプセルは
-    /// イベントが終わっても解除せず、予約された公開日時まで伏せたまま保持する。
-    /// タイムカプセルは「一定期間後に開く思い出」であって、
-    /// イベントと一緒に片付けられる一時的なものではない。
+    /// まだ公開されていないタイムカプセル写真には使えない。全員に非公開という
+    /// タイムカプセルの原則を、シェアOK経由で崩さないようにするため。
     ///
-    /// - Returns: 実際に解除された写真
+    /// - Returns: 更新後の写真。変更不要／失敗した場合は nil
     @discardableResult
-    func releaseSharedTimeCapsules(for eventID: UUID) async -> [Photo] {
-        let targets = allPhotos.filter {
-            $0.eventID == eventID
-                && $0.isShareOK
-                && $0.isTimeCapsule
-                && !$0.isRevealed()   // まだ公開待ちのものだけ。公開済みは触らない
+    func setShareOK(_ isShareOK: Bool, for photo: Photo, event: Event) async -> Photo? {
+        guard photo.isShareOK != isShareOK else { return photo }
+        guard !photo.isTimeCapsule || photo.isRevealed() else {
+            print("⚠️ 未公開のタイムカプセル写真はシェアOKを変更できません: \(photo.id)")
+            return nil
         }
 
-        guard !targets.isEmpty else { return [] }
+        var updated = photo
+        updated.isShareOK = isShareOK
 
-        print("🔓 シェア優先: \(targets.count)枚のタイムカプセルを解除します")
-
-        var released: [Photo] = []
-
-        for photo in targets {
-            let updated = photo.releasedFromTimeCapsule()
-            do {
-                try await save(updated)
-                released.append(updated)
-            } catch {
-                print("❌ タイムカプセルの解除に失敗 (\(photo.id)): \(error)")
-            }
+        do {
+            try await save(updated)
+        } catch {
+            print("❌ シェアOK状態の更新に失敗 (\(photo.id)): \(error)")
+            self.error = error
+            return nil
         }
 
-        guard !released.isEmpty else { return [] }
+        if let index = allPhotos.firstIndex(where: { $0.id == photo.id }) {
+            allPhotos[index] = updated
+        }
+        if let index = photos.firstIndex(where: { $0.id == photo.id }) {
+            photos[index] = updated
+        }
 
-        // ローカルの状態を差し替える。解除された写真はアルバムにも並ぶようになる。
-        let releasedByID = Dictionary(uniqueKeysWithValues: released.map { ($0.id, $0) })
-        allPhotos = allPhotos.map { releasedByID[$0.id] ?? $0 }
-        photos = TimeCapsuleService.albumPhotos(allPhotos)
+        if isShareOK {
+            print("📤 シェアOKにしました: \(photo.id)")
+            await ShareCollageBuilder.buildIfNeeded(for: event)
+        } else {
+            print("🔒 シェアOKを取り消しました: \(photo.id)")
+            await ShareCollageBuilder.removeFromReels(photoID: photo.id, event: event)
+        }
 
-        // 公開予定が無くなったので、予約済みの通知も取り消す
-        await NotificationService.shared.cancelReveals(for: released.map(\.id))
-
-        return released
+        return updated
     }
 
-    /// 写真を保存する（既存があれば上書き、無ければ新規作成）。
+    /// 写真を更新する（既存レコードを取得してから上書きする）。
     ///
     /// 新規に `CKRecord` を作り直すと recordID が変わって複製になるため、
     /// 更新時は既存レコードを取り直してから書き込む。

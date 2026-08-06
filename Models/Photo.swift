@@ -27,10 +27,11 @@ struct Photo: Identifiable, Codable, Equatable, Hashable {
     /// 公開予定日時。`isTimeCapsule == true` のときだけ意味を持つ
     var revealDate: Date?
 
-    // MARK: - シェアコラージュ（機能B）
+    // MARK: - Event Reel（機能B）
 
     /// 撮影者が「この写真はSNSでシェアしてよい」と明示的に許可したか。
-    /// **デフォルトは false**。本人がONにした写真だけがコラージュに使われる。
+    /// **デフォルトは false**。本人がONにした写真だけがEvent Reelに使われる。
+    /// trueの写真はタイムカプセルの対象外になる（即時共有を優先するため）。
     var isShareOK: Bool
 
     init(
@@ -74,28 +75,11 @@ struct Photo: Identifiable, Codable, Equatable, Hashable {
         return revealDate <= now
     }
 
-    /// 指定の端末から見えるべき写真か。
-    /// 未公開のタイムカプセル写真は、撮影者本人にだけ見えるようにする。
-    func isVisible(to deviceID: String, asOf now: Date = Date()) -> Bool {
-        isRevealed(asOf: now) || uploaderID == deviceID
-    }
-
     /// 公開までのおおよその残り日数（正確な日時は見せない方針）
     func daysUntilReveal(asOf now: Date = Date()) -> Int? {
         guard isTimeCapsule, let revealDate, revealDate > now else { return nil }
         let seconds = revealDate.timeIntervalSince(now)
         return max(1, Int(ceil(seconds / 86_400)))
-    }
-
-    /// タイムカプセル状態を解除して通常公開の写真にする。
-    ///
-    /// シェアOKとタイムカプセルが重複したときに使う。
-    /// 「未来の再訪価値より、イベント終了直後の共有価値を優先する」という判断。
-    func releasedFromTimeCapsule() -> Photo {
-        var released = self
-        released.isTimeCapsule = false
-        released.revealDate = nil
-        return released
     }
 
     // MARK: - CloudKit
