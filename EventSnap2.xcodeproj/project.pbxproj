@@ -17,7 +17,7 @@
 		2A38855153B264258C228C9C /* FilterPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFCAE433E8096D49781D2F3D /* FilterPickerView.swift */; };
 		34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */; };
 		6672E15CA9D7AD5E2FC592FC /* AlbumViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */; };
-		E5300000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7760F8AA2F5D236F00F18A2E /* Assets.xcassets */; };
+		7760F8EA2F5D2CBC00F18A2E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7760F8AA2F5D236F00F18A2E /* Assets.xcassets */; };
 		7C142E68F84DD7505B638AC5 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0CA4F056D31CD263119C9D8 /* CameraView.swift */; };
 		94A53529D607048BD1840E6E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05ED44B24BF30673E712740A /* QRCodeView.swift */; };
 		9B2319CCFD1753657F39F1FE /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1FC9B16BEEE0613D3DEA5D /* MainTabView.swift */; };
@@ -216,7 +216,7 @@
 			buildConfigurationList = 138C64439E8A39F331A152A1 /* Build configuration list for PBXNativeTarget "EventSnap2" */;
 			buildPhases = (
 				6949D50C2CAE67F39314B1AC /* Sources */,
-				E5300000000000000000002 /* Resources */,
+				54B85DF74363802E2110964A /* Resources */,
 			);
 			buildRules = (
 			);
@@ -258,11 +258,11 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		E5300000000000000000002 /* Resources */ = {
+		54B85DF74363802E2110964A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5300000000000000000001 /* Assets.xcassets in Resources */,
+				7760F8EA2F5D2CBC00F18A2E /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
