@@ -59,7 +59,7 @@ final class TimeCapsuleViewModel: ObservableObject {
 
         await NotificationService.shared.scheduleReveals(
             for: photoRepository.allPhotos,
-            eventName: event.name,
+            event: event,
             viewerID: DeviceIdentity.current
         )
     }

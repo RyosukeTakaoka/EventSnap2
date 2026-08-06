@@ -268,7 +268,12 @@ class EventRepository: ObservableObject {
 
     // MARK: - イベント終了
 
-    /// イベントを終了する
+    /// イベントを終了する。
+    ///
+    /// 終了しても写真は一切消えない。**タイムカプセルの公開予定もそのまま残る**。
+    /// イベントの終了はシェアコラージュを作るきっかけであって、
+    /// 伏せてある思い出を片付けるための操作ではない。
+    /// （シェアOKが付いた写真だけは、コラージュ生成時に公開へ回される）
     @discardableResult
     func endEvent() async throws -> Event? {
         guard var event = currentEvent, event.isActive else { return nil }

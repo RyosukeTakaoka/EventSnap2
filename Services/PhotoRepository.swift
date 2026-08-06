@@ -195,11 +195,19 @@ class PhotoRepository: ObservableObject {
     /// 拡散効果が最も高いのはイベント直後であり、その機会を逃さないことを取る。
     /// ユーザーに二択を迫らず、アプリ側が自動で役割を決める。
     ///
+    /// **解除するのはシェアOKが付いたものだけ**。それ以外のタイムカプセルは
+    /// イベントが終わっても解除せず、予約された公開日時まで伏せたまま保持する。
+    /// タイムカプセルは「一定期間後に開く思い出」であって、
+    /// イベントと一緒に片付けられる一時的なものではない。
+    ///
     /// - Returns: 実際に解除された写真
     @discardableResult
     func releaseSharedTimeCapsules(for eventID: UUID) async -> [Photo] {
         let targets = allPhotos.filter {
-            $0.eventID == eventID && $0.isShareOK && $0.isTimeCapsule
+            $0.eventID == eventID
+                && $0.isShareOK
+                && $0.isTimeCapsule
+                && !$0.isRevealed()   // まだ公開待ちのものだけ。公開済みは触らない
         }
 
         guard !targets.isEmpty else { return [] }

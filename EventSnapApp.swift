@@ -132,7 +132,7 @@ enum SyncCoordinator {
 
         await NotificationService.shared.scheduleReveals(
             for: PhotoRepository.shared.allPhotos,
-            eventName: event.name,
+            event: event,
             viewerID: DeviceIdentity.current
         )
 

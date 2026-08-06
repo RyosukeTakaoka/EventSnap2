@@ -35,7 +35,12 @@ final class NotificationService {
     private init() {}
 
     /// iOSが1アプリに許す保留中ローカル通知の上限は64件。
-    /// 超えると古いものから捨てられるため、公開が近いものを優先して予約する。
+    /// 超えると捨てられるため、公開が近いものを優先して予約する。
+    ///
+    /// これは **1イベントあたり** の上限。複数のイベントに参加していると
+    /// 合計で64件を超えうるが、公開が近い順に予約しているので、
+    /// 直近に鳴るべき通知から埋まる。アプリを開くたびに予約し直すため、
+    /// 遠い先の分は手前の通知が消化されてから入る。
     private let maxScheduled = 56
 
     private let center = UNUserNotificationCenter.current()
@@ -67,26 +72,40 @@ final class NotificationService {
     /// 未公開のタイムカプセル写真に対して公開通知を予約する。
     ///
     /// 同じ写真IDで予約し直すと上書きされるので、何度呼んでも重複しない。
-    func scheduleReveals(for photos: [Photo], eventName: String, viewerID: String) async {
+    func scheduleReveals(for photos: [Photo], event: Event, viewerID: String) async {
         guard await isAuthorized else {
             print("⚠️ 通知が許可されていないため予約をスキップします")
             return
         }
 
         let now = Date()
+        // 公開が近い順に並んでいるので、上限に当たっても直近のものが残る
         let pending = TimeCapsuleService.lockedCapsules(photos, now: now)
             .prefix(maxScheduled)
 
-        // 予約済みのうち、もう存在しない/公開済みになった写真の予約は取り消す
+        // 予約済みのうち、もう存在しない/公開済みになった写真の予約は取り消す。
+        //
+        // ⚠️ この掃除は **このイベントの予約だけ** を対象にすること。
+        // 接頭辞だけで判定すると、渡されたのは今開いているイベントの写真だけなので、
+        // 別のイベントのタイムカプセルの予約まで巻き添えで消えてしまう。
+        // グループを切り替えただけで、前のイベントの思い出が
+        // 公開日を迎えても通知されなくなる、という壊れ方をする。
         let keepIDs = Set(pending.map { notificationID(for: $0) })
         let existing = await center.pendingNotificationRequests()
         let stale = existing
-            .filter { $0.identifier.hasPrefix(Self.prefix) && !keepIDs.contains($0.identifier) }
+            .filter { request in
+                guard request.identifier.hasPrefix(Self.prefix) else { return false }
+                guard (request.content.userInfo["eventID"] as? String) == event.id.uuidString
+                else { return false }   // 他のイベントの予約には触れない
+                return !keepIDs.contains(request.identifier)
+            }
             .map(\.identifier)
 
         if !stale.isEmpty {
             center.removePendingNotificationRequests(withIdentifiers: stale)
         }
+
+        let eventName = event.name
 
         for photo in pending {
             guard let revealDate = photo.revealDate, revealDate > now else { continue }
