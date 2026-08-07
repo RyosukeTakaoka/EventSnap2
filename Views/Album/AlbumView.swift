@@ -178,11 +178,20 @@ struct LockedPhotoCell: View {
                     .padding(.horizontal, 6)
             }
             .overlay(alignment: .topTrailing) {
+                // 単色だと質素に見えるので、暖色のグラデーションでポップに見せる
                 Image(systemName: "hourglass")
                     .font(.caption)
                     .foregroundColor(.white)
-                    .padding(5)
-                    .background(Color.black.opacity(0.45), in: Circle())
+                    .padding(6)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.orange, Color.pink],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        in: Circle()
+                    )
+                    .shadow(color: Color.orange.opacity(0.5), radius: 3, y: 1)
                     .padding(5)
             }
             .clipped()

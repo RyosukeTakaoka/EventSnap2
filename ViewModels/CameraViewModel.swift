@@ -380,13 +380,20 @@ class CameraViewModel: ObservableObject {
 
     private func uploadPhoto(_ image: UIImage) async {
         print("  📤 アップロード処理開始...")
-        
-        guard let eventID = eventRepository.currentEvent?.id else {
+
+        guard let event = eventRepository.currentEvent else {
             print("  ❌ アップロード失敗: イベントが見つかりません")
-            print("  ⚠️ eventRepository.currentEvent = \(eventRepository.currentEvent != nil ? "存在" : "nil")")
             return
         }
 
+        // 終了したイベントには新しい写真を追加できない。
+        // UI側（CameraView）でシャッターを無効化しているが、念のためここでも防ぐ。
+        guard event.isActive else {
+            print("  ❌ アップロード失敗: イベントは終了しています")
+            return
+        }
+
+        let eventID = event.id
         print("  📋 イベントID: \(eventID.uuidString)")
 
         do {

@@ -10,7 +10,13 @@ import AVFoundation
 
 struct CameraView: View {
     @StateObject private var viewModel = CameraViewModel()
+    @ObservedObject private var eventRepository = EventRepository.shared
     @State private var showFilterPicker = false
+
+    /// 終了したイベントには新しい写真を追加できない
+    private var isEventActive: Bool {
+        eventRepository.currentEvent?.isActive ?? true
+    }
 
     var body: some View {
         ZStack {
@@ -112,24 +118,40 @@ struct CameraView: View {
 
                 Spacer()
 
-                // 撮影オプション（シェア許可・タイムカプセル）
-                HStack(spacing: 12) {
-                    CaptureOptionToggle(
-                        isOn: $viewModel.shareOK,
-                        icon: "square.and.arrow.up",
-                        label: "シェアOK",
-                        tint: .green
-                    )
+                if isEventActive {
+                    // 撮影オプション（シェア許可・タイムカプセル）
+                    HStack(spacing: 12) {
+                        CaptureOptionToggle(
+                            isOn: $viewModel.shareOK,
+                            icon: "square.and.arrow.up",
+                            label: "シェアOK",
+                            tint: .green
+                        )
 
-                    CaptureOptionToggle(
-                        isOn: $viewModel.saveAsTimeCapsule,
-                        icon: "hourglass",
-                        label: "あとで公開",
-                        tint: .orange,
-                        isDisabled: viewModel.shareOK
-                    )
+                        CaptureOptionToggle(
+                            isOn: $viewModel.saveAsTimeCapsule,
+                            icon: "hourglass",
+                            label: "あとで公開",
+                            tint: .orange,
+                            isDisabled: viewModel.shareOK
+                        )
+                    }
+                    .padding(.bottom, 18)
+                } else {
+                    // 終了したイベントでは撮影オプションの代わりに案内を出す
+                    HStack {
+                        Image(systemName: "lock.fill")
+                        Text("このイベントは終了しています。新しい写真は追加できません。")
+                            .font(.caption)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color.black.opacity(0.6))
+                    .cornerRadius(14)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 18)
                 }
-                .padding(.bottom, 18)
 
                 // ボトムコントロール
                 VStack(spacing: 20) {
@@ -159,8 +181,9 @@ struct CameraView: View {
                                 .stroke(Color.white, lineWidth: 3)
                                 .frame(width: 80, height: 80)
                         }
+                        .opacity(isEventActive ? 1 : 0.4)
                     }
-                    .disabled(viewModel.isProcessing)
+                    .disabled(viewModel.isProcessing || !isEventActive)
                 }
                 .padding(.bottom, 40)
             }

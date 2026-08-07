@@ -136,7 +136,11 @@ class EventViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 self?.currentEvent = event
-                if event != nil { self?.hasJoinedEvent = true }
+                // イベントが無くなった（終了して外れた等）場合もタイトル画面へ
+                // 戻すため、両方向に反映する。この EventViewModel が
+                // HomeView / MainTabView のどちらのインスタンスであっても、
+                // 同じ EventRepository.shared を見ているので同期される。
+                self?.hasJoinedEvent = event != nil
             }
             .store(in: &cancellables)
 

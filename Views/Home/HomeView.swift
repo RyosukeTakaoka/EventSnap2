@@ -24,76 +24,27 @@ struct HomeView: View {
                 )
                 .ignoresSafeArea()
 
-                VStack(spacing: 40) {
-                    Spacer()
+                GeometryReader { proxy in
+                    ScrollView {
+                        VStack(spacing: 32) {
+                            Spacer(minLength: 24)
 
-                    // アプリタイトル
-                    VStack(spacing: 8) {
-                        Image(systemName: "photo.on.rectangle.angled")
-                            .font(.system(size: 80))
-                            .foregroundColor(.white)
+                            titleSection
 
-                        Text("EventSnap")
-                            .font(.system(size: 40, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            actionsSection
 
-                        Text("思い出を、みんなで")
-                            .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.9))
-                    }
-
-                    Spacer()
-
-                    // メインアクション
-                    VStack(spacing: 20) {
-                        // イベント作成ボタン
-                        Button {
-                            showEventCreation = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "plus.circle.fill")
-                                Text("新しいイベントを作成")
-                                    .fontWeight(.semibold)
+                            // イベント終了は「そのイベントだけ」に効く操作。
+                            // タイトル画面に戻っても、他に参加しているイベントには
+                            // すぐ入れるよう一覧を出しておく。
+                            if !eventViewModel.recentEvents.isEmpty {
+                                joinedEventsSection
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.white)
-                            .foregroundColor(.blue)
-                            .cornerRadius(16)
-                        }
 
-                        // QRスキャンボタン
-                        Button {
-                            showQRScanner = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "qrcode.viewfinder")
-                                Text("QRコードで参加")
-                                    .fontWeight(.semibold)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.white.opacity(0.2))
-                            .foregroundColor(.white)
-                            .cornerRadius(16)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color.white, lineWidth: 2)
-                            )
+                            Spacer(minLength: 24)
                         }
-
-                        // 参加経路はQRコードだけ。その場に居合わせた人しか
-                        // 入れないことがEventSnapの前提なので、コードを
-                        // 伝えるだけで参加できる手段は用意しない。
-                        Text("参加できるのはQRコードを読み取った人だけです")
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.85))
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 4)
+                        .frame(minHeight: proxy.size.height)
+                        .frame(maxWidth: .infinity)
                     }
-                    .padding(.horizontal, 40)
-
-                    Spacer()
                 }
             }
             .navigationBarHidden(true)
@@ -116,6 +67,133 @@ struct HomeView: View {
                 MainTabView(initialTab: eventViewModel.pendingTab ?? .album)
             }
         }
+        .task {
+            await eventViewModel.loadRecentEvents()
+        }
+    }
+
+    // MARK: - アプリタイトル
+
+    private var titleSection: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "photo.on.rectangle.angled")
+                .font(.system(size: 80))
+                .foregroundColor(.white)
+
+            Text("EventSnap")
+                .font(.system(size: 40, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+
+            Text("思い出を、みんなで")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.9))
+        }
+    }
+
+    // MARK: - メインアクション
+
+    private var actionsSection: some View {
+        VStack(spacing: 20) {
+            // イベント作成ボタン
+            Button {
+                showEventCreation = true
+            } label: {
+                HStack {
+                    Image(systemName: "plus.circle.fill")
+                    Text("新しいイベントを作成")
+                        .fontWeight(.semibold)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.white)
+                .foregroundColor(.blue)
+                .cornerRadius(16)
+            }
+
+            // QRスキャンボタン
+            Button {
+                showQRScanner = true
+            } label: {
+                HStack {
+                    Image(systemName: "qrcode.viewfinder")
+                    Text("QRコードで参加")
+                        .fontWeight(.semibold)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.white.opacity(0.2))
+                .foregroundColor(.white)
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.white, lineWidth: 2)
+                )
+            }
+
+            // 参加経路はQRコードだけ。その場に居合わせた人しか
+            // 入れないことがEventSnapの前提なので、コードを
+            // 伝えるだけで参加できる手段は用意しない。
+            Text("参加できるのはQRコードを読み取った人だけです")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.85))
+                .multilineTextAlignment(.center)
+                .padding(.top, 4)
+        }
+        .padding(.horizontal, 40)
+    }
+
+    // MARK: - 参加中のイベント
+
+    /// 作成・参加したことのあるイベントへすぐ戻れる一覧。
+    /// 終了済みのイベントもここから開ける（新しい写真は追加できない）。
+    private var joinedEventsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("参加中のイベント")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.white.opacity(0.85))
+
+            VStack(spacing: 8) {
+                ForEach(eventViewModel.recentEvents) { event in
+                    Button {
+                        Task { await eventViewModel.switchEvent(to: event) }
+                    } label: {
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(event.name)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+
+                                HStack(spacing: 8) {
+                                    Text("\(event.participantIDs.count)人")
+                                    if !event.isActive {
+                                        Text("終了")
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 1)
+                                            .background(Color.white.opacity(0.25))
+                                            .cornerRadius(4)
+                                    }
+                                }
+                                .font(.caption2)
+                                .foregroundColor(.white.opacity(0.75))
+                            }
+
+                            Spacer()
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.6))
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(Color.white.opacity(0.15))
+                        .cornerRadius(14)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 40)
     }
 }
 

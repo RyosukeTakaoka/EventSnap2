@@ -277,6 +277,11 @@ class EventRepository: ObservableObject {
     /// Event Reelもここでは作らない。シェアOKの写真が5枚集まるたびに
     /// イベント中随時作られている（`ShareCollageBuilder.buildIfNeeded`）ため、
     /// 終了をきっかけに何かを生成する必要はない。
+    ///
+    /// 終了は**そのイベントだけ**に効く操作。`currentEvent` を外して
+    /// タイトル画面に戻すが、参加履歴（`joinedEventIDs`）からは外さないので、
+    /// 他に参加しているイベントには一切影響しない。ホーム画面の
+    /// 「参加中のイベント」からいつでもまた開ける（新しい写真の追加はできない）。
     @discardableResult
     func endEvent() async throws -> Event? {
         guard var event = currentEvent, event.isActive else { return nil }
@@ -286,8 +291,13 @@ class EventRepository: ObservableObject {
 
         do {
             try await save(event)
-            applyCurrent(event)
             print("✅ イベント終了")
+
+            currentEvent = nil
+            participants = []
+            saveCurrentEventID(nil)
+            await loadRecentEvents()
+
             return event
         } catch {
             print("❌ イベント終了失敗: \(error)")
