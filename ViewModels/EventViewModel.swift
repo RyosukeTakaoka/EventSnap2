@@ -16,7 +16,6 @@ class EventViewModel: ObservableObject {
     @Published var recentEvents: [Event] = []
     @Published var isLoading = false
     @Published var error: String?
-    @Published var hasJoinedEvent = false
 
     /// イベント作成／参加の直後に開くべきタブ
     @Published var pendingTab: AppTab?
@@ -33,9 +32,7 @@ class EventViewModel: ObservableObject {
         self.participants = eventRepository.participants
         self.recentEvents = eventRepository.recentEvents
 
-        if currentEvent != nil {
-            self.hasJoinedEvent = true
-        } else {
+        if currentEvent == nil {
             // 前回開いていたイベントを復元する（無ければ何も起きない）
             Task { await eventRepository.restoreEvent() }
         }
@@ -49,7 +46,6 @@ class EventViewModel: ObservableObject {
 
         do {
             let event = try await eventRepository.createEvent(name: name)
-            self.hasJoinedEvent = true
             // 作った直後は人を呼びたいので招待画面から始める
             self.pendingTab = .invite
             print("✅ イベント作成成功: \(event.name) / \(event.id.uuidString)")
@@ -74,7 +70,6 @@ class EventViewModel: ObservableObject {
 
         do {
             try await eventRepository.joinEvent(eventID: eventID)
-            self.hasJoinedEvent = true
             // 参加した側はまず何が撮られているか見たいはずなのでアルバムへ
             self.pendingTab = .album
             print("✅ イベント参加成功")
@@ -91,12 +86,10 @@ class EventViewModel: ObservableObject {
 
     func switchEvent(to event: Event) async {
         await eventRepository.switchEvent(to: event)
-        self.hasJoinedEvent = true
     }
 
     func leaveEvent(_ event: Event) async {
         await eventRepository.leaveEvent(event)
-        self.hasJoinedEvent = eventRepository.currentEvent != nil
     }
 
     func loadRecentEvents() async {
@@ -132,17 +125,12 @@ class EventViewModel: ObservableObject {
     // MARK: - Repository監視
 
     private func observeRepository() {
+        // MainTabViewを表示するかどうかは HomeView が EventRepository.shared を
+        // 直接見て判断する（`currentEvent` の有無だけが真の情報源）ため、
+        // ここでは currentEvent をそのまま流し込むだけでよい。
         eventRepository.$currentEvent
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] event in
-                self?.currentEvent = event
-                // イベントが無くなった（終了して外れた等）場合もタイトル画面へ
-                // 戻すため、両方向に反映する。この EventViewModel が
-                // HomeView / MainTabView のどちらのインスタンスであっても、
-                // 同じ EventRepository.shared を見ているので同期される。
-                self?.hasJoinedEvent = event != nil
-            }
-            .store(in: &cancellables)
+            .assign(to: &$currentEvent)
 
         // assign(to:on:) は self を強参照して循環参照になるため、
         // @Published へ直接流し込む assign(to:&$...) を使う。

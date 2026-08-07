@@ -45,12 +45,14 @@ struct MainTabView: View {
             eventViewModel.pendingTab = nil
         }
         .task {
-            // アプリ起動時にイベントがなければ作成
-            if eventViewModel.currentEvent == nil {
-                print("⚠️ イベントがないため、デフォルトイベントを作成します")
-                await eventViewModel.createEvent(name: "マイイベント")
-            }
-            // タイムカプセルの公開を知らせるために通知の許可をもらう
+            // MainTabViewはHomeView側でcurrentEventがある時にしか提示されないため、
+            // ここでイベントが無い場合の自動作成は行わない。
+            //
+            // 以前はここで「イベントが無ければデフォルトイベントを作る」という
+            // 保険を入れていたが、これが原因でイベント終了時にバグっていた:
+            // 終了処理でcurrentEventがnilになった瞬間にこの保険が発火し、
+            // 新しい「マイイベント」を勝手に作ってMainTabViewに居座ってしまい、
+            // タイトル画面に戻ったように見えなくなっていた。
             await NotificationService.shared.requestAuthorization()
         }
     }

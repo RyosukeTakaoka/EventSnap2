@@ -9,6 +9,10 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var eventViewModel = EventViewModel()
+    // MainTabViewを出すかどうかは、EventViewModel経由の間接的な状態ではなく
+    // EventRepository.shared（真の情報源）から直接判定する。
+    // 別インスタンスのEventViewModel同士が同期しきれない可能性を排除するため。
+    @ObservedObject private var eventRepository = EventRepository.shared
     @State private var showQRScanner = false
     @State private var showEventCreation = false
     @State private var eventName = ""
@@ -61,7 +65,10 @@ struct HomeView: View {
             .sheet(isPresented: $showQRScanner) {
                 QRScannerView(eventViewModel: eventViewModel)
             }
-            .fullScreenCover(isPresented: $eventViewModel.hasJoinedEvent) {
+            .fullScreenCover(isPresented: Binding(
+                get: { eventRepository.currentEvent != nil },
+                set: { _ in } // 閉じる導線はイベント終了／離脱のみで、いずれもリポジトリ側から起きる
+            )) {
                 // 作成直後は招待画面、参加直後はアルバム。
                 // どちらに飛ばすかは EventViewModel.pendingTab が決める。
                 MainTabView(initialTab: eventViewModel.pendingTab ?? .album)
