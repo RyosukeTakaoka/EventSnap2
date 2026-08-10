@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import CloudKit
 
 @MainActor
 class EventViewModel: ObservableObject {
@@ -54,7 +55,9 @@ class EventViewModel: ObservableObject {
             self.pendingTab = .invite
             print("✅ イベント作成成功: \(event.name) / \(event.id.uuidString)")
         } catch {
-            self.error = "イベントの作成に失敗しました"
+            // 「失敗しました」だけだと原因が分からず詰まってしまうので、
+            // iCloud未サインインなどの理由をそのまま出す
+            self.error = Self.message(for: error, fallback: "イベントの作成に失敗しました")
             print("❌ イベント作成エラー: \(error)")
         }
 
@@ -79,8 +82,7 @@ class EventViewModel: ObservableObject {
             self.pendingTab = .album
             print("✅ イベント参加成功")
         } catch {
-            self.error = (error as? LocalizedError)?.errorDescription
-                ?? "イベントへの参加に失敗しました"
+            self.error = Self.message(for: error, fallback: "イベントへの参加に失敗しました")
             print("❌ イベント参加エラー: \(error)")
         }
 
@@ -135,6 +137,42 @@ class EventViewModel: ObservableObject {
         if let event {
             let ended = eventRepository.currentEvent ?? event
             didGenerateCollage = await ShareCollageBuilder.buildIfPossible(for: ended) != nil
+        }
+    }
+
+    // MARK: - エラーの文言
+
+    /// 何が起きたのか分かる日本語にして返す。
+    ///
+    /// 以前はすべて「イベントの作成に失敗しました」で潰していたため、
+    /// iCloudにサインインしていないだけなのか、通信が悪いのか、
+    /// CloudKitのスキーマが本番に反映されていないのかが区別できなかった。
+    static func message(for error: Error, fallback: String) -> String {
+        if let localized = error as? LocalizedError,
+           let description = localized.errorDescription {
+            return description
+        }
+
+        guard let ckError = error as? CKError else { return fallback }
+
+        switch ckError.code {
+        case .notAuthenticated:
+            return "iCloudにサインインしていません。\n「設定」アプリからサインインしてください。"
+        case .networkUnavailable, .networkFailure:
+            return "ネットワークに接続できません。\n通信環境をご確認ください。"
+        case .quotaExceeded:
+            return "iCloudの空き容量が足りません。"
+        case .permissionFailure:
+            return "iCloudへの書き込みが許可されていません。\niCloudの設定をご確認ください。"
+        case .serviceUnavailable, .requestRateLimited:
+            return "iCloudが混み合っています。\nしばらくしてからもう一度お試しください。"
+        case .unknownItem:
+            return "イベントが見つかりませんでした。\nQRコードをもう一度読み取ってください。"
+        case .invalidArguments, .constraintViolation:
+            // スキーマ未反映のときにここへ来る。開発者向けの手掛かりを残す。
+            return "サーバーの設定に問題があります。\n(\(ckError.localizedDescription))"
+        default:
+            return "\(fallback)\n(\(ckError.localizedDescription))"
         }
     }
 

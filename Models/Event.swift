@@ -46,6 +46,22 @@ struct Event: Identifiable, Codable, Equatable, Hashable {
 
     // MARK: - CloudKit
 
+    /// レコードIDをイベントのUUIDから決める。
+    ///
+    /// こうしておくと `CKDatabase.record(for:)` で **直接** 取得できる。
+    /// クエリ（`records(matching:)`）はインデックス経由で結果整合なので、
+    /// 保存した直後のレコードは数秒〜数十秒ヒットしないことがある。
+    /// 「部屋を作った直後にQRを読んでも参加できない」の原因がこれ。
+    /// recordID での取得だけが強い一貫性を持つ。
+    ///
+    /// Public Database のデフォルトゾーンでは recordName が
+    /// **レコードタイプをまたいで一意**である必要があるため接頭辞を付ける。
+    static func recordID(for id: UUID) -> CKRecord.ID {
+        CKRecord.ID(recordName: "event-\(id.uuidString)")
+    }
+
+    var recordID: CKRecord.ID { Self.recordID(for: id) }
+
     /// 既存のレコードに値を書き込む。
     ///
     /// 毎回 `CKRecord(recordType:)` で新規レコードを作ると **recordID が新しく振られて
@@ -66,7 +82,7 @@ struct Event: Identifiable, Codable, Equatable, Hashable {
 
     /// 新規作成用
     func toRecord() -> CKRecord {
-        apply(to: CKRecord(recordType: "Event"))
+        apply(to: CKRecord(recordType: "Event", recordID: recordID))
     }
 
     // CloudKitレコードからの変換

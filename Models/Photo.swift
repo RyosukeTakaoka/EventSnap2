@@ -100,6 +100,14 @@ struct Photo: Identifiable, Codable, Equatable, Hashable {
 
     // MARK: - CloudKit
 
+    /// レコードIDを写真のUUIDから決める（Eventと同じ理由）。
+    /// クエリは結果整合なので、保存直後に確実に取り出すには recordID が要る。
+    static func recordID(for id: UUID) -> CKRecord.ID {
+        CKRecord.ID(recordName: "photo-\(id.uuidString)")
+    }
+
+    var recordID: CKRecord.ID { Self.recordID(for: id) }
+
     /// 既存レコードへの書き込み。
     /// 新規 `CKRecord` を作り直すと recordID が変わって複製になるため、
     /// 更新時は取得済みのレコードを渡すこと。
@@ -120,7 +128,7 @@ struct Photo: Identifiable, Codable, Equatable, Hashable {
     }
 
     func toRecord() -> CKRecord {
-        apply(to: CKRecord(recordType: "Photo"))
+        apply(to: CKRecord(recordType: "Photo", recordID: recordID))
     }
 
     static func from(record: CKRecord) -> Photo? {

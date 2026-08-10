@@ -177,11 +177,18 @@ struct QRCodeView: View {
         let eventID = currentEvent.id.uuidString
         print("📋 イベントID: \(eventID)")
 
-        // App Clip URLを生成（本番環境では実際のドメインに変更してください）
-        // 開発中は "eventsnap.example.com" を使用
-        // 実際には、自分で管理するドメインを使用する必要があります
-        let appClipURL = "https://eventsnap.example.com/event/\(eventID)"
+        // QRコードの行き先。ドメインの設定は AppLinkConfig にまとめてある。
+        let appClipURL = AppLinkConfig.joinURL(eventID: currentEvent.id)
         print("🔗 App Clip URL: \(appClipURL)")
+
+        if !AppLinkConfig.isConfigured {
+            print("""
+            ⚠️ QRコードのドメインが example.com のままです。
+               標準カメラアプリからの読み取りとApp Clipは動作しません。
+               アプリ内のスキャナからのみ参加できます。
+               詳細は AppLinkConfig の説明を参照してください。
+            """)
+        }
 
         // 非同期でQRコード生成（App Clip URLを使用）
         QRCodeService.generateQRCode(from: appClipURL) { image in

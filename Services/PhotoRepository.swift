@@ -244,6 +244,16 @@ class PhotoRepository: ObservableObject {
     /// 新規に `CKRecord` を作り直すと recordID が変わって複製になるため、
     /// 更新時は既存レコードを取り直してから書き込む。
     private func save(_ photo: Photo) async throws {
+        // recordID で直接取得する（クエリは結果整合なので、保存直後の写真が
+        // 見つからず新規レコードを作ってしまう＝複製の原因になる）
+        do {
+            let existing = try await database.record(for: photo.recordID)
+            _ = try await database.save(photo.apply(to: existing))
+            return
+        } catch let error as CKError where error.code == .unknownItem {
+            // 旧形式のレコードかもしれないのでフィールド検索に落とす
+        }
+
         let predicate = NSPredicate(format: "id == %@", photo.id.uuidString)
         let query = CKQuery(recordType: "Photo", predicate: predicate)
         let results = try await database.records(matching: query)

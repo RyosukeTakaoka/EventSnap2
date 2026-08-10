@@ -52,6 +52,8 @@
 		E5200C000000000000000000 /* TimeCapsuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100C000000000000000000 /* TimeCapsuleView.swift */; };
 		E5200D000000000000000000 /* ShareCollageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100D000000000000000000 /* ShareCollageView.swift */; };
 		E5200E000000000000000000 /* EventSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100E000000000000000000 /* EventSwitcherView.swift */; };
+		E64000000000000000000000 /* CloudKitAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = E63000000000000000000000 /* CloudKitAccount.swift */; };
+		E64001000000000000000000 /* AppLinkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E63001000000000000000000 /* AppLinkConfig.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,6 +132,8 @@
 		E5100C000000000000000000 /* TimeCapsuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TimeCapsuleView.swift"; sourceTree = "<group>"; };
 		E5100D000000000000000000 /* ShareCollageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ShareCollageView.swift"; sourceTree = "<group>"; };
 		E5100E000000000000000000 /* EventSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventSwitcherView.swift"; sourceTree = "<group>"; };
+		E63000000000000000000000 /* CloudKitAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CloudKitAccount.swift"; sourceTree = "<group>"; };
+		E63001000000000000000000 /* AppLinkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppLinkConfig.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -204,6 +208,8 @@
 		7EADC30A06EEA49AA9CE8AD4 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				E63000000000000000000000 /* CloudKitAccount.swift */,
+				E63001000000000000000000 /* AppLinkConfig.swift */,
 				E51001000000000000000000 /* DeviceIdentity.swift */,
 				E51003000000000000000000 /* CameraOrientation.swift */,
 				E51004000000000000000000 /* UIImage+Orientation.swift */,
@@ -471,6 +477,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E64000000000000000000000 /* CloudKitAccount.swift in Sources */,
+				E64001000000000000000000 /* AppLinkConfig.swift in Sources */,
 				E52000000000000000000000 /* AppTab.swift in Sources */,
 				E52001000000000000000000 /* DeviceIdentity.swift in Sources */,
 				E52003000000000000000000 /* CameraOrientation.swift in Sources */,
