@@ -35,6 +35,11 @@ enum ShareCollageBuilder {
     @MainActor
     @discardableResult
     static func buildIfNeeded(for event: Event) async -> [EventReel] {
+        // シェアOKとタイムカプセルが両方trueのまま残っている写真は、
+        // ここでシェアを優先して解除する。「両立を許し、実際に使う瞬間に解決する」
+        // という設計のため、shareApprovedPhotosを読む前に必ず呼ぶこと。
+        await PhotoRepository.shared.releaseSharedTimeCapsules(for: event.id)
+
         let approved = PhotoRepository.shared.shareApprovedPhotos(for: event.id) // 古い順
         let store = ShareCollageStore.shared
         let used = store.usedPhotoIDs(for: event.id)

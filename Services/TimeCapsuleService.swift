@@ -30,9 +30,11 @@ import Foundation
 /// - 手動で早めて公開する経路は無い。伏せた写真を捨てたり、
 ///   個人の判断で公開を早めたりしてはいけない
 ///
-/// なお、**シェアOKの写真はそもそもタイムカプセルの選定対象にならない**
-/// （`decideRevealDate` 参照）。シェアOK＝今すぐ共有したい写真、タイムカプセル＝
-/// イベント全員が未来に受け取る思い出、という役割分担のため。
+/// シェアOKとの重複は禁止しない。**両方trueのまま選定されることを許し、
+/// Event Reel（`ShareCollageBuilder`）を組む直前にシェアを優先して解除する**。
+/// 撮影時点ではどちらの意図で撮ったか本人にも決めきれないことがあるため、
+/// 選定時に片方を機械的に弾くのではなく、実際に共有する瞬間まで判断を遅らせる。
+/// 唯一の例外は `PhotoRepository.releaseSharedTimeCapsules`。
 enum TimeCapsuleService {
 
     // MARK: - 調整パラメータ
@@ -52,20 +54,18 @@ enum TimeCapsuleService {
 
     /// この写真をタイムカプセルにするか決める。
     ///
+    /// シェアOKかどうかはここでは見ない。両方trueになることを許し、
+    /// Event Reelを組む直前（`PhotoRepository.releaseSharedTimeCapsules`）で
+    /// シェアを優先して解除する。
+    ///
     /// - Parameters:
-    ///   - isShareOK: 撮影者が「シェアOK」を選んだか。**true ならタイムカプセルの
-    ///                対象外**。シェアOK＝今共有したい写真であり、後で公開する
-    ///                候補にはしない（`forcedByUser` が true でもこちらが優先）。
     ///   - forcedByUser: 撮影者本人が明示的に「あとで公開」を選んだか。
-    ///                   選んでいれば（シェアOKでない限り）必ずタイムカプセルになる。
+    ///                   選んでいれば必ずタイムカプセルになる。
     /// - Returns: タイムカプセルなら公開予定日時、そうでなければ nil
     static func decideRevealDate(
         capturedAt: Date = Date(),
-        isShareOK: Bool = false,
         forcedByUser: Bool = false
     ) -> Date? {
-        guard !isShareOK else { return nil }
-
         let selected = forcedByUser || Double.random(in: 0..<1) < autoSelectionRate
         guard selected else { return nil }
 

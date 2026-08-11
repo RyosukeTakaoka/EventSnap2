@@ -26,17 +26,15 @@ class CameraViewModel: ObservableObject {
     /// この写真をEvent Reel（SNSシェア用のコラージュ）に使ってよいか（機能B）。
     /// **既定はOFF**。撮るたびにOFFへ戻し、意図しない拡散が起きないようにする。
     ///
-    /// シェアOK＝今共有したい写真なので、ONにした瞬間「あとで公開」は解除する
-    /// （シェアOKの写真はタイムカプセルの対象外というルールをUIでも表す）
-    @Published var shareOK = false {
-        didSet {
-            if shareOK { saveAsTimeCapsule = false }
-        }
-    }
+    /// 「あとで公開」との併用を許す。両方ONで撮った写真は一旦タイムカプセルとして
+    /// 伏せられ、Event Reelを組む瞬間にシェアを優先してタイムカプセル状態を解除する
+    /// （`PhotoRepository.releaseSharedTimeCapsules`）。撮影時点でどちらの意図か
+    /// 決めきれないことがあるため、選択肢を狭めず両方選べるようにしている。
+    @Published var shareOK = false
 
     /// この写真をタイムカプセル（遅延公開）にするか（機能A）。
     /// 撮影者本人による明示的な指定。OFFでも一定確率で自動選定される。
-    /// シェアOKがONのときは選べない（シェアOKの写真は必ず即時共有になる）。
+    /// シェアOKと併用可能（詳細は `shareOK` のコメントを参照）。
     @Published var saveAsTimeCapsule = false
 
     /// 直前の撮影がタイムカプセルになったか（撮影後のフィードバック表示用）

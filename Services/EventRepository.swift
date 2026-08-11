@@ -100,6 +100,10 @@ class EventRepository: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
+        // 書き込みには iCloud へのサインインが要る。
+        // 先に確認しておかないと、原因の分からない失敗になる。
+        try await CloudKitAccount.ensureAvailable()
+
         let deviceID = DeviceIdentity.current
 
         let event = Event(
@@ -137,6 +141,9 @@ class EventRepository: ObservableObject {
         guard UUID(uuidString: eventID) != nil else {
             throw EventError.invalidID
         }
+
+        // 参加者リストへの書き込みが発生するので、先にiCloudを確認する
+        try await CloudKitAccount.ensureAvailable()
 
         guard let event = try await fetchEvent(id: eventID) else {
             throw EventError.notFound
@@ -246,9 +253,32 @@ class EventRepository: ObservableObject {
         try await fetchRecord(id: id).flatMap(Event.from(record:))
     }
 
-    /// 更新に使う CKRecord を取得する。
-    /// `save()` で複製を作らないよう、必ず既存レコードを取り直してから書き込む。
+    /// イベントのレコードを取得する。
+    ///
+    /// ## なぜ2段構えなのか
+    ///
+    /// CloudKit のクエリ（`records(matching:)`）は **結果整合**で、
+    /// 保存した直後のレコードはインデックスに載るまで数秒〜数十秒ヒットしない。
+    /// クエリだけに頼ると、**イベントを作った直後にQRを読ませても
+    /// 「イベントが見つかりません」**になる。開発中は作ってから試すまでに
+    /// 間が空くので再現しにくく、その場で読ませる実際の使い方でだけ失敗する。
+    ///
+    /// `record(for:)` による recordID 直接取得は **強い一貫性**を持つので、
+    /// 保存した次の瞬間でも必ず取れる。まずこちらを試す。
     private func fetchRecord(id: String) async throws -> CKRecord? {
+        guard let uuid = UUID(uuidString: id) else { return nil }
+
+        // ① recordID で直接取得（強い一貫性）
+        do {
+            return try await database.record(for: Event.recordID(for: uuid))
+        } catch let error as CKError where error.code == .unknownItem {
+            // このIDのレコードは無い。旧形式の可能性があるので②へ。
+        } catch {
+            throw error
+        }
+
+        // ② 旧バージョンが作ったレコードは recordName がランダムなので
+        //    フィールド検索でしか見つけられない
         let predicate = NSPredicate(format: "id == %@", id)
         let query = CKQuery(recordType: "Event", predicate: predicate)
         let results = try await database.records(matching: query)

@@ -53,11 +53,11 @@ class PhotoRepository: ObservableObject {
         let deviceID = DeviceIdentity.current
         let capturedAt = Date()
 
-        // 一部の写真を遅延公開に回す（機能A）。
-        // シェアOKの写真は対象外（シェアOK＝今共有したい写真を優先する）
+        // 一部の写真を遅延公開に回す（機能A）。シェアOKとの併用を許す。
+        // 両方trueになった場合はEvent Reel生成時にシェアを優先して解除する
+        // （`releaseSharedTimeCapsules`）。
         let revealDate = TimeCapsuleService.decideRevealDate(
             capturedAt: capturedAt,
-            isShareOK: isShareOK,
             forcedByUser: forceTimeCapsule
         )
 
@@ -180,13 +180,74 @@ class PhotoRepository: ObservableObject {
 
     /// シェアが許可された写真だけを、撮影順（古い順）に取り出す（Event Reel生成用）。
     ///
-    /// タイムカプセルは撮影時点でシェアOKの写真を対象外にしているため
-    /// 基本的には重複しないが、念のためタイムカプセル中の写真は除外しておく。
+    /// シェアOKとタイムカプセルは両立しうるため、`isTimeCapsule` で除外している。
+    /// まだ公開されていない（＝タイムカプセルのまま残っている）写真は、
+    /// `releaseSharedTimeCapsules` で解除されるまでここには出てこない。
+    /// 呼び出し側（`ShareCollageBuilder.buildIfNeeded`）は、このメソッドを呼ぶ前に
+    /// 必ず解除処理を先に行うこと。
     /// 古い順に並んでいるのは、Event Reelが5枚ずつの塊で生成順に区切られるため。
     func shareApprovedPhotos(for eventID: UUID) -> [Photo] {
         allPhotos
             .filter { $0.eventID == eventID && $0.isShareOK && !$0.isTimeCapsule }
             .sorted { $0.uploadedAt < $1.uploadedAt }
+    }
+
+    // MARK: - タイムカプセルの解除（優先ルール）
+
+    /// シェアOKとタイムカプセルが重複した、まだ未公開の写真を通常公開に戻す。
+    ///
+    /// EventSnapには2つの価値がある:
+    ///   - タイムカプセル … 隠すことで未来の価値を作る
+    ///   - Event Reel（シェア） … 公開することで今の価値を最大化する
+    ///
+    /// 両立できる状態は許すが、実際にEvent Reelへ使う瞬間には解決が要る。
+    /// **イベント直後〜イベント中の共有価値を優先する**と決めているので、
+    /// ここで呼ばれた時点で対象の写真は問答無用でタイムカプセルから外れ、
+    /// 通常のアルバム写真として全員に公開される。
+    ///
+    /// `ShareCollageBuilder.buildIfNeeded` が `shareApprovedPhotos` を読む前に
+    /// 必ず呼ぶ。単体では呼ばない（Event Reelに使われないのに公開だけ早まる、
+    /// という中途半端な状態を作らないため）。
+    ///
+    /// - Returns: 実際に解除された写真
+    @discardableResult
+    func releaseSharedTimeCapsules(for eventID: UUID) async -> [Photo] {
+        let targets = allPhotos.filter {
+            $0.eventID == eventID
+                && $0.isShareOK
+                && $0.isTimeCapsule
+                && !$0.isRevealed()   // 既に公開済みのものは触らない
+        }
+
+        guard !targets.isEmpty else { return [] }
+
+        print("🔓 シェア優先: \(targets.count)枚のタイムカプセルを解除します")
+
+        var released: [Photo] = []
+
+        for photo in targets {
+            var updated = photo
+            updated.isTimeCapsule = false
+            updated.revealDate = nil
+
+            do {
+                try await save(updated)
+                released.append(updated)
+            } catch {
+                print("❌ タイムカプセルの解除に失敗 (\(photo.id)): \(error)")
+            }
+        }
+
+        guard !released.isEmpty else { return [] }
+
+        let releasedByID = Dictionary(uniqueKeysWithValues: released.map { ($0.id, $0) })
+        allPhotos = allPhotos.map { releasedByID[$0.id] ?? $0 }
+        photos = TimeCapsuleService.albumPhotos(allPhotos)
+
+        // 公開予定が無くなったので、予約済みの通知も取り消す
+        await NotificationService.shared.cancelReveals(for: released.map(\.id))
+
+        return released
     }
 
     // MARK: - シェアOK状態の変更
@@ -201,19 +262,15 @@ class PhotoRepository: ObservableObject {
     ///   （`ShareCollageBuilder.removeFromReels`）。以後の`shareApprovedPhotos`にも
     ///   出てこなくなるため、今後生成されるReelにも一切使われない
     /// - ONにした場合: 次回以降のEvent Reel生成の対象に加わる
-    ///   （`ShareCollageBuilder.buildIfNeeded`）
-    ///
-    /// まだ公開されていないタイムカプセル写真には使えない。全員に非公開という
-    /// タイムカプセルの原則を、シェアOK経由で崩さないようにするため。
+    ///   （`ShareCollageBuilder.buildIfNeeded`）。まだ公開されていない
+    ///   タイムカプセル写真であっても指定できる。その場合、写真自体はまだ非公開の
+    ///   ままで、実際にEvent Reelへ使われる瞬間（`releaseSharedTimeCapsules`）に
+    ///   初めて公開される（このメソッドを呼んだだけでは公開されない）
     ///
     /// - Returns: 更新後の写真。変更不要／失敗した場合は nil
     @discardableResult
     func setShareOK(_ isShareOK: Bool, for photo: Photo, event: Event) async -> Photo? {
         guard photo.isShareOK != isShareOK else { return photo }
-        guard !photo.isTimeCapsule || photo.isRevealed() else {
-            print("⚠️ 未公開のタイムカプセル写真はシェアOKを変更できません: \(photo.id)")
-            return nil
-        }
 
         var updated = photo
         updated.isShareOK = isShareOK
@@ -248,7 +305,21 @@ class PhotoRepository: ObservableObject {
     ///
     /// 新規に `CKRecord` を作り直すと recordID が変わって複製になるため、
     /// 更新時は既存レコードを取り直してから書き込む。
+    ///
+    /// まず `recordID` で直接取得する（強い一貫性）。クエリ
+    /// （`records(matching:)`）は結果整合なので、保存した直後の写真は
+    /// インデックスに載るまで見つからず、更新のつもりが新規作成＝複製に
+    /// なってしまうことがある。旧バージョンが作った recordName がランダムな
+    /// レコードだけ、見つからない場合にクエリへフォールバックする。
     private func save(_ photo: Photo) async throws {
+        do {
+            let existing = try await database.record(for: photo.recordID)
+            _ = try await database.save(photo.apply(to: existing))
+            return
+        } catch let error as CKError where error.code == .unknownItem {
+            // 旧形式のレコードかもしれないのでフィールド検索に落とす
+        }
+
         let predicate = NSPredicate(format: "id == %@", photo.id.uuidString)
         let query = CKQuery(recordType: "Photo", predicate: predicate)
         let results = try await database.records(matching: query)

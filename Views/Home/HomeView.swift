@@ -73,6 +73,25 @@ struct HomeView: View {
                 // どちらに飛ばすかは EventViewModel.pendingTab が決める。
                 MainTabView(initialTab: eventViewModel.pendingTab ?? .album)
             }
+            // 失敗の理由を必ず画面に出す。以前は print だけだったので、
+            // iCloud未サインインで作成に失敗しても何も起きないように見えていた。
+            .alert("うまくいきませんでした",
+                   isPresented: Binding(get: { eventViewModel.error != nil },
+                                        set: { if !$0 { eventViewModel.error = nil } })) {
+                Button("OK", role: .cancel) { eventViewModel.error = nil }
+            } message: {
+                Text(eventViewModel.error ?? "")
+            }
+            .overlay {
+                if eventViewModel.isLoading {
+                    ZStack {
+                        Color.black.opacity(0.3).ignoresSafeArea()
+                        ProgressView()
+                            .tint(.white)
+                            .scaleEffect(1.4)
+                    }
+                }
+            }
         }
         .task {
             await eventViewModel.loadRecentEvents()

@@ -132,8 +132,7 @@ struct CameraView: View {
                             isOn: $viewModel.saveAsTimeCapsule,
                             icon: "hourglass",
                             label: "あとで公開",
-                            tint: .orange,
-                            isDisabled: viewModel.shareOK
+                            tint: .orange
                         )
                     }
                     .padding(.bottom, 18)

@@ -39,6 +39,8 @@
 		EA1A7497F70CC406621DEF9A /* EventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C600D3D5C6BB4F411ED1607B /* EventRepository.swift */; };
 		F2434A896825B0EDCDFBB10C /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3CB1C550D157424087F6B4 /* Participant.swift */; };
 		F2CAC544E91C5A9FEC4EC5B5 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */; };
+		E76000000000000000000000 /* CloudKitAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75000000000000000000000 /* CloudKitAccount.swift */; };
+		E76001000000000000000000 /* AppLinkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75001000000000000000000 /* AppLinkConfig.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -75,6 +77,8 @@
 		F5210C5AE9EB4A64A7585DAC /* EventReel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventReel.swift; sourceTree = "<group>"; };
 		F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewModel.swift; sourceTree = "<group>"; };
 		FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
+		E75000000000000000000000 /* CloudKitAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CloudKitAccount.swift"; sourceTree = "<group>"; };
+		E75001000000000000000000 /* AppLinkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppLinkConfig.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -108,6 +112,8 @@
 		7EADC30A06EEA49AA9CE8AD4 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				E75000000000000000000000 /* CloudKitAccount.swift */,
+				E75001000000000000000000 /* AppLinkConfig.swift */,
 				E51001000000000000000000 /* DeviceIdentity.swift */,
 				E51003000000000000000000 /* CameraOrientation.swift */,
 				E51004000000000000000000 /* UIImage+Orientation.swift */,
@@ -262,6 +268,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E76000000000000000000000 /* CloudKitAccount.swift in Sources */,
+				E76001000000000000000000 /* AppLinkConfig.swift in Sources */,
 				E52000000000000000000000 /* AppTab.swift in Sources */,
 				E52001000000000000000000 /* DeviceIdentity.swift in Sources */,
 				E52003000000000000000000 /* CameraOrientation.swift in Sources */,
