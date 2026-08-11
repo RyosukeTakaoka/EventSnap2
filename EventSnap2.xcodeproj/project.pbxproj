@@ -18,6 +18,7 @@
 		34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */; };
 		4BA45F6E7F014F81B165E400 /* EventReel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5210C5AE9EB4A64A7585DAC /* EventReel.swift */; };
 		6672E15CA9D7AD5E2FC592FC /* AlbumViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */; };
+		775673723025AAC40003484E /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 775673713025AAC40003484E /* AppIcon.icon */; };
 		7760F8EA2F5D2CBC00F18A2E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7760F8AA2F5D236F00F18A2E /* Assets.xcassets */; };
 		7C142E68F84DD7505B638AC5 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0CA4F056D31CD263119C9D8 /* CameraView.swift */; };
 		94A53529D607048BD1840E6E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05ED44B24BF30673E712740A /* QRCodeView.swift */; };
@@ -50,6 +51,7 @@
 		54C236C172F86BEBC915519F /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
 		5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewModel.swift; sourceTree = "<group>"; };
 		603E3322F12D494691F2AB55 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
+		775673713025AAC40003484E /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		7760F8AA2F5D236F00F18A2E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7A1FC9B16BEEE0613D3DEA5D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		8257853D0F117AD23C2561B6 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -188,6 +190,7 @@
 			isa = PBXGroup;
 			children = (
 				7760F8AA2F5D236F00F18A2E /* Assets.xcassets */,
+				775673713025AAC40003484E /* AppIcon.icon */,
 				A2D16059709C44664F34BE80 /* EventSnapApp.swift */,
 				BC50DA07C3F6CCC4452B93EF /* Models */,
 				7EADC30A06EEA49AA9CE8AD4 /* Services */,
@@ -251,6 +254,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				775673723025AAC40003484E /* AppIcon.icon in Resources */,
 				7760F8EA2F5D2CBC00F18A2E /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -362,7 +366,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = EventSnap.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 5B2NQ74986;
 				ENABLE_PREVIEWS = YES;
@@ -376,8 +380,12 @@
 				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2;
 				PRODUCT_NAME = EventSnap;
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -388,7 +396,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = EventSnap.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 5B2NQ74986;
 				ENABLE_PREVIEWS = YES;
@@ -402,8 +410,12 @@
 				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2;
 				PRODUCT_NAME = EventSnap;
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
