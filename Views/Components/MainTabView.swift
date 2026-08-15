@@ -125,14 +125,6 @@ struct EventSettingsView: View {
                     }
                 }
 
-                Section("アクション") {
-                    Button {
-                        Task { await eventViewModel.refreshEvent() }
-                    } label: {
-                        Label("更新", systemImage: "arrow.clockwise")
-                    }
-                }
-
                 Section {
                     Button(role: .destructive) {
                         showEndConfirmation = true

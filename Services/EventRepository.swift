@@ -238,17 +238,6 @@ class EventRepository: ObservableObject {
 
     // MARK: - イベント取得
 
-    /// イベント情報を更新
-    func refreshEvent() async throws {
-        guard let event = currentEvent else { return }
-
-        if let updated = try await fetchEvent(id: event.id.uuidString) {
-            applyCurrent(updated)
-        }
-
-        await loadRecentEvents()
-    }
-
     private func fetchEvent(id: String) async throws -> Event? {
         try await fetchRecord(id: id).flatMap(Event.from(record:))
     }

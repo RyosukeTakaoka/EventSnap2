@@ -98,16 +98,6 @@ class EventViewModel: ObservableObject {
         await eventRepository.loadRecentEvents()
     }
 
-    // MARK: - イベント更新
-
-    func refreshEvent() async {
-        do {
-            try await eventRepository.refreshEvent()
-        } catch {
-            print("❌ イベント更新エラー: \(error)")
-        }
-    }
-
     // MARK: - イベント終了
 
     /// イベントを終了する。
