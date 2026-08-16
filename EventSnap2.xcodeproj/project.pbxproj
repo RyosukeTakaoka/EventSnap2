@@ -54,8 +54,10 @@
 		EA0003000000000000000000 /* PrimaryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0004000000000000000000 /* PrimaryButtonStyle.swift */; };
 		EA0005000000000000000000 /* NotoSansJP-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0006000000000000000000 /* NotoSansJP-Bold.ttf */; };
 		EA0007000000000000000000 /* NotoSansJP-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0008000000000000000000 /* NotoSansJP-Black.ttf */; };
-		EA000B000000000000000000 /* MemberCardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000A000000000000000000 /* MemberCardService.swift */; };
-		EA000D000000000000000000 /* MemberCardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000C000000000000000000 /* MemberCardPreviewView.swift */; };
+		EA000E000000000000000000 /* BebasNeue-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA000F000000000000000000 /* BebasNeue-Regular.ttf */; };
+		EA000B000000000000000000 /* SocialCardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000A000000000000000000 /* SocialCardService.swift */; };
+		EA000D000000000000000000 /* SocialCardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000C000000000000000000 /* SocialCardPreviewView.swift */; };
+		EA0011000000000000000000 /* PhotoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0010000000000000000000 /* PhotoAnalyzer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -135,8 +137,10 @@
 		EA0004000000000000000000 /* PrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PrimaryButtonStyle.swift"; sourceTree = "<group>"; };
 		EA0006000000000000000000 /* NotoSansJP-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansJP-Bold.ttf"; sourceTree = "<group>"; };
 		EA0008000000000000000000 /* NotoSansJP-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansJP-Black.ttf"; sourceTree = "<group>"; };
-		EA000A000000000000000000 /* MemberCardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MemberCardService.swift"; sourceTree = "<group>"; };
-		EA000C000000000000000000 /* MemberCardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MemberCardPreviewView.swift"; sourceTree = "<group>"; };
+		EA000F000000000000000000 /* BebasNeue-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BebasNeue-Regular.ttf"; sourceTree = "<group>"; };
+		EA000A000000000000000000 /* SocialCardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardService.swift"; sourceTree = "<group>"; };
+		EA0010000000000000000000 /* PhotoAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoAnalyzer.swift"; sourceTree = "<group>"; };
+		EA000C000000000000000000 /* SocialCardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardPreviewView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -178,7 +182,8 @@
 				E51005000000000000000000 /* TimeCapsuleService.swift */,
 				E51006000000000000000000 /* NotificationService.swift */,
 				E51007000000000000000000 /* PhotoImageLoader.swift */,
-				EA000A000000000000000000 /* MemberCardService.swift */,
+				EA000A000000000000000000 /* SocialCardService.swift */,
+				EA0010000000000000000000 /* PhotoAnalyzer.swift */,
 				E51009000000000000000000 /* ShareCollageStore.swift */,
 				E5100A000000000000000000 /* ShareCollageBuilder.swift */,
 				0CB51D1A3000AF3AEC06A1E2 /* AIFilterService.swift */,
@@ -247,7 +252,7 @@
 			isa = PBXGroup;
 			children = (
 				E5100D000000000000000000 /* ShareCollageView.swift */,
-				EA000C000000000000000000 /* MemberCardPreviewView.swift */,
+				EA000C000000000000000000 /* SocialCardPreviewView.swift */,
 			);
 			path = Share;
 			sourceTree = "<group>";
@@ -257,6 +262,7 @@
 			children = (
 				EA0006000000000000000000 /* NotoSansJP-Bold.ttf */,
 				EA0008000000000000000000 /* NotoSansJP-Black.ttf */,
+				EA000F000000000000000000 /* BebasNeue-Regular.ttf */,
 			);
 			path = Fonts;
 			sourceTree = "<group>";
@@ -367,6 +373,7 @@
 				7760F8EA2F5D2CBC00F18A2E /* Assets.xcassets in Resources */,
 				EA0005000000000000000000 /* NotoSansJP-Bold.ttf in Resources */,
 				EA0007000000000000000000 /* NotoSansJP-Black.ttf in Resources */,
+				EA000E000000000000000000 /* BebasNeue-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -388,8 +395,9 @@
 			files = (
 				EA0002000000000000000000 /* UnreadBadge.swift in Sources */,
 				EA0003000000000000000000 /* PrimaryButtonStyle.swift in Sources */,
-				EA000B000000000000000000 /* MemberCardService.swift in Sources */,
-				EA000D000000000000000000 /* MemberCardPreviewView.swift in Sources */,
+				EA000B000000000000000000 /* SocialCardService.swift in Sources */,
+				EA0011000000000000000000 /* PhotoAnalyzer.swift in Sources */,
+				EA000D000000000000000000 /* SocialCardPreviewView.swift in Sources */,
 				E76000000000000000000000 /* CloudKitAccount.swift in Sources */,
 				E76001000000000000000000 /* AppLinkConfig.swift in Sources */,
 				E52000000000000000000000 /* AppTab.swift in Sources */,

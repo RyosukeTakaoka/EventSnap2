@@ -109,7 +109,7 @@ enum ShareCollageBuilder {
     private static func renderCollage(from photos: [Photo], event: Event) async -> UIImage? {
         print("🖼 Event Reel生成: シェアOK \(photos.count)枚")
 
-        // Member Cardは1枚の写真を主役にするデザインのため、バッチの中で新しい順に
+        // SocialCardServiceは1枚の写真を主役にするデザインのため、バッチの中で新しい順に
         // 試し、実際に読み込めた最初の1枚を代表写真として使う。
         let ordered = photos.sorted { $0.uploadedAt > $1.uploadedAt }
         var heroPhoto: Photo?
@@ -124,19 +124,19 @@ enum ShareCollageBuilder {
 
         guard let heroPhoto, let heroImage else { return nil }
 
-        // MEMBER番号は「代表写真の撮影者が参加者の中で何番目に参加したか」から決める。
+        // 「瞬間の主」の番号は「代表写真の撮影者が参加者の中で何番目に参加したか」から決める。
         // Event Reelは誰の端末で生成しても同じ画像になる必要がある設計
         // （ShareCollageStoreはローカルにしか画像を持たず、共有ストレージを介さない）
         // ため、閲覧者自身の端末情報ではなく、写真に紐づく撮影者情報を使う。
-        let memberIndex = (event.participantIDs.firstIndex(of: heroPhoto.uploaderID) ?? 0) + 1
-        let memberTotal = max(event.participantIDs.count, memberIndex)
+        let momentIndex = (event.participantIDs.firstIndex(of: heroPhoto.uploaderID) ?? 0) + 1
+        let momentTotal = max(event.participantIDs.count, momentIndex)
 
-        return MemberCardService.makeCard(
+        return SocialCardService.makeCard(
             from: heroImage,
             eventName: event.name,
             date: heroPhoto.uploadedAt,
-            memberIndex: memberIndex,
-            memberTotal: memberTotal
+            momentIndex: momentIndex,
+            momentTotal: momentTotal
         )
     }
 }
