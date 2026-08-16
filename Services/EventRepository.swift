@@ -293,7 +293,7 @@ class EventRepository: ObservableObject {
     /// 終了しない**。終了はユーザーが自分で判断して行う操作。
     ///
     /// 終了しても写真は一切消えない。**タイムカプセルの公開予定もそのまま残る**。
-    /// Event Reelもここでは作らない。シェアOKの写真が5枚集まるたびに
+    /// Event Reelもここでは作らない。シェアOKの写真が増えるたびに
     /// イベント中随時作られている（`ShareCollageBuilder.buildIfNeeded`）ため、
     /// 終了をきっかけに何かを生成する必要はない。
     ///

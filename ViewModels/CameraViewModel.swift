@@ -418,7 +418,7 @@ class CameraViewModel: ObservableObject {
             }
 
             // シェアOKの写真が増えたので、新しいEvent Reelの生成条件を満たしていないか確認する。
-            // イベント終了を待たず、5枚集まった時点でイベント中に作る。
+            // イベント終了を待たず、この1枚が増えた時点でイベント中に作る。
             if uploaded.isShareOK, let event = eventRepository.currentEvent {
                 await ShareCollageBuilder.buildIfNeeded(for: event)
             }

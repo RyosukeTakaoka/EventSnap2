@@ -123,7 +123,7 @@ struct EventSettingsView: View {
                             }
                         }
                     } else {
-                        Text("撮影時に「シェアOK」を選んだ写真が\(ShareCollageBuilder.photosPerReel)枚集まるごとに、イベント中に自動でEvent Reelが作られます。")
+                        Text("撮影時に「シェアOK」を選んだ写真は、その場で自動的にEvent Reelになります。")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
