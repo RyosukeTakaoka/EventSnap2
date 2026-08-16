@@ -53,6 +53,10 @@
 		E90000000000000000000016 /* EventSnapClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = E9000000000000000000000E /* EventSnapClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EA0002000000000000000000 /* UnreadBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0001000000000000000000 /* UnreadBadge.swift */; };
 		EA0003000000000000000000 /* PrimaryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0004000000000000000000 /* PrimaryButtonStyle.swift */; };
+		EA0005000000000000000000 /* NotoSansJP-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0006000000000000000000 /* NotoSansJP-Bold.ttf */; };
+		EA0007000000000000000000 /* NotoSansJP-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0008000000000000000000 /* NotoSansJP-Black.ttf */; };
+		EA000B000000000000000000 /* MemberCardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000A000000000000000000 /* MemberCardService.swift */; };
+		EA000D000000000000000000 /* MemberCardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000C000000000000000000 /* MemberCardPreviewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -131,6 +135,10 @@
 		E9000000000000000000000E /* EventSnapClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnapClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA0001000000000000000000 /* UnreadBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnreadBadge.swift"; sourceTree = "<group>"; };
 		EA0004000000000000000000 /* PrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PrimaryButtonStyle.swift"; sourceTree = "<group>"; };
+		EA0006000000000000000000 /* NotoSansJP-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansJP-Bold.ttf"; sourceTree = "<group>"; };
+		EA0008000000000000000000 /* NotoSansJP-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansJP-Black.ttf"; sourceTree = "<group>"; };
+		EA000A000000000000000000 /* MemberCardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MemberCardService.swift"; sourceTree = "<group>"; };
+		EA000C000000000000000000 /* MemberCardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MemberCardPreviewView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -173,6 +181,7 @@
 				E51006000000000000000000 /* NotificationService.swift */,
 				E51007000000000000000000 /* PhotoImageLoader.swift */,
 				E51008000000000000000000 /* CollageService.swift */,
+				EA000A000000000000000000 /* MemberCardService.swift */,
 				E51009000000000000000000 /* ShareCollageStore.swift */,
 				E5100A000000000000000000 /* ShareCollageBuilder.swift */,
 				0CB51D1A3000AF3AEC06A1E2 /* AIFilterService.swift */,
@@ -241,8 +250,18 @@
 			isa = PBXGroup;
 			children = (
 				E5100D000000000000000000 /* ShareCollageView.swift */,
+				EA000C000000000000000000 /* MemberCardPreviewView.swift */,
 			);
 			path = Share;
+			sourceTree = "<group>";
+		};
+		EA0009000000000000000000 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				EA0006000000000000000000 /* NotoSansJP-Bold.ttf */,
+				EA0008000000000000000000 /* NotoSansJP-Black.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 		EE37BEE979FB00FB2D8DFAF6 = {
@@ -250,6 +269,7 @@
 			children = (
 				7760F8AA2F5D236F00F18A2E /* Assets.xcassets */,
 				775673713025AAC40003484E /* AppIcon.icon */,
+				EA0009000000000000000000 /* Fonts */,
 				A2D16059709C44664F34BE80 /* EventSnapApp.swift */,
 				BC50DA07C3F6CCC4452B93EF /* Models */,
 				7EADC30A06EEA49AA9CE8AD4 /* Services */,
@@ -348,6 +368,8 @@
 			files = (
 				775673723025AAC40003484E /* AppIcon.icon in Resources */,
 				7760F8EA2F5D2CBC00F18A2E /* Assets.xcassets in Resources */,
+				EA0005000000000000000000 /* NotoSansJP-Bold.ttf in Resources */,
+				EA0007000000000000000000 /* NotoSansJP-Black.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -369,6 +391,8 @@
 			files = (
 				EA0002000000000000000000 /* UnreadBadge.swift in Sources */,
 				EA0003000000000000000000 /* PrimaryButtonStyle.swift in Sources */,
+				EA000B000000000000000000 /* MemberCardService.swift in Sources */,
+				EA000D000000000000000000 /* MemberCardPreviewView.swift in Sources */,
 				E76000000000000000000000 /* CloudKitAccount.swift in Sources */,
 				E76001000000000000000000 /* AppLinkConfig.swift in Sources */,
 				E52000000000000000000000 /* AppTab.swift in Sources */,
