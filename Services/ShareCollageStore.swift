@@ -40,6 +40,32 @@ final class ShareCollageStore: ObservableObject {
         "eventReels_\(eventID.uuidString)"
     }
 
+    private func lastSeenKey(for eventID: UUID) -> String {
+        "eventReelsLastSeen_\(eventID.uuidString)"
+    }
+
+    // MARK: - 未読管理（LINEのような通知バッジに使う）
+
+    /// 最後に確認したEvent Reelの番号(index)。まだ一度も見ていなければ0。
+    func lastSeenReelIndex(for eventID: UUID) -> Int {
+        UserDefaults.standard.integer(forKey: lastSeenKey(for: eventID))
+    }
+
+    /// まだ見ていないEvent Reelの件数。
+    /// `index`は生成順に振られる連番なので、これより大きいものが「新着」。
+    func unseenReelCount(for eventID: UUID) -> Int {
+        let seen = lastSeenReelIndex(for: eventID)
+        return reels(for: eventID).filter { $0.index > seen }.count
+    }
+
+    /// Event Reel一覧を開いたときに呼ぶ。全て読んだことにしてバッジを消す。
+    func markReelsSeen(for eventID: UUID) {
+        let latest = reels(for: eventID).map(\.index).max() ?? 0
+        guard latest > lastSeenReelIndex(for: eventID) else { return }
+        UserDefaults.standard.set(latest, forKey: lastSeenKey(for: eventID))
+        objectWillChange.send()
+    }
+
     // MARK: - 履歴の読み書き
 
     /// このイベントのEvent Reel一覧（新しい順）
@@ -129,6 +155,7 @@ final class ShareCollageStore: ObservableObject {
             try? FileManager.default.removeItem(at: imageURL(for: reel.id))
         }
         UserDefaults.standard.removeObject(forKey: reelsKey(for: eventID))
+        UserDefaults.standard.removeObject(forKey: lastSeenKey(for: eventID))
         objectWillChange.send()
     }
 

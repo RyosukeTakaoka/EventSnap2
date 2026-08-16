@@ -127,14 +127,9 @@ struct HomeView: View {
                 HStack {
                     Image(systemName: "plus.circle.fill")
                     Text("新しいイベントを作成")
-                        .fontWeight(.semibold)
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.white)
-                .foregroundColor(.blue)
-                .cornerRadius(16)
             }
+            .buttonStyle(.primary)
 
             // QRスキャンボタン
             Button {
@@ -232,25 +227,43 @@ struct EventCreationSheet: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 30) {
-                Text("イベント名を入力")
-                    .font(.title2)
-                    .fontWeight(.bold)
+            ZStack {
+                // HomeViewの青紫グラデーションを、ここでは主張しすぎない濃度で
+                // 引き継ぐ。真っ白なシートが唐突に被さる違和感を無くすため。
+                LinearGradient(
+                    colors: [Color.blue.opacity(0.12), Color.purple.opacity(0.12)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
-                TextField("例: 文化祭2024", text: $eventName)
-                    .textFieldStyle(.roundedBorder)
+                VStack(spacing: 28) {
+                    VStack(spacing: 8) {
+                        Text("イベントを作成")
+                            .font(.title2)
+                            .fontWeight(.bold)
+
+                        Text("イベント名を入力してください")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.top, 12)
+
+                    TextField("例: 文化祭2024", text: $eventName)
+                        .textFieldStyle(.roundedBorder)
+                        .padding(.horizontal)
+
+                    Button("作成する") {
+                        onCreate()
+                        dismiss()
+                    }
+                    .buttonStyle(.primary)
                     .padding(.horizontal)
 
-                Button("作成してQRコードを表示") {
-                    onCreate()
-                    dismiss()
+                    Spacer()
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-
-                Spacer()
+                .padding(.top, 20)
             }
-            .padding()
             .navigationBarItems(trailing: Button("キャンセル") {
                 dismiss()
             })

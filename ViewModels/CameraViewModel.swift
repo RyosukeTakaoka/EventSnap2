@@ -24,7 +24,8 @@ class CameraViewModel: ObservableObject {
     @Published var beautyIntensity: Double = 0.5
 
     /// この写真をEvent Reel（SNSシェア用のコラージュ）に使ってよいか（機能B）。
-    /// **既定はOFF**。撮るたびにOFFへ戻し、意図しない拡散が起きないようにする。
+    /// **既定はOFF**。一度ONにしたら、本人が明示的にOFFに戻すまで次の撮影にも
+    /// 引き継がれる（イベント中はまとめてシェアOKにしたい、という使い方を想定）。
     ///
     /// 「あとで公開」との併用を許す。両方ONで撮った写真は一旦タイムカプセルとして
     /// 伏せられ、Event Reelを組む瞬間にシェアを優先してタイムカプセル状態を解除する
@@ -406,8 +407,8 @@ class CameraViewModel: ObservableObject {
 
             lastCaptureWasTimeCapsule = uploaded.isTimeCapsule
 
-            // 次の撮影に持ち越さない。特にシェア許可は既定OFFに戻すのが重要。
-            shareOK = false
+            // シェアOKは一度ONにしたら、本人がOFFにするまで継続する仕様。
+            // 撮影のたびに自動でリセットしない（「あとで公開」は毎回リセットする）。
             saveAsTimeCapsule = false
 
             if uploaded.isTimeCapsule {
