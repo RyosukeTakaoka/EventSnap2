@@ -140,12 +140,14 @@ struct PhotoCell: View {
                     }
                 }
             }
-            .clipped()
+            // グリッド全体が真四角のタイル敷き詰めだと硬い印象になるため、
+            // ごく小さい角丸だけ付けて柔らかく見せる（Instagramのグリッドに近い調整）。
+            .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
             .task {
                 await loadImage()
             }
     }
-    
+
     private func loadImage() async {
         print("📥 画像ダウンロード開始: \(photo.id)")
         
@@ -203,7 +205,8 @@ struct LockedPhotoCell: View {
                     .shadow(color: Color.orange.opacity(0.5), radius: 3, y: 1)
                     .padding(5)
             }
-            .clipped()
+            // PhotoCellと角丸を揃え、グリッド上で浮いて見えないようにする
+            .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
             .accessibilityLabel("公開前のタイムカプセル写真。公開までお待ちください")
     }
 }
@@ -251,20 +254,26 @@ struct PhotoDetailView: View {
 
                 Spacer()
 
-                // 写真情報
-                VStack(spacing: 8) {
-                    Text("撮影日時: \(photo.uploadedAt.formatted())")
-                        .font(.caption)
-                        .foregroundColor(.white)
-
-                    if let filterName = photo.filterName {
-                        Text("フィルター: \(filterName)")
-                            .font(.caption)
-                            .foregroundColor(.white)
-                    }
-                }
-                .padding()
+                // 写真情報。以前は背景に何も無い白文字だけだったため、明るい写真の上では
+                // 読みにくかった。すりガラス調のカプセルに乗せて、どんな写真の上でも
+                // 視認性を確保する。
+                infoCard
+                    .padding(.bottom, 20)
             }
+
+            // 上部はナビゲーションバーのボタンが写真に埋もれて見づらくなることがあるため、
+            // ごく薄いスクリムを敷いて視認性を底上げする。
+            VStack {
+                LinearGradient(
+                    colors: [Color.black.opacity(0.45), Color.black.opacity(0)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 110)
+                .allowsHitTesting(false)
+                Spacer()
+            }
+            .ignoresSafeArea()
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -273,7 +282,11 @@ struct PhotoDetailView: View {
                     saveImageToPhotos()
                 } label: {
                     Image(systemName: "square.and.arrow.down")
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.white)
+                        .padding(8)
+                        .background(.ultraThinMaterial, in: Circle())
+                        .environment(\.colorScheme, .dark)
                 }
                 .disabled(image == nil)
             }
@@ -288,6 +301,36 @@ struct PhotoDetailView: View {
         }
     }
     
+    // MARK: - 写真情報カード
+
+    private var infoCard: some View {
+        HStack(spacing: 14) {
+            Label {
+                Text(photo.uploadedAt.formatted(date: .abbreviated, time: .shortened))
+            } icon: {
+                Image(systemName: "calendar")
+            }
+
+            if let filterName = photo.filterName {
+                Divider()
+                    .frame(height: 12)
+                    .overlay(Color.white.opacity(0.35))
+
+                Label {
+                    Text(filterName)
+                } icon: {
+                    Image(systemName: "wand.and.stars")
+                }
+            }
+        }
+        .font(.caption)
+        .foregroundColor(.white)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(.ultraThinMaterial, in: Capsule())
+        .environment(\.colorScheme, .dark)
+    }
+
     private func loadImage() async {
         print("📥 詳細画像ダウンロード開始: \(photo.id)")
         
