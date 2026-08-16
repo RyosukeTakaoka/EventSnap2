@@ -83,11 +83,11 @@ enum SocialCardService {
 
 /// ユーザーがワンタップで切り替える3種類。色違いではなく「写真の見せ方」自体が異なる。
 enum SocialCardTemplate: String, CaseIterable, Identifiable {
-    /// 雑誌・写真集のように写真を美しく見せる
+    /// イベント写真集の1ページ。雑誌の表紙のように写真を美しく見せる
     case editorial
-    /// 大胆なタイポグラフィでスクロールを止める
+    /// イベントポスター。巨大タイポグラフィと写真で1枚のグラフィックを作る
     case bold
-    /// 写真そのものを最大限に活かす
+    /// 意図的に削ぎ落とした、写真そのものを最大限に活かす1枚
     case minimal
 
     var id: String { rawValue }
@@ -109,7 +109,7 @@ enum SocialCardTemplate: String, CaseIterable, Identifiable {
     }
 }
 
-/// 各テンプレートが実装するプロトコル。テンプレートごとに完全に独立したファイル/型にでき、
+/// 各テンプレートが実装するプロトコル。テンプレートごとに完全に独立した型にでき、
 /// 将来自動選択(TemplateSelector)を足すときも「選ぶロジック」と「描くロジック」を分離できる。
 protocol SocialCardRenderer {
     static func draw(
@@ -123,9 +123,10 @@ protocol SocialCardRenderer {
     )
 }
 
-// MARK: - A. Editorial(雑誌の写真ページのような静けさ)
+// MARK: - A. Editorial(イベント写真集の1ページ)
 
-/// 写真を主役にした、控えめで洗練されたタイポグラフィ。
+/// 単に写真＋小さい文字ではなく「雑誌の表紙」を目指す。
+/// 大きなタイトル・細いライン・小さな添え文字・大きな余白でコントラストを作る。
 /// 「おしゃれな写真をそのまま投稿したい」と思えることを目標にする。
 enum EditorialRenderer: SocialCardRenderer {
     static func draw(
@@ -137,62 +138,87 @@ enum EditorialRenderer: SocialCardRenderer {
         momentIndex: Int,
         momentTotal: Int
     ) {
-        let zoneInfo = analysis.bestZone
-        let zone = zoneInfo.zone
-        let ink: UIColor = zoneInfo.isDark ? .white : UIColor(white: 0.1, alpha: 1)
-        let sub = ink.withAlphaComponent(0.75)
-        let inset: CGFloat = 72
+        let titleZone = analysis.bestZone
+        let zone = titleZone.zone
+        let ink: UIColor = titleZone.isDark ? .white : UIColor(white: 0.08, alpha: 1)
+        let secondaryZone = zone.opposite
 
-        var kicker = SocialCardDrawing.dateString(date).uppercased()
-        kicker += "   MEMORIES \(String(format: "%02d", max(momentIndex, 1)))"
-        let kickerFont = SocialCardDrawing.bebasNeue(size: 32)
-        let kickerHeight = kickerFont.ascender - kickerFont.descender
+        // タイトルは写真の端に寄せて置く（写真の外へ逃げるような、攻めた余白の取り方）。
+        // 添え文字・ブランドは通常のinsetのままにして、要素ごとに緊張感の差を作る。
+        let titleInset: CGFloat = 48
+        let inset: CGFloat = 72
 
         let maxWidth: CGFloat = {
             switch zone {
-            case .top, .bottom: return canvasSize.width - inset * 2
-            case .left, .right: return canvasSize.width * 0.42 - inset
+            case .top, .bottom: return canvasSize.width - titleInset * 2
+            // PhotoAnalyzerが安全ゾーンとして評価した幅（40%）を大きく超えないようにする。
+            // ここを広げすぎると、スコアリングでは避けたはずの被写体側に文字が
+            // はみ出しかねない。
+            case .left, .right: return canvasSize.width * 0.42 - titleInset
             }
         }()
 
         let (lines, titleFont) = SocialCardDrawing.fitTitle(
             eventName, weight: .black, maxWidth: maxWidth,
-            maxLines: (zone == .left || zone == .right) ? 4 : 2, maxSize: 66, minSize: 38
+            maxLines: (zone == .left || zone == .right) ? 5 : 3, maxSize: 84, minSize: 42
         )
         let lineHeight = titleFont.ascender - titleFont.descender
-        let titleBlockHeight = CGFloat(lines.count) * lineHeight * 1.08
+        let titleBlockHeight = CGFloat(lines.count) * lineHeight * 1.05
 
-        let x: CGFloat = zone == .right ? canvasSize.width - inset - maxWidth : inset
+        let titleX: CGFloat = zone == .right ? canvasSize.width - titleInset - maxWidth : titleInset
+        let ruleWidth: CGFloat = min(96, maxWidth * 0.3)
 
         switch zone {
         case .top:
-            var y = inset
-            SocialCardDrawing.drawTracked(kicker, at: CGPoint(x: x, y: y), font: kickerFont, color: sub, tracking: 3)
-            y += kickerHeight + 20
-            SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.08)
+            var y = titleInset + 8
+            SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: titleX, y: &y, lineHeight: lineHeight * 1.05, softShadow: true)
+            SocialCardDrawing.drawRule(cg: cg, from: CGPoint(x: titleX, y: y + 10), width: ruleWidth, color: ink.withAlphaComponent(0.7))
 
         case .bottom:
-            var y = canvasSize.height - inset - titleBlockHeight - kickerHeight - 20
-            SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.08)
-            y += 4
-            SocialCardDrawing.drawTracked(kicker, at: CGPoint(x: x, y: y), font: kickerFont, color: sub, tracking: 3)
+            var y = canvasSize.height - titleInset - titleBlockHeight
+            SocialCardDrawing.drawRule(cg: cg, from: CGPoint(x: titleX, y: y - 20), width: ruleWidth, color: ink.withAlphaComponent(0.7))
+            SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: titleX, y: &y, lineHeight: lineHeight * 1.05, softShadow: true)
 
         case .left, .right:
-            var y = (canvasSize.height - titleBlockHeight - kickerHeight - 20) / 2
-            SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.08)
-            y += 4
-            SocialCardDrawing.drawTracked(kicker, at: CGPoint(x: x, y: y), font: kickerFont, color: sub, tracking: 3)
+            var y = (canvasSize.height - titleBlockHeight) / 2
+            SocialCardDrawing.drawRule(cg: cg, from: CGPoint(x: titleX, y: y - 20), width: ruleWidth, color: ink.withAlphaComponent(0.7))
+            SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: titleX, y: &y, lineHeight: lineHeight * 1.05, softShadow: true)
         }
 
-        let brandCorner: SocialCardDrawing.Corner = (zone == .bottom) ? .topTrailing : .bottomTrailing
-        SocialCardDrawing.drawBrandMark(canvasSize: canvasSize, corner: brandCorner, ink: ink)
+        // 添え文字（日付・MEMORIES番号）。タイトルとは反対側の帯に、小さく静かに置く。
+        // タイトルと添え文字のサイズ差そのものが「雑誌のレイアウト」らしいコントラストを作る。
+        //
+        // 反対側の帯はタイトル側とは明るさが違うことがあるため、ink色は
+        // タイトル側のものを使い回さず、その帯自身の明暗判定から選び直す。
+        let secondaryIsDark = analysis.textZones.first(where: { $0.zone == secondaryZone })?.isDark ?? titleZone.isDark
+        let captionInk: UIColor = secondaryIsDark ? .white : UIColor(white: 0.08, alpha: 1)
+
+        // 帯全体の平均明度で選んだink色は、添え文字を置く角だけで見ると
+        // 実際には合わないことがある（部分的に明暗が混ざった写真など）。
+        // ソフトシャドウだけでは白文字/黒文字が背景と同化するケースまでは
+        // 救えないため、ごく控えめな中立色のスクリムを保険として敷く
+        // （アクセントカラーは混ぜず、Editorialの静けさを保つ）。
+        let neutralBase: UIColor = secondaryIsDark ? .black : .white
+        SocialCardDrawing.drawScrim(cg: cg, zone: secondaryZone, canvasSize: canvasSize, tint: neutralBase, dark: secondaryIsDark, strength: 0.3)
+
+        var caption = SocialCardDrawing.dateString(date).uppercased()
+        caption += "\nMEMORIES \(String(format: "%02d", max(momentIndex, 1)))"
+        SocialCardDrawing.drawCaptionBlock(
+            cg: cg, canvasSize: canvasSize, zone: secondaryZone, text: caption,
+            color: captionInk.withAlphaComponent(0.85), inset: inset
+        )
+
+        // ブランドは添え文字と同じ帯の反対側の端に、ごく小さく
+        let brandCorner = SocialCardDrawing.Corner.corner(endOf: secondaryZone)
+        SocialCardDrawing.drawBrandMark(canvasSize: canvasSize, corner: brandCorner, ink: captionInk, opacity: 0.7)
     }
 }
 
-// MARK: - B. Bold(スクロールを止める大胆な見出し)
+// MARK: - B. Bold(イベントポスター)
 
-/// 3案の中で最もSNS上のインパクトを重視する。写真を壊さず、
-/// 「写真＋タイポグラフィで1つの作品」になることを目指す。
+/// 写真と文字を別々に置くのではなく「写真＋巨大タイポグラフィ＝1枚のグラフィック」にする。
+/// 巨大なイベント名・背景化した巨大な日付数字・写真から抽出したアクセントカラーの
+/// エッジストライプ、という強い要素を少数だけ組み合わせる。
 enum BoldRenderer: SocialCardRenderer {
     static func draw(
         cg: CGContext,
@@ -205,37 +231,50 @@ enum BoldRenderer: SocialCardRenderer {
     ) {
         let zoneInfo = analysis.bestZone
         let zone = zoneInfo.zone
-        let ink: UIColor = zoneInfo.isDark ? .white : UIColor(white: 0.08, alpha: 1)
-        let inset: CGFloat = 64
+        let ink: UIColor = zoneInfo.isDark ? .white : UIColor(white: 0.05, alpha: 1)
+        let accent = analysis.accentColor
+        let inset: CGFloat = 48
 
-        // 写真から抽出したアクセントカラーを少し混ぜたグラデーションスクリムだけを敷き、
-        // 視認性を確保する(箱ではないので写真は隠れない)
-        SocialCardDrawing.drawScrim(cg: cg, zone: zone, canvasSize: canvasSize, tint: analysis.accentColor, dark: zoneInfo.isDark)
+        // 1. 視認性確保のためのスクリム（写真の色を混ぜているので、写真から浮かない）
+        SocialCardDrawing.drawScrim(cg: cg, zone: zone, canvasSize: canvasSize, tint: accent, dark: zoneInfo.isDark, strength: 0.62)
 
+        let zoneRect = zone.rect(in: canvasSize)
+
+        // 2. 日付を「背景要素」として使う巨大なゴースト数字。タイトルと同じゾーンの中に
+        //    低い不透明度で置き、タイトルの後ろに沈める（写真そのものを暗くする処理は避け、
+        //    あくまで文字レイヤーの中で完結させる）。
+        let day = Calendar.current.component(.day, from: date)
+        SocialCardDrawing.drawGhostNumber(String(format: "%02d", day), in: zoneRect, ink: ink)
+
+        // 3. 巨大なイベント名。画面幅の70〜100%を狙って攻めたサイズにする。
         let maxWidth: CGFloat = {
             switch zone {
             case .top, .bottom: return canvasSize.width - inset * 2
-            case .left, .right: return canvasSize.width * 0.62 - inset
+            case .left, .right: return canvasSize.width * 0.66 - inset
             }
         }()
 
         let (lines, titleFont) = SocialCardDrawing.fitTitle(
-            eventName, weight: .black, maxWidth: maxWidth, maxLines: 3, maxSize: 132, minSize: 60
+            eventName, weight: .black, maxWidth: maxWidth, maxLines: 3, maxSize: 190, minSize: 66
         )
         let lineHeight = titleFont.ascender - titleFont.descender
-        let blockHeight = CGFloat(lines.count) * lineHeight * 0.98
+        let blockHeight = CGFloat(lines.count) * lineHeight * 0.94
 
         let x: CGFloat = zone == .right ? canvasSize.width - inset - maxWidth : inset
         var y: CGFloat = {
             switch zone {
-            case .top: return inset + 16
+            case .top: return inset + 4
             case .bottom: return canvasSize.height - inset - blockHeight
             case .left, .right: return (canvasSize.height - blockHeight) / 2
             }
         }()
-        SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 0.98)
+        SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 0.94, softShadow: true, shadowStrength: 1.4)
 
-        // 端に沿わせた縦書き風の小さな番号(フェス/イベントポスターの定番モチーフ)
+        // 4. アクセントカラーの太いエッジストライプ。タイトルと反対側の辺に置くので
+        //    文字とは絶対にぶつからない。
+        SocialCardDrawing.drawAccentStripe(cg: cg, canvasSize: canvasSize, avoiding: zone, color: accent)
+
+        // 5. 端に沿わせた縦書き風の小さな番号(フェス/イベントポスターの定番モチーフ)
         let figure = "\(String(format: "%02d", max(momentIndex, 1))) / \(String(format: "%02d", max(momentTotal, momentIndex, 1)))"
         SocialCardDrawing.drawRotatedFigure(cg: cg, text: figure, canvasSize: canvasSize, onRight: zone != .right, ink: ink)
 
@@ -244,9 +283,10 @@ enum BoldRenderer: SocialCardRenderer {
     }
 }
 
-// MARK: - C. Minimal(写真を信じて引き算する)
+// MARK: - C. Minimal(意図的に削ぎ落とされた1枚)
 
-/// 装飾を最小限に。「この写真なら何も足さない方が良い」場合に強いデザイン。
+/// 「写真を活かす」ことが「何もデザインしない」ことにならないよう、
+/// 小さな署名のような要素（細いライン・色のアクセント・控えめな日付）を1組だけ添える。
 enum MinimalRenderer: SocialCardRenderer {
     static func draw(
         cg: CGContext,
@@ -260,6 +300,7 @@ enum MinimalRenderer: SocialCardRenderer {
         let zoneInfo = analysis.bestZone
         let zone = zoneInfo.zone
         let ink: UIColor = zoneInfo.isDark ? .white : UIColor(white: 0.1, alpha: 1)
+        let accent = analysis.accentColor
         let inset: CGFloat = 76
 
         let maxWidth: CGFloat = {
@@ -270,10 +311,18 @@ enum MinimalRenderer: SocialCardRenderer {
         }()
 
         let (lines, font) = SocialCardDrawing.fitTitle(
-            eventName, weight: .bold, maxWidth: maxWidth, maxLines: 2, maxSize: 46, minSize: 30
+            eventName, weight: .bold, maxWidth: maxWidth, maxLines: 2, maxSize: 50, minSize: 30
         )
         let lineHeight = font.ascender - font.descender
-        let blockHeight = CGFloat(lines.count) * lineHeight * 1.12
+
+        let dateFont = SocialCardDrawing.bebasNeue(size: 22)
+        let dateHeight = dateFont.ascender - dateFont.descender
+        let markHeight: CGFloat = 4
+        let gapAboveMark: CGFloat = 14
+        let gapBelowMark: CGFloat = 10
+        let gapAboveDate: CGFloat = 8
+
+        let blockHeight = CGFloat(lines.count) * lineHeight * 1.12 + gapAboveMark + markHeight + gapBelowMark + gapAboveDate + dateHeight
 
         let x: CGFloat = zone == .right ? canvasSize.width - inset - maxWidth : inset
         var y: CGFloat = {
@@ -283,7 +332,18 @@ enum MinimalRenderer: SocialCardRenderer {
             case .left, .right: return (canvasSize.height - blockHeight) / 2
             }
         }()
-        SocialCardDrawing.drawLines(lines, font: font, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.12, kern: 0.5)
+
+        SocialCardDrawing.drawLines(lines, font: font, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.12, kern: 0.5, softShadow: true)
+
+        // 小さな署名のようなマーク: 短いアクセントカラーの線
+        y += gapAboveMark
+        cg.saveGState()
+        accent.setFill()
+        cg.fill(CGRect(x: x, y: y, width: 28, height: markHeight))
+        cg.restoreGState()
+        y += markHeight + gapBelowMark
+
+        SocialCardDrawing.drawTracked(SocialCardDrawing.dateString(date), at: CGPoint(x: x, y: y), font: dateFont, color: ink.withAlphaComponent(0.65), tracking: 2)
 
         let brandCorner: SocialCardDrawing.Corner = (zone == .bottom) ? .topTrailing : .bottomTrailing
         SocialCardDrawing.drawBrandMark(canvasSize: canvasSize, corner: brandCorner, ink: ink, opacity: 0.55)
@@ -305,7 +365,19 @@ enum SocialCardDrawing {
 
     // MARK: ブランド表記
 
-    enum Corner { case topLeading, topTrailing, bottomLeading, bottomTrailing }
+    enum Corner {
+        case topLeading, topTrailing, bottomLeading, bottomTrailing
+
+        /// 指定ゾーンの帯・列の「終端」に対応する隅（開始端は`drawCaptionBlock`が使う）
+        static func corner(endOf zone: SafeZone) -> Corner {
+            switch zone {
+            case .top: return .topTrailing
+            case .bottom: return .bottomTrailing
+            case .left: return .bottomLeading
+            case .right: return .bottomTrailing
+            }
+        }
+    }
 
     /// 「EVENTSNAP」の小さなワードマークだけ。バッジ・背景チップ・広告的な文言は使わない。
     /// 「広告」ではなく「作品のクレジット」として見えることを狙っている。
@@ -325,6 +397,32 @@ enum SocialCardDrawing {
         }
 
         drawTracked(text, at: CGPoint(x: x, y: y), font: font, color: ink.withAlphaComponent(opacity), tracking: 3)
+    }
+
+    /// Editorialの添え文字（日付・MEMORIES番号）を、指定ゾーンの「開始端」に小さく置く。
+    /// 複数行(`\n`区切り)を想定する。
+    static func drawCaptionBlock(cg: CGContext, canvasSize: CGSize, zone: SafeZone, text: String, color: UIColor, inset: CGFloat) {
+        let font = bebasNeue(size: 26)
+        let lineHeight = font.ascender - font.descender
+        let lines = text.components(separatedBy: "\n")
+
+        let x: CGFloat
+        var y: CGFloat
+        switch zone {
+        case .top: x = inset; y = inset
+        case .bottom: x = inset; y = canvasSize.height - inset - CGFloat(lines.count) * lineHeight * 1.15
+        case .left: x = inset; y = inset
+        case .right: x = canvasSize.width - inset - maxTrackedWidth(lines, font: font, tracking: 2); y = inset
+        }
+
+        for line in lines {
+            drawTracked(line, at: CGPoint(x: x, y: y), font: font, color: color, tracking: 2)
+            y += lineHeight * 1.15
+        }
+    }
+
+    private static func maxTrackedWidth(_ lines: [String], font: UIFont, tracking: CGFloat) -> CGFloat {
+        lines.map { trackedWidth($0, font: font, tracking: tracking) }.max() ?? 0
     }
 
     /// Bold用の、ポスター下部のクレジット行のような表記("EVENTSNAP · 日付")
@@ -350,14 +448,14 @@ enum SocialCardDrawing {
     }
 
     /// 写真から抽出したアクセントカラーを混ぜたグラデーションスクリム。ゾーン内だけに敷き、写真を隠さない。
-    static func drawScrim(cg: CGContext, zone: SafeZone, canvasSize: CGSize, tint: UIColor, dark: Bool) {
+    static func drawScrim(cg: CGContext, zone: SafeZone, canvasSize: CGSize, tint: UIColor, dark: Bool, strength: CGFloat = 0.55) {
         let rect = zone.rect(in: canvasSize)
         let base: UIColor = dark ? .black : .white
         let scrimColor = blend(base, tint, 0.25)
 
         guard let gradient = CGGradient(
             colorsSpace: CGColorSpaceCreateDeviceRGB(),
-            colors: [scrimColor.withAlphaComponent(0.55).cgColor, scrimColor.withAlphaComponent(0).cgColor] as CFArray,
+            colors: [scrimColor.withAlphaComponent(strength).cgColor, scrimColor.withAlphaComponent(0).cgColor] as CFArray,
             locations: [0, 1]
         ) else { return }
 
@@ -373,6 +471,51 @@ enum SocialCardDrawing {
         cg.saveGState()
         cg.clip(to: rect)
         cg.drawLinearGradient(gradient, start: start, end: end, options: [])
+        cg.restoreGState()
+    }
+
+    /// タイトルの後ろに沈める、日付などの巨大なゴースト数字。Boldの「数字を背景要素にする」用。
+    /// 指定した矩形の幅いっぱいに広がるサイズを、基準サイズでの実測幅から比例計算で求める
+    /// （Bebas Neueは文字幅がフォントサイズにほぼ線形に比例するため、1回の実測で求まる）。
+    static func drawGhostNumber(_ text: String, in rect: CGRect, ink: UIColor) {
+        let referenceSize: CGFloat = 300
+        let referenceFont = bebasNeue(size: referenceSize)
+        let referenceWidth = (text as NSString).size(withAttributes: [.font: referenceFont]).width
+        guard referenceWidth > 0 else { return }
+
+        let targetWidth = rect.width * 0.92
+        let fontSize = referenceSize * (targetWidth / referenceWidth)
+        let font = bebasNeue(size: fontSize)
+        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: ink.withAlphaComponent(0.14)]
+        let size = (text as NSString).size(withAttributes: attrs)
+        let point = CGPoint(x: rect.midX - size.width / 2, y: rect.midY - size.height / 2)
+        (text as NSString).draw(at: point, withAttributes: attrs)
+    }
+
+    /// タイトルと反対側の辺に置く、アクセントカラーの太いストライプ（額縁にはならない一辺だけの色面）
+    static func drawAccentStripe(cg: CGContext, canvasSize: CGSize, avoiding zone: SafeZone, color: UIColor) {
+        let thickness: CGFloat = 14
+        let rect: CGRect
+        switch zone {
+        case .top: rect = CGRect(x: 0, y: canvasSize.height - thickness, width: canvasSize.width, height: thickness)
+        case .bottom: rect = CGRect(x: 0, y: 0, width: canvasSize.width, height: thickness)
+        case .left: rect = CGRect(x: canvasSize.width - thickness, y: 0, width: thickness, height: canvasSize.height)
+        case .right: rect = CGRect(x: 0, y: 0, width: thickness, height: canvasSize.height)
+        }
+        cg.saveGState()
+        color.setFill()
+        cg.fill(rect)
+        cg.restoreGState()
+    }
+
+    /// 短い装飾ライン（Editorialの見出し下の細いライン）
+    static func drawRule(cg: CGContext, from point: CGPoint, width: CGFloat, color: UIColor) {
+        cg.saveGState()
+        cg.setStrokeColor(color.cgColor)
+        cg.setLineWidth(3)
+        cg.move(to: point)
+        cg.addLine(to: CGPoint(x: point.x + width, y: point.y))
+        cg.strokePath()
         cg.restoreGState()
     }
 
@@ -411,30 +554,86 @@ enum SocialCardDrawing {
         return (lines, font)
     }
 
+    /// 英数字の連続（"2026" など）はひとまとまりのトークンとして扱い、途中で
+    /// 折り返さない。日本語（かな・漢字）は分かち書きされないため引き続き
+    /// 1文字ごとに折り返し可能とする。
     static func wrapText(_ text: String, font: UIFont, maxWidth: CGFloat) -> [String] {
         guard !text.isEmpty else { return [] }
         let attrs: [NSAttributedString.Key: Any] = [.font: font]
+        func width(_ s: String) -> CGFloat { (s as NSString).size(withAttributes: attrs).width }
+
         var lines: [String] = []
         var current = ""
-        for ch in text {
-            let candidate = current + String(ch)
-            let width = (candidate as NSString).size(withAttributes: attrs).width
-            if width > maxWidth, !current.isEmpty {
-                lines.append(current)
-                current = String(ch)
-            } else {
+
+        for token in tokenize(text) {
+            let candidate = current + token
+            if current.isEmpty || width(candidate) <= maxWidth {
                 current = candidate
+            } else {
+                lines.append(current)
+                current = token
+            }
+
+            // トークン単体（英数字の連続）がそもそも1行に収まらない場合だけ、
+            // そのトークンを文字単位でさらに分割する。
+            if current == token, width(current) > maxWidth, token.count > 1 {
+                var sub = ""
+                for ch in token {
+                    let candidateChar = sub + String(ch)
+                    if !sub.isEmpty, width(candidateChar) > maxWidth {
+                        lines.append(sub)
+                        sub = String(ch)
+                    } else {
+                        sub = candidateChar
+                    }
+                }
+                current = sub
             }
         }
         if !current.isEmpty { lines.append(current) }
         return lines
     }
 
-    static func drawLines(_ lines: [String], font: UIFont, color: UIColor, x: CGFloat, y: inout CGFloat, lineHeight: CGFloat, kern: CGFloat = 0) {
+    /// ASCII英数字の連続はひとまとまりのトークンに、それ以外(日本語など)は
+    /// 1文字ずつのトークンにする
+    private static func tokenize(_ text: String) -> [String] {
+        var tokens: [String] = []
+        var word = ""
+        for ch in text {
+            if ch.isASCII, ch.isLetter || ch.isNumber {
+                word.append(ch)
+            } else {
+                if !word.isEmpty { tokens.append(word); word = "" }
+                tokens.append(String(ch))
+            }
+        }
+        if !word.isEmpty { tokens.append(word) }
+        return tokens
+    }
+
+    static func drawLines(
+        _ lines: [String], font: UIFont, color: UIColor, x: CGFloat, y: inout CGFloat, lineHeight: CGFloat,
+        kern: CGFloat = 0, softShadow: Bool = false, shadowStrength: CGFloat = 1
+    ) {
+        var attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color, .kern: kern]
+        if softShadow {
+            attrs[.shadow] = textShadow(strength: shadowStrength)
+        }
         for line in lines {
-            (line as NSString).draw(at: CGPoint(x: x, y: y), withAttributes: [.font: font, .foregroundColor: color, .kern: kern])
+            (line as NSString).draw(at: CGPoint(x: x, y: y), withAttributes: attrs)
             y += lineHeight
         }
+    }
+
+    /// 文字を写真に直接載せても読めるようにする、控えめなドロップシャドウ。
+    /// 黒縁取り（ストローク）ではなく、ごく柔らかい影だけを足す方針
+    /// （写真全体を暗くしたり、文字を縁取って安っぽく見せたりしない）。
+    private static func textShadow(strength: CGFloat = 1) -> NSShadow {
+        let shadow = NSShadow()
+        shadow.shadowColor = UIColor.black.withAlphaComponent(min(0.32 * strength, 0.5))
+        shadow.shadowOffset = CGSize(width: 0, height: 2 * strength)
+        shadow.shadowBlurRadius = 8 * strength
+        return shadow
     }
 
     static func trackedWidth(_ text: String, font: UIFont, tracking: CGFloat) -> CGFloat {
@@ -446,11 +645,11 @@ enum SocialCardDrawing {
 
     static func drawTracked(_ text: String, at point: CGPoint, font: UIFont, color: UIColor, tracking: CGFloat) {
         var x = point.x
-        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color]
+        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color, .shadow: textShadow(strength: 0.7)]
         for ch in text {
             let s = String(ch)
             (s as NSString).draw(at: CGPoint(x: x, y: point.y), withAttributes: attrs)
-            x += s.size(withAttributes: attrs).width + tracking
+            x += s.size(withAttributes: [.font: font]).width + tracking
         }
     }
 
@@ -492,5 +691,17 @@ enum SocialCardDrawing {
         if let font = UIFont(name: "BebasNeue-Regular", size: size) { return font }
         print("⚠️ BebasNeue-Regular の読み込みに失敗したため、システムフォントで代用します")
         return .systemFont(ofSize: size * 0.85, weight: .semibold)
+    }
+}
+
+private extension SafeZone {
+    /// タイトルが置かれた側と反対側のゾーン。添え文字・ブランドの置き場に使う。
+    var opposite: SafeZone {
+        switch self {
+        case .top: return .bottom
+        case .bottom: return .top
+        case .left: return .right
+        case .right: return .left
+        }
     }
 }

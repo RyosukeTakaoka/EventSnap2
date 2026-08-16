@@ -90,9 +90,17 @@ struct AlbumView: View {
                         NavigationLink {
                             ShareCollageView(event: event)
                         } label: {
+                            // アイコンに明示的なフレームを持たせてからバッジを重ねる。
+                            // タイトなグリフのバウンディングボックスに対してバッジを
+                            // .offsetではみ出させると、ナビゲーションバー側のクリップで
+                            // 見えなくなったり、画面遷移時に残像として残ったりするため
+                            // （UnreadBadge.swiftのコメント参照）、先に余裕のある
+                            // フレームを確保しておく。
                             Image(systemName: "square.and.arrow.up.on.square")
+                                .font(.system(size: 17))
+                                .frame(width: 30, height: 30)
+                                .unreadBadge(collageStore.unseenReelCount(for: event.id))
                         }
-                        .unreadBadge(collageStore.unseenReelCount(for: event.id))
                         .accessibilityLabel("Event Reel")
                     }
                 }

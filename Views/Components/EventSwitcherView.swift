@@ -2,7 +2,7 @@
 //  EventSwitcherView.swift
 //  EventSnap
 //
-//  参加済みイベントの切り替え
+//  参加済みイベントの切り替え・新規作成
 //
 
 import SwiftUI
@@ -12,12 +12,26 @@ import SwiftUI
 /// これまでは一度に1つのイベントしか持てず、別のイベントに参加すると
 /// 前のイベントに戻れなくなっていた。参加履歴を端末に持たせることで
 /// 好きなときに切り替えられるようにする。
+///
+/// 「現在（開催中）」と「過去（終了済み）」を分けて表示する。終了したイベントを
+/// 参加中の一覧にいつまでも残すと、使うほどに一覧が伸びて分かりにくくなるため。
+/// ただし履歴からは消さない（`EventRepository`が保持する参加履歴自体は変えない）。
 struct EventSwitcherView: View {
     @ObservedObject var eventViewModel: EventViewModel
     @Environment(\.dismiss) private var dismiss
 
     @State private var showJoinSheet = false
+    @State private var showCreateSheet = false
+    @State private var newEventName = ""
     @State private var leaveTarget: Event?
+
+    private var currentEvents: [Event] {
+        eventViewModel.recentEvents.filter(\.isActive)
+    }
+
+    private var pastEvents: [Event] {
+        eventViewModel.recentEvents.filter { !$0.isActive }
+    }
 
     var body: some View {
         NavigationView {
@@ -26,14 +40,32 @@ struct EventSwitcherView: View {
                     Text("参加中のイベントはありません")
                         .foregroundColor(.secondary)
                 } else {
-                    Section("参加中のイベント") {
-                        ForEach(eventViewModel.recentEvents) { event in
-                            row(for: event)
+                    if !currentEvents.isEmpty {
+                        Section("現在") {
+                            ForEach(currentEvents) { event in
+                                row(for: event)
+                            }
+                        }
+                    }
+
+                    if !pastEvents.isEmpty {
+                        Section("過去のイベント") {
+                            ForEach(pastEvents) { event in
+                                row(for: event)
+                            }
                         }
                     }
                 }
 
+                // 「作成」と「参加」を明確に分けた導線。
+                // 以前はここに参加（QRコード）しか無かった。
                 Section {
+                    Button {
+                        showCreateSheet = true
+                    } label: {
+                        Label("イベントを作成", systemImage: "plus.circle")
+                    }
+
                     Button {
                         showJoinSheet = true
                     } label: {
@@ -54,6 +86,22 @@ struct EventSwitcherView: View {
             .refreshable { await eventViewModel.loadRecentEvents() }
             .sheet(isPresented: $showJoinSheet) {
                 QRScannerView(eventViewModel: eventViewModel)
+            }
+            .sheet(isPresented: $showCreateSheet) {
+                // 既存のEventCreationSheet（HomeView.swift）をそのまま再利用する。
+                // 作成すると EventRepository が currentEvent を新しいイベントに
+                // 切り替えるので、このスイッチャー自体を閉じれば、下にある
+                // MainTabViewが自動的に新しいイベントの中身を表示する。
+                EventCreationSheet(
+                    eventName: $newEventName,
+                    onCreate: {
+                        Task {
+                            await eventViewModel.createEvent(name: newEventName.isEmpty ? "新しいイベント" : newEventName)
+                            newEventName = ""
+                            dismiss()
+                        }
+                    }
+                )
             }
             .confirmationDialog(
                 "「\(leaveTarget?.name ?? "")」を一覧から外しますか？",

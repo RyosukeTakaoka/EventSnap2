@@ -11,7 +11,6 @@ import AVFoundation
 struct CameraView: View {
     @StateObject private var viewModel = CameraViewModel()
     @ObservedObject private var eventRepository = EventRepository.shared
-    @State private var showFilterPicker = false
 
     /// 終了したイベントには新しい写真を追加できない
     private var isEventActive: Bool {
@@ -20,26 +19,8 @@ struct CameraView: View {
 
     var body: some View {
         ZStack {
-            // カメラプレビュー（リアルタイムフィルター対応）
-            if let previewImage = viewModel.previewImage,
-               viewModel.isRealtimeEnabled,
-               viewModel.selectedFilter == .beauty {
-                // リアルタイムフィルタープレビュー
-                //
-                // 以前はここで .rotationEffect(.degrees(90)) を掛けていたが、
-                // これは「美肌をONにすると画が横に倒れる」のを力技で戻していたもので、
-                // 端末を横にすると逆に破綻していた。
-                // 回転と鏡像は AVCaptureConnection 側で処理するようにしたので、
-                // ここでは何も回さずそのまま表示する。
-                Image(uiImage: previewImage)
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-            } else {
-                // 通常のカメラプレビュー
-                CameraPreview(session: viewModel.captureSession, mirrored: viewModel.cameraPosition == .front)
-                    .ignoresSafeArea()
-            }
+            CameraPreview(session: viewModel.captureSession, mirrored: viewModel.cameraPosition == .front)
+                .ignoresSafeArea()
 
             // UI オーバーレイ
             VStack {
@@ -59,83 +40,15 @@ struct CameraView: View {
                     .padding(.leading)
                     .accessibilityLabel("カメラを切り替え")
 
-                    // リアルタイムフィルターON/OFFトグル
-                    if viewModel.selectedFilter == .beauty {
-                        Button {
-                            viewModel.isRealtimeEnabled.toggle()
-                        } label: {
-                            HStack {
-                                Image(systemName: viewModel.isRealtimeEnabled ? "bolt.fill" : "bolt.slash")
-                                Text(viewModel.isRealtimeEnabled ? "リアルタイム" : "撮影時のみ")
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(viewModel.isRealtimeEnabled ? Color.yellow.opacity(0.8) : Color.black.opacity(0.6))
-                            .foregroundColor(viewModel.isRealtimeEnabled ? .black : .white)
-                            .cornerRadius(16)
-                        }
-                        .padding(.leading, 8)
-                    }
-
                     Spacer()
-
-                    // フィルター選択ボタン
-                    Button {
-                        showFilterPicker.toggle()
-                    } label: {
-                        HStack {
-                            Image(systemName: viewModel.selectedFilter.icon)
-                            Text(viewModel.selectedFilter.rawValue)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.black.opacity(0.6))
-                        .foregroundColor(.white)
-                        .cornerRadius(20)
-                    }
-                    .padding()
                 }
                 .padding(.top, 8)
-
-                // 美肌強度スライダー
-                if viewModel.selectedFilter == .beauty && viewModel.isRealtimeEnabled {
-                    HStack {
-                        Image(systemName: "sparkles")
-                            .foregroundColor(.white)
-                        Slider(value: $viewModel.beautyIntensity, in: 0...1)
-                            .tint(.yellow)
-                        Text("\(Int(viewModel.beautyIntensity * 100))%")
-                            .foregroundColor(.white)
-                            .font(.caption)
-                            .frame(width: 40)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    .background(Color.black.opacity(0.6))
-                    .cornerRadius(16)
-                    .padding(.horizontal)
-                }
 
                 Spacer()
 
                 if isEventActive {
-                    // 撮影オプション（シェア許可・タイムカプセル）
-                    HStack(spacing: 12) {
-                        CaptureOptionToggle(
-                            isOn: $viewModel.shareOK,
-                            icon: "square.and.arrow.up",
-                            label: "シェアOK",
-                            tint: .green
-                        )
-
-                        CaptureOptionToggle(
-                            isOn: $viewModel.saveAsTimeCapsule,
-                            icon: "hourglass",
-                            label: "あとで公開",
-                            tint: .orange
-                        )
-                    }
-                    .padding(.bottom, 18)
+                    PublishSettingPicker(shareOK: $viewModel.shareOK, saveAsTimeCapsule: $viewModel.saveAsTimeCapsule)
+                        .padding(.bottom, 18)
                 } else {
                     // 終了したイベントでは撮影オプションの代わりに案内を出す
                     HStack {
@@ -186,21 +99,6 @@ struct CameraView: View {
                 }
                 .padding(.bottom, 40)
             }
-
-            // フィルターピッカー
-            if showFilterPicker {
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        showFilterPicker = false
-                    }
-
-                FilterPickerView(
-                    selectedFilter: $viewModel.selectedFilter,
-                    onDismiss: { showFilterPicker = false }
-                )
-                .transition(.move(edge: .bottom))
-            }
         }
         .task {
             await viewModel.checkCameraPermission()
@@ -214,52 +112,96 @@ struct CameraView: View {
     }
 }
 
-// MARK: - 撮影オプションのトグル
+// MARK: - 公開設定ピッカー
 
-/// シャッターの上に置く小さなトグル。
-/// どちらも **押していない状態が既定** で、撮影のたびにOFFへ戻る。
+/// 「シェアOK」「あとで公開」を2つの独立トグルにせず、
+/// 「非公開 / あとで公開 / シェアOK」という1つの排他的な選択として扱う。
 ///
-/// アイコンのみの丸ボタンにして画面上の情報量を抑えている（文字ラベルは常時表示しない）。
-/// 機能自体（タップでON/OFF）は変わらず、ONのときだけ下に短いラベルを出して
-/// 何がONになっているか分かるようにする。
-struct CaptureOptionToggle: View {
-    @Binding var isOn: Bool
-    let icon: String
-    let label: String
-    let tint: Color
-    var isDisabled: Bool = false
+/// `shareOK`がONの間は`saveAsTimeCapsule`は選べない
+/// （`CameraViewModel.shareOK`の`didSet`が自動でOFFに戻すため、内部的にも
+/// 常にどちらか一方だけがtrueになる）。UI側もそれを素直に反映するだけで、
+/// 独自の状態は持たない。
+struct PublishSettingPicker: View {
+    @Binding var shareOK: Bool
+    @Binding var saveAsTimeCapsule: Bool
+
+    private enum Choice: CaseIterable {
+        case `private`, later, share
+
+        var label: String {
+            switch self {
+            case .private: return "非公開"
+            case .later: return "あとで公開"
+            case .share: return "シェアOK"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .private: return "lock"
+            case .later: return "hourglass"
+            case .share: return "square.and.arrow.up"
+            }
+        }
+
+        var tint: Color {
+            switch self {
+            case .private: return .gray
+            case .later: return .orange
+            case .share: return .green
+            }
+        }
+    }
+
+    private var current: Choice {
+        if shareOK { return .share }
+        if saveAsTimeCapsule { return .later }
+        return .private
+    }
 
     var body: some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.15)) { isOn.toggle() }
-        } label: {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 17, weight: .semibold))
-                    .frame(width: 44, height: 44)
-                    .background(isOn ? tint.opacity(0.9) : Color.black.opacity(0.55))
-                    .foregroundColor(isOn ? .black : .white)
-                    .clipShape(Circle())
-                    .overlay(
-                        Circle().stroke(isOn ? Color.clear : Color.white.opacity(0.35), lineWidth: 1)
-                    )
+        HStack(spacing: 12) {
+            ForEach(Choice.allCases, id: \.self) { choice in
+                Button {
+                    select(choice)
+                } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: choice.icon)
+                            .font(.system(size: 17, weight: .semibold))
+                            .frame(width: 44, height: 44)
+                            .background(current == choice ? choice.tint.opacity(0.9) : Color.black.opacity(0.55))
+                            .foregroundColor(current == choice ? .black : .white)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle().stroke(current == choice ? Color.clear : Color.white.opacity(0.35), lineWidth: 1)
+                            )
 
-                if isOn {
-                    Text(label)
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(Color.black.opacity(0.55))
-                        .clipShape(Capsule())
+                        Text(choice.label)
+                            .font(.caption2)
+                            .fontWeight(current == choice ? .semibold : .regular)
+                            .foregroundColor(current == choice ? .white : .white.opacity(0.6))
+                    }
                 }
+                .accessibilityLabel(choice.label)
+                .accessibilityAddTraits(current == choice ? .isSelected : [])
             }
-            .opacity(isDisabled ? 0.4 : 1)
         }
-        .disabled(isDisabled)
-        .accessibilityLabel(label)
-        .accessibilityValue(isOn ? "オン" : "オフ")
+    }
+
+    private func select(_ choice: Choice) {
+        withAnimation(.easeInOut(duration: 0.15)) {
+            switch choice {
+            case .private:
+                shareOK = false
+                saveAsTimeCapsule = false
+            case .later:
+                shareOK = false
+                saveAsTimeCapsule = true
+            case .share:
+                // shareOKのdidSetがsaveAsTimeCapsuleを自動でfalseにする
+                shareOK = true
+            }
+        }
     }
 }
 

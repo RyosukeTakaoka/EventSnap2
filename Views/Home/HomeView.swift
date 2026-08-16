@@ -167,15 +167,34 @@ struct HomeView: View {
 
     /// 作成・参加したことのあるイベントへすぐ戻れる一覧。
     /// 終了済みのイベントもここから開ける（新しい写真は追加できない）。
+    ///
+    /// 「現在」と「過去」を分けて表示する。以前は「参加中のイベント」という
+    /// 見出しの下に終了済みイベントまで並んでいて、見出しと中身が矛盾していた。
     private var joinedEventsSection: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            let current = eventViewModel.recentEvents.filter(\.isActive)
+            let past = eventViewModel.recentEvents.filter { !$0.isActive }
+
+            if !current.isEmpty {
+                eventGroup(title: "現在", events: current)
+            }
+
+            if !past.isEmpty {
+                eventGroup(title: "過去のイベント", events: past)
+            }
+        }
+        .padding(.horizontal, 40)
+    }
+
+    private func eventGroup(title: String, events: [Event]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("参加中のイベント")
+            Text(title)
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.white.opacity(0.85))
 
             VStack(spacing: 8) {
-                ForEach(eventViewModel.recentEvents) { event in
+                ForEach(events) { event in
                     Button {
                         Task { await eventViewModel.switchEvent(to: event) }
                     } label: {
@@ -214,7 +233,6 @@ struct HomeView: View {
                 }
             }
         }
-        .padding(.horizontal, 40)
     }
 }
 

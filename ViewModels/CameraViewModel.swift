@@ -14,28 +14,26 @@ import Combine
 class CameraViewModel: ObservableObject {
     @Published var capturedImage: UIImage?
     @Published var isProcessing = false
-    @Published var selectedFilter: FilterType = .none
     @Published var isCameraAuthorized = false
-    @Published var showFilterPreview = false
 
-    // ✨ リアルタイムフィルター用プロパティ
-    @Published var previewImage: UIImage?
-    @Published var isRealtimeEnabled = true
-    @Published var beautyIntensity: Double = 0.5
-
-    /// この写真をEvent Reel（SNSシェア用のコラージュ）に使ってよいか（機能B）。
+    /// この写真をEvent Reel（SNSシェア用の画像）に使ってよいか（機能B）。
     /// **既定はOFF**。一度ONにしたら、本人が明示的にOFFに戻すまで次の撮影にも
     /// 引き継がれる（イベント中はまとめてシェアOKにしたい、という使い方を想定）。
     ///
-    /// 「あとで公開」との併用を許す。両方ONで撮った写真は一旦タイムカプセルとして
-    /// 伏せられ、Event Reelを組む瞬間にシェアを優先してタイムカプセル状態を解除する
-    /// （`PhotoRepository.releaseSharedTimeCapsules`）。撮影時点でどちらの意図か
-    /// 決めきれないことがあるため、選択肢を狭めず両方選べるようにしている。
-    @Published var shareOK = false
+    /// シェアOKにした瞬間、「あとで公開」は自動でOFFにする（`didSet`参照）。
+    /// 「シェアOKなのに、あとで公開もON」という、ユーザーから見て
+    /// いつ公開されるのか分かりにくい状態を作らないため。
+    @Published var shareOK = false {
+        didSet {
+            if shareOK, saveAsTimeCapsule {
+                saveAsTimeCapsule = false
+            }
+        }
+    }
 
     /// この写真をタイムカプセル（遅延公開）にするか（機能A）。
     /// 撮影者本人による明示的な指定。OFFでも一定確率で自動選定される。
-    /// シェアOKと併用可能（詳細は `shareOK` のコメントを参照）。
+    /// シェアOKがONの間は選べない（`shareOK`の`didSet`で自動的にOFFに戻される）。
     @Published var saveAsTimeCapsule = false
 
     /// 直前の撮影がタイムカプセルになったか（撮影後のフィードバック表示用）
@@ -49,50 +47,24 @@ class CameraViewModel: ObservableObject {
 
     let captureSession = AVCaptureSession()
     private let photoOutput = AVCapturePhotoOutput()
-    private let videoOutput = AVCaptureVideoDataOutput() // ✨ 追加
     private var videoDeviceInput: AVCaptureDeviceInput?
-    private let aiFilterService = AIFilterService()
     private let photoRepository = PhotoRepository.shared
     private let eventRepository = EventRepository.shared
 
     // カメラ専用のキュー
     private let cameraQueue = DispatchQueue(label: "com.eventsnap.camera")
-    private let videoQueue = DispatchQueue(label: "com.eventsnap.video", qos: .userInteractive) // ✨ 追加
 
     // 🔥 重要: デリゲートを強参照で保持
     private var photoCaptureDelegate: PhotoCaptureDelegate?
-    private var videoDelegate: VideoDataOutputDelegate? // ✨ 追加
-
-    // ✨ フレームスロットリング用
-    private var lastFrameProcessedTime: Date = .distantPast
-    private let frameProcessingInterval: TimeInterval = 0.1 // 10 FPS
 
     // 端末の向きの購読
     private var orientationCancellable: AnyCancellable?
-
-    enum FilterType: String, CaseIterable, Identifiable {
-        case none = "なし"
-        case beauty = "美肌"
-        case bright = "明るく"
-        case vintage = "レトロ"
-
-        var id: String { rawValue }
-
-        var icon: String {
-            switch self {
-            case .none: return "camera"
-            case .beauty: return "sparkles"
-            case .bright: return "sun.max"
-            case .vintage: return "photo.on.rectangle"
-            }
-        }
-    }
 
     // MARK: - カメラ権限確認
 
     func checkCameraPermission() async {
         print("🔍 カメラ権限を確認中...")
-        
+
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             print("✅ カメラ権限が許可されています")
@@ -143,36 +115,6 @@ class CameraViewModel: ObservableObject {
         if captureSession.canAddOutput(photoOutput) {
             captureSession.addOutput(photoOutput)
             print("✅ 写真出力を追加しました")
-        }
-
-        // ✨ ビデオ出力を追加（リアルタイムプレビュー用）
-        videoOutput.setSampleBufferDelegate(nil, queue: nil) // 既存のデリゲートをクリア
-        videoOutput.videoSettings = [
-            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
-        ]
-        videoOutput.alwaysDiscardsLateVideoFrames = true // パフォーマンス最適化
-
-        if captureSession.canAddOutput(videoOutput) {
-            captureSession.addOutput(videoOutput)
-            print("✅ ビデオ出力を追加しました")
-
-            // デリゲート設定
-            let delegate = VideoDataOutputDelegate { [weak self] pixelBuffer in
-                self?.processVideoFrame(pixelBuffer)
-            }
-            self.videoDelegate = delegate
-            videoOutput.setSampleBufferDelegate(delegate, queue: videoQueue)
-            print("✅ ビデオデリゲートを設定しました")
-        }
-
-        // 🔄 プレビュー用の出力は「縦固定」にする。
-        // 画面自体が端末と一緒に物理的に回るので、これで見た目は常に正しくなる。
-        if let videoConnection = videoOutput.connection(with: .video) {
-            videoConnection.applyPortrait()
-            // 鏡像化は接続側で行う。以前は UIImage の orientation を .upMirrored に
-            // 決め打ちしていたが、それだと横向きのときに破綻していた。
-            // 鏡像にするのはインカメラ（自撮り）のときだけ。アウトカメラは鏡像にしない。
-            videoConnection.applyMirroring(cameraPosition == .front)
         }
 
         // 端末の向きの監視を開始し、写真出力の回転角を追従させる
@@ -226,7 +168,6 @@ class CameraViewModel: ObservableObject {
     /// 現在のカメラ（イン/アウト）に応じて鏡像設定をやり直す
     private func applyMirroringForCurrentPosition() {
         let mirrored = cameraPosition == .front
-        videoOutput.connection(with: .video)?.applyMirroring(mirrored)
         photoOutput.connection(with: .video)?.applyMirroring(mirrored)
     }
 
@@ -263,7 +204,7 @@ class CameraViewModel: ObservableObject {
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("📸 撮影開始")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        
+
         guard !isProcessing else {
             print("⚠️ 既に処理中です")
             return
@@ -274,7 +215,7 @@ class CameraViewModel: ObservableObject {
 
         let settings = AVCapturePhotoSettings()
         settings.flashMode = .auto
-        
+
         print("📷 写真キャプチャを開始します...")
         print("🔍 photoOutputの状態: \(photoOutput)")
         print("🔍 captureSessionの状態: isRunning=\(captureSession.isRunning)")
@@ -282,12 +223,12 @@ class CameraViewModel: ObservableObject {
         // 🔥 重要: デリゲートを強参照で保持
         let delegate = PhotoCaptureDelegate { [weak self] image in
             print("\n【コールバック】写真キャプチャのコールバックが呼ばれました")
-            
+
             guard let self = self else {
                 print("❌ selfがnilです")
                 return
             }
-            
+
             guard let image = image else {
                 print("❌ 画像がnilです")
                 Task { @MainActor in
@@ -297,7 +238,7 @@ class CameraViewModel: ObservableObject {
                 }
                 return
             }
-            
+
             print("✅ 画像取得成功")
             print("📐 画像サイズ: \(image.size)")
 
@@ -307,16 +248,9 @@ class CameraViewModel: ObservableObject {
                 // 🔄 向きをピクセルに焼き込んでから処理する。
                 // CIImage と Vision は imageOrientation を見てくれないので、
                 // ここで .up に正規化しておかないと横向きの写真が崩れる。
-                let image = image.normalizedUp()
-                print("📐 正規化後のサイズ: \(image.size) (横向き: \(image.isLandscape))")
+                let processedImage = image.normalizedUp()
+                print("📐 正規化後のサイズ: \(processedImage.size) (横向き: \(processedImage.isLandscape))")
 
-                // フィルター適用
-                print("🎨 フィルター適用開始: \(self.selectedFilter.rawValue)")
-                let filterStartTime = Date()
-                let processedImage = await self.applySelectedFilter(to: image)
-                let filterTime = Date().timeIntervalSince(filterStartTime)
-                print("✅ フィルター適用完了（\(String(format: "%.2f", filterTime))秒）")
-                
                 self.capturedImage = processedImage
                 print("✅ capturedImageに画像を設定しました")
 
@@ -335,44 +269,14 @@ class CameraViewModel: ObservableObject {
                 print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
             }
         }
-        
+
         // デリゲートを保持
         self.photoCaptureDelegate = delegate
         print("✅ PhotoCaptureDelegateを作成・保持しました")
-        
+
         // 写真をキャプチャ
         photoOutput.capturePhoto(with: settings, delegate: delegate)
         print("✅ capturePhoto()メソッドを呼び出しました")
-    }
-
-    // MARK: - フィルター適用
-
-    private func applySelectedFilter(to image: UIImage) async -> UIImage {
-        print("  🎨 選択されたフィルター: \(selectedFilter.rawValue)")
-        
-        switch selectedFilter {
-        case .none:
-            print("  ✅ フィルターなし - そのまま返します")
-            return image
-
-        case .beauty:
-            print("  🌟 美肌フィルター適用中...")
-            let result = await aiFilterService.applyBeautyFilter(to: image)
-            print("  ✅ 美肌フィルター適用完了")
-            return result
-
-        case .bright:
-            print("  ☀️ 明るさフィルター適用中...")
-            let result = aiFilterService.applyBrightnessFilter(to: image)
-            print("  ✅ 明るさフィルター適用完了")
-            return result
-
-        case .vintage:
-            print("  📸 レトロフィルター適用中...")
-            let result = aiFilterService.applyVintageFilter(to: image)
-            print("  ✅ レトロフィルター適用完了")
-            return result
-        }
     }
 
     // MARK: - 写真アップロード
@@ -400,7 +304,6 @@ class CameraViewModel: ObservableObject {
             let uploaded = try await photoRepository.uploadPhoto(
                 image,
                 eventID: eventID,
-                filterName: selectedFilter != .none ? selectedFilter.rawValue : nil,
                 isShareOK: shareOK,
                 forceTimeCapsule: saveAsTimeCapsule
             )
@@ -460,47 +363,6 @@ class CameraViewModel: ObservableObject {
             }
         }
     }
-
-    // MARK: - リアルタイムフレーム処理
-
-    /// ビデオフレームを処理（リアルタイムフィルター適用）
-    nonisolated private func processVideoFrame(_ pixelBuffer: CVPixelBuffer) {
-        Task { @MainActor [weak self] in
-            guard let self = self else { return }
-            guard self.isRealtimeEnabled, self.selectedFilter == .beauty else { return }
-
-            // フレームスロットリング（0.1秒間隔）
-            let now = Date()
-            guard now.timeIntervalSince(self.lastFrameProcessedTime) >= self.frameProcessingInterval else {
-                return
-            }
-            self.lastFrameProcessedTime = now
-
-            // 現在の強度を取得
-            let intensity = self.beautyIntensity
-            let filterService = self.aiFilterService
-
-            // フィルター適用（バックグラウンドで実行）
-            Task.detached { [weak self] in
-                guard let filteredImage = filterService.applyRealtimeBeautyFilter(
-                    to: pixelBuffer,
-                    intensity: intensity
-                ) else {
-                    return
-                }
-
-                // UIImageに変換
-                guard let uiImage = filterService.convertToUIImage(from: filteredImage) else {
-                    return
-                }
-
-                // メインスレッドでUIを更新
-                await MainActor.run { [weak self] in
-                    self?.previewImage = uiImage
-                }
-            }
-        }
-    }
 }
 
 // MARK: - 撮影デリゲート
@@ -513,7 +375,7 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
         super.init()
         print("🎬 PhotoCaptureDelegateが初期化されました")
     }
-    
+
     deinit {
         print("🧹 PhotoCaptureDelegateが解放されました")
     }
@@ -524,7 +386,7 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
         error: Error?
     ) {
         print("\n【PhotoCaptureDelegate】didFinishProcessingPhoto が呼ばれました")
-        
+
         if let error = error {
             print("❌ 撮影エラー: \(error.localizedDescription)")
             completion(nil)
@@ -537,7 +399,7 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
             completion(nil)
             return
         }
-        
+
         print("✅ 写真データ取得成功（\(imageData.count)バイト）")
 
         guard let image = UIImage(data: imageData) else {
@@ -548,10 +410,10 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
 
         print("✅ UIImage変換成功")
         print("📐 画像サイズ: \(image.size)")
-        
+
         completion(image)
     }
-    
+
     // この関数も念のため追加
     func photoOutput(
         _ output: AVCapturePhotoOutput,
@@ -559,33 +421,11 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     ) {
         print("📸 willCapturePhotoFor が呼ばれました（撮影開始）")
     }
-    
+
     func photoOutput(
         _ output: AVCapturePhotoOutput,
         didCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings
     ) {
         print("📸 didCapturePhotoFor が呼ばれました（撮影完了）")
-    }
-}
-
-// MARK: - ビデオデータ出力デリゲート
-
-class VideoDataOutputDelegate: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
-    private let frameHandler: (CVPixelBuffer) -> Void
-
-    init(frameHandler: @escaping (CVPixelBuffer) -> Void) {
-        self.frameHandler = frameHandler
-        super.init()
-    }
-
-    func captureOutput(
-        _ output: AVCaptureOutput,
-        didOutput sampleBuffer: CMSampleBuffer,
-        from connection: AVCaptureConnection
-    ) {
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            return
-        }
-        frameHandler(pixelBuffer)
     }
 }
