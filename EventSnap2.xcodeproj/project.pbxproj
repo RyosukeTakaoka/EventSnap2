@@ -32,7 +32,6 @@
 		E52005000000000000000000 /* TimeCapsuleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51005000000000000000000 /* TimeCapsuleService.swift */; };
 		E52006000000000000000000 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51006000000000000000000 /* NotificationService.swift */; };
 		E52007000000000000000000 /* PhotoImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51007000000000000000000 /* PhotoImageLoader.swift */; };
-		E52008000000000000000000 /* CollageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51008000000000000000000 /* CollageService.swift */; };
 		E52009000000000000000000 /* ShareCollageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51009000000000000000000 /* ShareCollageStore.swift */; };
 		E5200A000000000000000000 /* ShareCollageBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100A000000000000000000 /* ShareCollageBuilder.swift */; };
 		E5200D000000000000000000 /* ShareCollageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100D000000000000000000 /* ShareCollageView.swift */; };
@@ -118,7 +117,6 @@
 		E51005000000000000000000 /* TimeCapsuleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeCapsuleService.swift; sourceTree = "<group>"; };
 		E51006000000000000000000 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		E51007000000000000000000 /* PhotoImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoImageLoader.swift; sourceTree = "<group>"; };
-		E51008000000000000000000 /* CollageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollageService.swift; sourceTree = "<group>"; };
 		E51009000000000000000000 /* ShareCollageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageStore.swift; sourceTree = "<group>"; };
 		E5100A000000000000000000 /* ShareCollageBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageBuilder.swift; sourceTree = "<group>"; };
 		E5100D000000000000000000 /* ShareCollageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageView.swift; sourceTree = "<group>"; };
@@ -180,7 +178,6 @@
 				E51005000000000000000000 /* TimeCapsuleService.swift */,
 				E51006000000000000000000 /* NotificationService.swift */,
 				E51007000000000000000000 /* PhotoImageLoader.swift */,
-				E51008000000000000000000 /* CollageService.swift */,
 				EA000A000000000000000000 /* MemberCardService.swift */,
 				E51009000000000000000000 /* ShareCollageStore.swift */,
 				E5100A000000000000000000 /* ShareCollageBuilder.swift */,
@@ -402,7 +399,6 @@
 				E52005000000000000000000 /* TimeCapsuleService.swift in Sources */,
 				E52006000000000000000000 /* NotificationService.swift in Sources */,
 				E52007000000000000000000 /* PhotoImageLoader.swift in Sources */,
-				E52008000000000000000000 /* CollageService.swift in Sources */,
 				E52009000000000000000000 /* ShareCollageStore.swift in Sources */,
 				E5200A000000000000000000 /* ShareCollageBuilder.swift in Sources */,
 				E5200D000000000000000000 /* ShareCollageView.swift in Sources */,
