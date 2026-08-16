@@ -14,6 +14,7 @@ struct AlbumView: View {
     /// 持ってしまい、グループを切り替えても反映されなかった。
     @ObservedObject var eventViewModel: EventViewModel
     @Binding var showEventSwitcher: Bool
+    @StateObject private var collageStore = ShareCollageStore.shared
 
     let columns = [
         GridItem(.flexible(), spacing: 2),
@@ -82,10 +83,18 @@ struct AlbumView: View {
                     }
                 }
 
+                // 以前はここに写真枚数を表示するだけの、タップしても何も起きない
+                // ラベルを置いていた。Event Reelへの入口として機能を持たせる。
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Label("\(viewModel.photos.count)枚", systemImage: "photo.fill")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                    if let event = eventViewModel.currentEvent {
+                        NavigationLink {
+                            ShareCollageView(event: event)
+                        } label: {
+                            Image(systemName: "square.and.arrow.up.on.square")
+                        }
+                        .unreadBadge(collageStore.unseenReelCount(for: event.id))
+                        .accessibilityLabel("Event Reel")
+                    }
                 }
             }
             .refreshable {

@@ -116,7 +116,11 @@ struct EventSettingsView: View {
                         NavigationLink {
                             ShareCollageView(event: event)
                         } label: {
-                            Label("Event Reelを見る", systemImage: "square.and.arrow.up.on.square")
+                            HStack {
+                                Label("Event Reelを見る", systemImage: "square.and.arrow.up.on.square")
+                                Spacer()
+                                InlineUnreadBadge(count: collageStore.unseenReelCount(for: event.id))
+                            }
                         }
                     } else {
                         Text("撮影時に「シェアOK」を選んだ写真が\(ShareCollageBuilder.photosPerReel)枚集まるごとに、イベント中に自動でEvent Reelが作られます。")

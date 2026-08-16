@@ -51,6 +51,7 @@
 		E9000000000000000000000B /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 775673713025AAC40003484E /* AppIcon.icon */; };
 		E9000000000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7760F8AA2F5D236F00F18A2E /* Assets.xcassets */; };
 		E90000000000000000000016 /* EventSnapClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = E9000000000000000000000E /* EventSnapClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EA0002000000000000000000 /* UnreadBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0001000000000000000000 /* UnreadBadge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -127,6 +128,7 @@
 		E90000000000000000000005 /* EventSnapClipRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipRootView.swift; sourceTree = "<group>"; };
 		E90000000000000000000007 /* GetAppScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetAppScreen.swift; sourceTree = "<group>"; };
 		E9000000000000000000000E /* EventSnapClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnapClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA0001000000000000000000 /* UnreadBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnreadBadge.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -192,6 +194,7 @@
 		A772EFD4E478775BAFE91AA1 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				EA0001000000000000000000 /* UnreadBadge.swift */,
 				E5100E000000000000000000 /* EventSwitcherView.swift */,
 				7A1FC9B16BEEE0613D3DEA5D /* MainTabView.swift */,
 			);
@@ -361,6 +364,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EA0002000000000000000000 /* UnreadBadge.swift in Sources */,
 				E76000000000000000000000 /* CloudKitAccount.swift in Sources */,
 				E76001000000000000000000 /* AppLinkConfig.swift in Sources */,
 				E52000000000000000000000 /* AppTab.swift in Sources */,

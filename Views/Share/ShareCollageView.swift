@@ -42,6 +42,9 @@ struct ShareCollageView: View {
             await ShareCollageBuilder.buildIfNeeded(for: event)
             reels = store.reels(for: event.id)
             isChecking = false
+
+            // 開いたので未読バッジを消す（LINEの既読と同じ考え方）
+            store.markReelsSeen(for: event.id)
         }
     }
 
