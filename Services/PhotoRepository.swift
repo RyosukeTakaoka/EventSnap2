@@ -185,7 +185,7 @@ class PhotoRepository: ObservableObject {
     /// `releaseSharedTimeCapsules` で解除されるまでここには出てこない。
     /// 呼び出し側（`ShareCollageBuilder.buildIfNeeded`）は、このメソッドを呼ぶ前に
     /// 必ず解除処理を先に行うこと。
-    /// 古い順に並んでいるのは、Event Reelが5枚ずつの塊で生成順に区切られるため。
+    /// 古い順に並んでいるのは、Event Reelが古いものから順に1枚ずつ区切られるため。
     func shareApprovedPhotos(for eventID: UUID) -> [Photo] {
         allPhotos
             .filter { $0.eventID == eventID && $0.isShareOK && !$0.isTimeCapsule }

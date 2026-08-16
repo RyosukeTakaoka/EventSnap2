@@ -136,7 +136,7 @@ enum SyncCoordinator {
             viewerID: DeviceIdentity.current
         )
 
-        // イベント中でも、シェアOKの新着写真が5枚集まっていれば
+        // イベント中でも、シェアOKの新着写真があれば
         // 新しいEvent Reelを作る（イベント終了を待たない）
         await ShareCollageBuilder.buildIfNeeded(for: event)
     }
