@@ -12,9 +12,7 @@
 		0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38C4572E49ADF53996217172 /* QRCodeService.swift */; };
 		120F1A928552A6F94B2863A5 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603E3322F12D494691F2AB55 /* CameraViewModel.swift */; };
 		1406BD85B5F92142777FAFB0 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B6F77360BB3B5ED718507C /* Event.swift */; };
-		15BBE6FE77BB7A7A26C17581 /* AIFilterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CB51D1A3000AF3AEC06A1E2 /* AIFilterService.swift */; };
 		1AF10605D40D9A743104DEE5 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */; };
-		2A38855153B264258C228C9C /* FilterPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFCAE433E8096D49781D2F3D /* FilterPickerView.swift */; };
 		34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */; };
 		4BA45F6E7F014F81B165E400 /* EventReel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5210C5AE9EB4A64A7585DAC /* EventReel.swift */; };
 		6672E15CA9D7AD5E2FC592FC /* AlbumViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */; };
@@ -94,7 +92,6 @@
 
 /* Begin PBXFileReference section */
 		05ED44B24BF30673E712740A /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
-		0CB51D1A3000AF3AEC06A1E2 /* AIFilterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIFilterService.swift; sourceTree = "<group>"; };
 		293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRepository.swift; sourceTree = "<group>"; };
 		32B6F77360BB3B5ED718507C /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		38C4572E49ADF53996217172 /* QRCodeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeService.swift; sourceTree = "<group>"; };
@@ -107,7 +104,6 @@
 		8257853D0F117AD23C2561B6 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		A2D16059709C44664F34BE80 /* EventSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapApp.swift; sourceTree = "<group>"; };
 		ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
-		AFCAE433E8096D49781D2F3D /* FilterPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterPickerView.swift; sourceTree = "<group>"; };
 		BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C600D3D5C6BB4F411ED1607B /* EventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepository.swift; sourceTree = "<group>"; };
 		CB3CB1C550D157424087F6B4 /* Participant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Participant.swift; sourceTree = "<group>"; };
@@ -158,7 +154,6 @@
 			isa = PBXGroup;
 			children = (
 				D0CA4F056D31CD263119C9D8 /* CameraView.swift */,
-				AFCAE433E8096D49781D2F3D /* FilterPickerView.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -186,7 +181,6 @@
 				EA0010000000000000000000 /* PhotoAnalyzer.swift */,
 				E51009000000000000000000 /* ShareCollageStore.swift */,
 				E5100A000000000000000000 /* ShareCollageBuilder.swift */,
-				0CB51D1A3000AF3AEC06A1E2 /* AIFilterService.swift */,
 				C600D3D5C6BB4F411ED1607B /* EventRepository.swift */,
 				293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */,
 				38C4572E49ADF53996217172 /* QRCodeService.swift */,
@@ -411,7 +405,6 @@
 				E5200A000000000000000000 /* ShareCollageBuilder.swift in Sources */,
 				E5200D000000000000000000 /* ShareCollageView.swift in Sources */,
 				E5200E000000000000000000 /* EventSwitcherView.swift in Sources */,
-				15BBE6FE77BB7A7A26C17581 /* AIFilterService.swift in Sources */,
 				07CC90BB4A7DF00192BD0076 /* AlbumView.swift in Sources */,
 				6672E15CA9D7AD5E2FC592FC /* AlbumViewModel.swift in Sources */,
 				7C142E68F84DD7505B638AC5 /* CameraView.swift in Sources */,
@@ -421,7 +414,6 @@
 				EA1A7497F70CC406621DEF9A /* EventRepository.swift in Sources */,
 				01D9DA15894454558A31F2E0 /* EventSnapApp.swift in Sources */,
 				F2CAC544E91C5A9FEC4EC5B5 /* EventViewModel.swift in Sources */,
-				2A38855153B264258C228C9C /* FilterPickerView.swift in Sources */,
 				C8F67F33DDF36464638794BE /* HomeView.swift in Sources */,
 				9B2319CCFD1753657F39F1FE /* MainTabView.swift in Sources */,
 				F2434A896825B0EDCDFBB10C /* Participant.swift in Sources */,
