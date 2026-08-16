@@ -31,6 +31,12 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<true/>
 	</dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>NotoSansJP-Bold.ttf</string>
+		<string>NotoSansJP-Black.ttf</string>
+		<string>BebasNeue-Regular.ttf</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
