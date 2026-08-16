@@ -103,40 +103,55 @@ enum ShareCollageBuilder {
         }
     }
 
+    // MARK: - 代表写真の選定
+
+    /// 写真の集合から、代表として使う1枚を選ぶ（新しい順に、実際に画像取得できるものを探す）。
+    /// `SocialCardService` は1枚の写真を主役にするデザインのため、バッチ全部ではなく
+    /// 1枚だけを選ぶ。
+    @MainActor
+    static func heroPhoto(from photos: [Photo]) async -> (photo: Photo, image: UIImage)? {
+        let ordered = photos.sorted { $0.uploadedAt > $1.uploadedAt }
+        for candidate in ordered {
+            if let image = await PhotoImageLoader.shared.image(for: candidate) {
+                return (candidate, image)
+            }
+        }
+        return nil
+    }
+
+    /// 既存のEvent Reelから、代表写真を改めて取得する。
+    /// `SocialCardShareView`（テンプレート切り替え画面）がここから写真本体を取り直す。
+    @MainActor
+    static func heroPhoto(for reel: EventReel) async -> (photo: Photo, image: UIImage)? {
+        let candidates = PhotoRepository.shared.allPhotos.filter { reel.photoIDs.contains($0.id) }
+        return await heroPhoto(from: candidates)
+    }
+
+    /// 「瞬間の主」の番号（代表写真の撮影者が参加者の中で何番目に参加したか）。
+    /// Event Reelは誰の端末で生成しても同じ画像になる必要がある設計
+    /// （ShareCollageStoreはローカルにしか画像を持たず、共有ストレージを介さない）
+    /// ため、閲覧者自身の端末情報ではなく、写真に紐づく撮影者情報を使う。
+    static func momentInfo(for photo: Photo, event: Event) -> (index: Int, total: Int) {
+        let index = (event.participantIDs.firstIndex(of: photo.uploaderID) ?? 0) + 1
+        let total = max(event.participantIDs.count, index)
+        return (index, total)
+    }
+
     // MARK: - 内部
 
     @MainActor
     private static func renderCollage(from photos: [Photo], event: Event) async -> UIImage? {
         print("🖼 Event Reel生成: シェアOK \(photos.count)枚")
 
-        // SocialCardServiceは1枚の写真を主役にするデザインのため、バッチの中で新しい順に
-        // 試し、実際に読み込めた最初の1枚を代表写真として使う。
-        let ordered = photos.sorted { $0.uploadedAt > $1.uploadedAt }
-        var heroPhoto: Photo?
-        var heroImage: UIImage?
-        for candidate in ordered {
-            if let image = await PhotoImageLoader.shared.image(for: candidate) {
-                heroPhoto = candidate
-                heroImage = image
-                break
-            }
-        }
-
-        guard let heroPhoto, let heroImage else { return nil }
-
-        // 「瞬間の主」の番号は「代表写真の撮影者が参加者の中で何番目に参加したか」から決める。
-        // Event Reelは誰の端末で生成しても同じ画像になる必要がある設計
-        // （ShareCollageStoreはローカルにしか画像を持たず、共有ストレージを介さない）
-        // ため、閲覧者自身の端末情報ではなく、写真に紐づく撮影者情報を使う。
-        let momentIndex = (event.participantIDs.firstIndex(of: heroPhoto.uploaderID) ?? 0) + 1
-        let momentTotal = max(event.participantIDs.count, momentIndex)
+        guard let hero = await heroPhoto(from: photos) else { return nil }
+        let moment = momentInfo(for: hero.photo, event: event)
 
         return SocialCardService.makeCard(
-            from: heroImage,
+            from: hero.image,
             eventName: event.name,
-            date: heroPhoto.uploadedAt,
-            momentIndex: momentIndex,
-            momentTotal: momentTotal
+            date: hero.photo.uploadedAt,
+            momentIndex: moment.index,
+            momentTotal: moment.total
         )
     }
 }

@@ -2,7 +2,7 @@
 //  SocialCardService.swift
 //  EventSnap
 //
-//  SNSシェア画像の生成: Photo → PhotoAnalyzer → テンプレート選択 → 描画
+//  SNSシェア画像の生成: Photo → PhotoAnalyzer(1回だけ) → 選ばれたテンプレートで描画
 //
 
 import CoreGraphics
@@ -12,93 +12,140 @@ import UIKit
 /// 「EventSnapで撮った写真をSNSに載せたくなる」ことを目的にした、写真主役のシェア画像を作る。
 ///
 /// **設計方針**: 写真をキャンバスいっぱいに敷き詰め（枠・丸角・大きな余白は作らない）、
-/// `PhotoAnalyzer` が算出した安全ゾーン（被写体と重ならない領域）にタイポグラフィだけを
-/// 重ねる。固定テンプレートではなく、写真の中身（被写体の有無・明暗）に応じて
-/// 3つのテンプレート（Editorial / Festival / Minimal）を自動選択する。
-///
-/// ブランド表示は「EVENTSNAP」という小さなワードマークのみ。バッジや広告文言は使わない。
+/// `PhotoAnalyzer` が算出した安全ゾーンにタイポグラフィだけを重ねる。
+/// テンプレートは3種類（Editorial / Bold / Minimal）あり、**どれを使うかはユーザーが
+/// その場で選ぶ**（自動選択はしない）。ただし画像解析（Vision）は1回だけ行い、
+/// その結果を3テンプレートで使い回すことで、切り替えるたびに待たされないようにしている。
 enum SocialCardService {
 
-    static let canvasSize = CGSize(width: 1080, height: 1920)
+    static let canvasSize = PhotoAnalyzer.canvasSize
 
-    /// SNSシェア画像を1枚生成する。
-    ///
-    /// - Parameters:
-    ///   - image: 主役にする写真（1枚）
-    ///   - eventName: イベント名
-    ///   - date: 添える日付
-    ///   - momentIndex: この瞬間の主が参加者の中で何番目か（1始まり）。テンプレートによっては
-    ///     使わない（Minimalは表示しない）
-    ///   - momentTotal: 参加者の総数
-    static func makeCard(
-        from image: UIImage,
+    /// ユーザーが何も選ばなかった場合に最初に表示するテンプレート。
+    /// Editorialは被写体の有無や明暗を問わず破綻しにくいため既定にしている。
+    static let defaultTemplate: SocialCardTemplate = .editorial
+
+    /// 写真を解析する（重い処理はここだけ）。テンプレートを切り替えるたびに呼び直す必要はない。
+    static func analyze(_ image: UIImage) -> PhotoAnalysisResult {
+        PhotoAnalyzer.analyze(image)
+    }
+
+    /// 解析済みの結果を使って、指定したテンプレートで1枚描画する（軽い処理）。
+    static func render(
+        template: SocialCardTemplate,
+        image: UIImage,
+        analysis: PhotoAnalysisResult,
         eventName: String,
         date: Date,
         momentIndex: Int,
         momentTotal: Int
     ) -> UIImage {
-        let analysis = PhotoAnalyzer.analyze(image)
-        let template = selectTemplate(for: analysis)
-
         let format = UIGraphicsImageRendererFormat.default()
         format.scale = 1
         format.opaque = true
 
         return UIGraphicsImageRenderer(size: canvasSize, format: format).image { ctx in
-            drawPhotoFullBleed(image, canvasSize: canvasSize)
-            let cg = ctx.cgContext
-
-            switch template {
-            case .editorial:
-                drawEditorial(cg: cg, analysis: analysis, eventName: eventName, date: date, momentIndex: momentIndex)
-            case .festival:
-                drawFestival(cg: cg, analysis: analysis, eventName: eventName, date: date, momentIndex: momentIndex, momentTotal: momentTotal)
-            case .minimal:
-                drawMinimal(analysis: analysis, eventName: eventName)
-            }
+            SocialCardDrawing.drawPhotoFullBleed(image, analysis: analysis, canvasSize: canvasSize)
+            template.rendererType.draw(
+                cg: ctx.cgContext,
+                canvasSize: canvasSize,
+                analysis: analysis,
+                eventName: eventName,
+                date: date,
+                momentIndex: momentIndex,
+                momentTotal: momentTotal
+            )
         }
     }
 
-    // MARK: - テンプレート自動選択
+    /// 解析から描画まで一括で行う便利関数(自動生成される既定画像用)。
+    static func makeCard(
+        from image: UIImage,
+        eventName: String,
+        date: Date,
+        momentIndex: Int,
+        momentTotal: Int,
+        template: SocialCardTemplate = defaultTemplate
+    ) -> UIImage {
+        let analysis = analyze(image)
+        return render(
+            template: template,
+            image: image,
+            analysis: analysis,
+            eventName: eventName,
+            date: date,
+            momentIndex: momentIndex,
+            momentTotal: momentTotal
+        )
+    }
+}
 
-    private enum Template { case editorial, festival, minimal }
+// MARK: - テンプレートの種類
 
-    /// v1のヒューリスティック。将来的にはアスペクト比・彩度・顔の数なども加味して精緻化する想定。
-    ///
-    /// - 顔や明確な被写体がある写真は、それを邪魔しない上品な配置(Editorial)が合う
-    /// - 被写体が曖昧でも全体が暗い(夜景・ステージ照明など)写真は、コントラストが効く
-    ///   大胆な見出し(Festival)が映える
-    /// - それ以外(明るく穏やかで被写体が曖昧)は、写真そのものを信じて引き算する(Minimal)
-    private static func selectTemplate(for analysis: PhotoAnalysis) -> Template {
-        if analysis.hasStrongSubject {
-            return .editorial
-        } else if analysis.isOverallDark {
-            return .festival
-        } else {
-            return .minimal
+/// ユーザーがワンタップで切り替える3種類。色違いではなく「写真の見せ方」自体が異なる。
+enum SocialCardTemplate: String, CaseIterable, Identifiable {
+    /// 雑誌・写真集のように写真を美しく見せる
+    case editorial
+    /// 大胆なタイポグラフィでスクロールを止める
+    case bold
+    /// 写真そのものを最大限に活かす
+    case minimal
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .editorial: return "Editorial"
+        case .bold: return "Bold"
+        case .minimal: return "Minimal"
         }
     }
 
-    // MARK: - 写真(フルブリード)
-
-    private static func drawPhotoFullBleed(_ image: UIImage, canvasSize: CGSize) {
-        let scale = max(canvasSize.width / image.size.width, canvasSize.height / image.size.height)
-        let drawSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
-        let origin = CGPoint(x: (canvasSize.width - drawSize.width) / 2, y: (canvasSize.height - drawSize.height) / 2)
-        image.draw(in: CGRect(origin: origin, size: drawSize))
+    fileprivate var rendererType: SocialCardRenderer.Type {
+        switch self {
+        case .editorial: return EditorialRenderer.self
+        case .bold: return BoldRenderer.self
+        case .minimal: return MinimalRenderer.self
+        }
     }
+}
 
-    // MARK: - A. Editorial(雑誌の写真ページのような静けさ)
+/// 各テンプレートが実装するプロトコル。テンプレートごとに完全に独立したファイル/型にでき、
+/// 将来自動選択(TemplateSelector)を足すときも「選ぶロジック」と「描くロジック」を分離できる。
+protocol SocialCardRenderer {
+    static func draw(
+        cg: CGContext,
+        canvasSize: CGSize,
+        analysis: PhotoAnalysisResult,
+        eventName: String,
+        date: Date,
+        momentIndex: Int,
+        momentTotal: Int
+    )
+}
 
-    private static func drawEditorial(cg: CGContext, analysis: PhotoAnalysis, eventName: String, date: Date, momentIndex: Int) {
-        let ink: UIColor = analysis.zoneIsDark ? .white : UIColor(white: 0.1, alpha: 1)
+// MARK: - A. Editorial(雑誌の写真ページのような静けさ)
+
+/// 写真を主役にした、控えめで洗練されたタイポグラフィ。
+/// 「おしゃれな写真をそのまま投稿したい」と思えることを目標にする。
+enum EditorialRenderer: SocialCardRenderer {
+    static func draw(
+        cg: CGContext,
+        canvasSize: CGSize,
+        analysis: PhotoAnalysisResult,
+        eventName: String,
+        date: Date,
+        momentIndex: Int,
+        momentTotal: Int
+    ) {
+        let zoneInfo = analysis.bestZone
+        let zone = zoneInfo.zone
+        let ink: UIColor = zoneInfo.isDark ? .white : UIColor(white: 0.1, alpha: 1)
         let sub = ink.withAlphaComponent(0.75)
         let inset: CGFloat = 72
-        let zone = analysis.safeZone
 
-        var kicker = dateString(date).uppercased()
+        var kicker = SocialCardDrawing.dateString(date).uppercased()
         kicker += "   MEMORIES \(String(format: "%02d", max(momentIndex, 1)))"
-        let kickerFont = bebasNeue(size: 32)
+        let kickerFont = SocialCardDrawing.bebasNeue(size: 32)
         let kickerHeight = kickerFont.ascender - kickerFont.descender
 
         let maxWidth: CGFloat = {
@@ -108,7 +155,10 @@ enum SocialCardService {
             }
         }()
 
-        let (lines, titleFont) = fitTitle(eventName, weight: .black, maxWidth: maxWidth, maxLines: zone == .left || zone == .right ? 4 : 2, maxSize: 66, minSize: 38)
+        let (lines, titleFont) = SocialCardDrawing.fitTitle(
+            eventName, weight: .black, maxWidth: maxWidth,
+            maxLines: (zone == .left || zone == .right) ? 4 : 2, maxSize: 66, minSize: 38
+        )
         let lineHeight = titleFont.ascender - titleFont.descender
         let titleBlockHeight = CGFloat(lines.count) * lineHeight * 1.08
 
@@ -117,38 +167,50 @@ enum SocialCardService {
         switch zone {
         case .top:
             var y = inset
-            drawTracked(kicker, at: CGPoint(x: x, y: y), font: kickerFont, color: sub, tracking: 3)
+            SocialCardDrawing.drawTracked(kicker, at: CGPoint(x: x, y: y), font: kickerFont, color: sub, tracking: 3)
             y += kickerHeight + 20
-            drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.08)
+            SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.08)
 
         case .bottom:
             var y = canvasSize.height - inset - titleBlockHeight - kickerHeight - 20
-            drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.08)
+            SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.08)
             y += 4
-            drawTracked(kicker, at: CGPoint(x: x, y: y), font: kickerFont, color: sub, tracking: 3)
+            SocialCardDrawing.drawTracked(kicker, at: CGPoint(x: x, y: y), font: kickerFont, color: sub, tracking: 3)
 
         case .left, .right:
             var y = (canvasSize.height - titleBlockHeight - kickerHeight - 20) / 2
-            drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.08)
+            SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.08)
             y += 4
-            drawTracked(kicker, at: CGPoint(x: x, y: y), font: kickerFont, color: sub, tracking: 3)
+            SocialCardDrawing.drawTracked(kicker, at: CGPoint(x: x, y: y), font: kickerFont, color: sub, tracking: 3)
         }
 
-        // 見出しゾーンとぶつからない側の隅に、控えめなブランド表記を1つだけ
-        let brandCorner: Corner = (zone == .bottom) ? .topTrailing : .bottomTrailing
-        drawBrandMark(corner: brandCorner, ink: ink)
+        let brandCorner: SocialCardDrawing.Corner = (zone == .bottom) ? .topTrailing : .bottomTrailing
+        SocialCardDrawing.drawBrandMark(canvasSize: canvasSize, corner: brandCorner, ink: ink)
     }
+}
 
-    // MARK: - B. Festival(スクロールを止める大胆な見出し)
+// MARK: - B. Bold(スクロールを止める大胆な見出し)
 
-    private static func drawFestival(cg: CGContext, analysis: PhotoAnalysis, eventName: String, date: Date, momentIndex: Int, momentTotal: Int) {
-        let ink: UIColor = analysis.zoneIsDark ? .white : UIColor(white: 0.08, alpha: 1)
+/// 3案の中で最もSNS上のインパクトを重視する。写真を壊さず、
+/// 「写真＋タイポグラフィで1つの作品」になることを目指す。
+enum BoldRenderer: SocialCardRenderer {
+    static func draw(
+        cg: CGContext,
+        canvasSize: CGSize,
+        analysis: PhotoAnalysisResult,
+        eventName: String,
+        date: Date,
+        momentIndex: Int,
+        momentTotal: Int
+    ) {
+        let zoneInfo = analysis.bestZone
+        let zone = zoneInfo.zone
+        let ink: UIColor = zoneInfo.isDark ? .white : UIColor(white: 0.08, alpha: 1)
         let inset: CGFloat = 64
-        let zone = analysis.safeZone
 
-        // 写真の色味を少し混ぜたグラデーションスクリムだけを敷き、視認性を確保する
-        // (箱ではないので写真は隠れない)
-        drawScrim(cg: cg, zone: zone, tint: analysis.dominantColor, dark: analysis.zoneIsDark)
+        // 写真から抽出したアクセントカラーを少し混ぜたグラデーションスクリムだけを敷き、
+        // 視認性を確保する(箱ではないので写真は隠れない)
+        SocialCardDrawing.drawScrim(cg: cg, zone: zone, canvasSize: canvasSize, tint: analysis.accentColor, dark: zoneInfo.isDark)
 
         let maxWidth: CGFloat = {
             switch zone {
@@ -157,7 +219,9 @@ enum SocialCardService {
             }
         }()
 
-        let (lines, titleFont) = fitTitle(eventName, weight: .black, maxWidth: maxWidth, maxLines: 3, maxSize: 132, minSize: 60)
+        let (lines, titleFont) = SocialCardDrawing.fitTitle(
+            eventName, weight: .black, maxWidth: maxWidth, maxLines: 3, maxSize: 132, minSize: 60
+        )
         let lineHeight = titleFont.ascender - titleFont.descender
         let blockHeight = CGFloat(lines.count) * lineHeight * 0.98
 
@@ -169,23 +233,34 @@ enum SocialCardService {
             case .left, .right: return (canvasSize.height - blockHeight) / 2
             }
         }()
-        drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 0.98)
+        SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 0.98)
 
-        // 端に沿わせた縦書き風の小さな番号(フェスポスターの定番モチーフ)
+        // 端に沿わせた縦書き風の小さな番号(フェス/イベントポスターの定番モチーフ)
         let figure = "\(String(format: "%02d", max(momentIndex, 1))) / \(String(format: "%02d", max(momentTotal, momentIndex, 1)))"
-        drawRotatedFigure(cg: cg, text: figure, onRight: zone != .right, ink: ink)
+        SocialCardDrawing.drawRotatedFigure(cg: cg, text: figure, canvasSize: canvasSize, onRight: zone != .right, ink: ink)
 
-        // ポスターのクレジット行のような、控えめなブランド表記
         let creditAtTop = (zone == .bottom)
-        drawFestivalCredit(date: date, ink: ink, atTop: creditAtTop)
+        SocialCardDrawing.drawCredit(canvasSize: canvasSize, date: date, ink: ink, atTop: creditAtTop)
     }
+}
 
-    // MARK: - C. Minimal(写真を信じて引き算する)
+// MARK: - C. Minimal(写真を信じて引き算する)
 
-    private static func drawMinimal(analysis: PhotoAnalysis, eventName: String) {
-        let ink: UIColor = analysis.zoneIsDark ? .white : UIColor(white: 0.1, alpha: 1)
+/// 装飾を最小限に。「この写真なら何も足さない方が良い」場合に強いデザイン。
+enum MinimalRenderer: SocialCardRenderer {
+    static func draw(
+        cg: CGContext,
+        canvasSize: CGSize,
+        analysis: PhotoAnalysisResult,
+        eventName: String,
+        date: Date,
+        momentIndex: Int,
+        momentTotal: Int
+    ) {
+        let zoneInfo = analysis.bestZone
+        let zone = zoneInfo.zone
+        let ink: UIColor = zoneInfo.isDark ? .white : UIColor(white: 0.1, alpha: 1)
         let inset: CGFloat = 76
-        let zone = analysis.safeZone
 
         let maxWidth: CGFloat = {
             switch zone {
@@ -194,7 +269,9 @@ enum SocialCardService {
             }
         }()
 
-        let (lines, font) = fitTitle(eventName, weight: .bold, maxWidth: maxWidth, maxLines: 2, maxSize: 46, minSize: 30)
+        let (lines, font) = SocialCardDrawing.fitTitle(
+            eventName, weight: .bold, maxWidth: maxWidth, maxLines: 2, maxSize: 46, minSize: 30
+        )
         let lineHeight = font.ascender - font.descender
         let blockHeight = CGFloat(lines.count) * lineHeight * 1.12
 
@@ -206,21 +283,33 @@ enum SocialCardService {
             case .left, .right: return (canvasSize.height - blockHeight) / 2
             }
         }()
-        for line in lines {
-            (line as NSString).draw(at: CGPoint(x: x, y: y), withAttributes: [.font: font, .foregroundColor: ink, .kern: 0.5])
-            y += lineHeight * 1.12
-        }
+        SocialCardDrawing.drawLines(lines, font: font, color: ink, x: x, y: &y, lineHeight: lineHeight * 1.12, kern: 0.5)
 
-        let brandCorner: Corner = (zone == .bottom) ? .topTrailing : .bottomTrailing
-        drawBrandMark(corner: brandCorner, ink: ink, opacity: 0.55)
+        let brandCorner: SocialCardDrawing.Corner = (zone == .bottom) ? .topTrailing : .bottomTrailing
+        SocialCardDrawing.drawBrandMark(canvasSize: canvasSize, corner: brandCorner, ink: ink, opacity: 0.55)
+    }
+}
+
+// MARK: - 共通の描画ヘルパー(全テンプレートが共有する)
+
+enum SocialCardDrawing {
+
+    // MARK: 写真(被写体を維持するフルブリードクロップ)
+
+    static func drawPhotoFullBleed(_ image: UIImage, analysis: PhotoAnalysisResult, canvasSize: CGSize) {
+        let scale = max(canvasSize.width / image.size.width, canvasSize.height / image.size.height)
+        let crop = PhotoAnalyzer.coverCrop(imageSize: image.size, canvasSize: canvasSize, importanceCenter: analysis.importanceCenter)
+        let drawSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        image.draw(in: CGRect(origin: CGPoint(x: -crop.minX, y: -crop.minY), size: drawSize))
     }
 
-    // MARK: - 共通: ブランド表記
+    // MARK: ブランド表記
 
-    private enum Corner { case topLeading, topTrailing, bottomLeading, bottomTrailing }
+    enum Corner { case topLeading, topTrailing, bottomLeading, bottomTrailing }
 
     /// 「EVENTSNAP」の小さなワードマークだけ。バッジ・背景チップ・広告的な文言は使わない。
-    private static func drawBrandMark(corner: Corner, ink: UIColor, opacity: CGFloat = 0.85, inset: CGFloat = 44) {
+    /// 「広告」ではなく「作品のクレジット」として見えることを狙っている。
+    static func drawBrandMark(canvasSize: CGSize, corner: Corner, ink: UIColor, opacity: CGFloat = 0.85, inset: CGFloat = 44) {
         let text = "EVENTSNAP"
         let font = bebasNeue(size: 26)
         let width = trackedWidth(text, font: font, tracking: 3)
@@ -238,16 +327,16 @@ enum SocialCardService {
         drawTracked(text, at: CGPoint(x: x, y: y), font: font, color: ink.withAlphaComponent(opacity), tracking: 3)
     }
 
-    /// Festival用の、ポスター下部のクレジット行のような表記("EVENTSNAP · 日付")
-    private static func drawFestivalCredit(date: Date, ink: UIColor, atTop: Bool) {
+    /// Bold用の、ポスター下部のクレジット行のような表記("EVENTSNAP · 日付")
+    static func drawCredit(canvasSize: CGSize, date: Date, ink: UIColor, atTop: Bool) {
         let text = "EVENTSNAP  ·  \(dateString(date))"
         let font = bebasNeue(size: 24)
         let y: CGFloat = atTop ? 56 : canvasSize.height - 64
         drawTracked(text, at: CGPoint(x: 64, y: y), font: font, color: ink.withAlphaComponent(0.8), tracking: 2)
     }
 
-    /// フェスポスターの端に沿わせる、縦書き風に90度回転させた小さな番号
-    private static func drawRotatedFigure(cg: CGContext, text: String, onRight: Bool, ink: UIColor) {
+    /// ポスターの端に沿わせる、縦書き風に90度回転させた小さな番号
+    static func drawRotatedFigure(cg: CGContext, text: String, canvasSize: CGSize, onRight: Bool, ink: UIColor) {
         let font = bebasNeue(size: 30)
         cg.saveGState()
         if onRight {
@@ -260,8 +349,8 @@ enum SocialCardService {
         cg.restoreGState()
     }
 
-    /// 写真の色味を少し混ぜたグラデーションスクリム。ゾーン内だけに敷き、写真を隠さない。
-    private static func drawScrim(cg: CGContext, zone: PhotoAnalysis.SafeZone, tint: UIColor, dark: Bool) {
+    /// 写真から抽出したアクセントカラーを混ぜたグラデーションスクリム。ゾーン内だけに敷き、写真を隠さない。
+    static func drawScrim(cg: CGContext, zone: SafeZone, canvasSize: CGSize, tint: UIColor, dark: Bool) {
         let rect = zone.rect(in: canvasSize)
         let base: UIColor = dark ? .black : .white
         let scrimColor = blend(base, tint, 0.25)
@@ -287,11 +376,11 @@ enum SocialCardService {
         cg.restoreGState()
     }
 
-    // MARK: - テキスト整形
+    // MARK: テキスト整形
 
     /// 幅に収まるよう、フォントサイズを段階的に縮めながら最大行数以内に収める。
     /// 日本語は分かち書きされないため、単語単位ではなく文字単位で折り返す。
-    private static func fitTitle(
+    static func fitTitle(
         _ text: String,
         weight: FontWeight,
         maxWidth: CGFloat,
@@ -322,7 +411,7 @@ enum SocialCardService {
         return (lines, font)
     }
 
-    private static func wrapText(_ text: String, font: UIFont, maxWidth: CGFloat) -> [String] {
+    static func wrapText(_ text: String, font: UIFont, maxWidth: CGFloat) -> [String] {
         guard !text.isEmpty else { return [] }
         let attrs: [NSAttributedString.Key: Any] = [.font: font]
         var lines: [String] = []
@@ -341,21 +430,21 @@ enum SocialCardService {
         return lines
     }
 
-    private static func drawLines(_ lines: [String], font: UIFont, color: UIColor, x: CGFloat, y: inout CGFloat, lineHeight: CGFloat) {
+    static func drawLines(_ lines: [String], font: UIFont, color: UIColor, x: CGFloat, y: inout CGFloat, lineHeight: CGFloat, kern: CGFloat = 0) {
         for line in lines {
-            (line as NSString).draw(at: CGPoint(x: x, y: y), withAttributes: [.font: font, .foregroundColor: color])
+            (line as NSString).draw(at: CGPoint(x: x, y: y), withAttributes: [.font: font, .foregroundColor: color, .kern: kern])
             y += lineHeight
         }
     }
 
-    private static func trackedWidth(_ text: String, font: UIFont, tracking: CGFloat) -> CGFloat {
+    static func trackedWidth(_ text: String, font: UIFont, tracking: CGFloat) -> CGFloat {
         guard !text.isEmpty else { return 0 }
         let attrs: [NSAttributedString.Key: Any] = [.font: font]
         let total = text.reduce(CGFloat(0)) { sum, ch in sum + String(ch).size(withAttributes: attrs).width + tracking }
         return total - tracking
     }
 
-    private static func drawTracked(_ text: String, at point: CGPoint, font: UIFont, color: UIColor, tracking: CGFloat) {
+    static func drawTracked(_ text: String, at point: CGPoint, font: UIFont, color: UIColor, tracking: CGFloat) {
         var x = point.x
         let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color]
         for ch in text {
@@ -365,16 +454,16 @@ enum SocialCardService {
         }
     }
 
-    private static func dateString(_ date: Date) -> String {
+    static func dateString(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ja_JP")
         formatter.dateFormat = "yyyy.MM.dd"
         return formatter.string(from: date)
     }
 
-    // MARK: - 色
+    // MARK: 色
 
-    private static func blend(_ c1: UIColor, _ c2: UIColor, _ t: CGFloat) -> UIColor {
+    static func blend(_ c1: UIColor, _ c2: UIColor, _ t: CGFloat) -> UIColor {
         var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
         var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
         c1.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
@@ -387,11 +476,11 @@ enum SocialCardService {
         )
     }
 
-    // MARK: - フォント
+    // MARK: フォント
 
-    private enum FontWeight { case bold, black }
+    enum FontWeight { case bold, black }
 
-    private static func notoSansJP(weight: FontWeight, size: CGFloat) -> UIFont {
+    static func notoSansJP(weight: FontWeight, size: CGFloat) -> UIFont {
         let name = weight == .black ? "NotoSansJP-Black" : "NotoSansJP-Bold"
         if let font = UIFont(name: name, size: size) { return font }
         print("⚠️ \(name) の読み込みに失敗したため、システムフォントで代用します")
@@ -399,7 +488,7 @@ enum SocialCardService {
     }
 
     /// 英字の短いコピー(ブランド表記・数字)専用の欧文ディスプレイ書体
-    private static func bebasNeue(size: CGFloat) -> UIFont {
+    static func bebasNeue(size: CGFloat) -> UIFont {
         if let font = UIFont(name: "BebasNeue-Regular", size: size) { return font }
         print("⚠️ BebasNeue-Regular の読み込みに失敗したため、システムフォントで代用します")
         return .systemFont(ofSize: size * 0.85, weight: .semibold)

@@ -56,7 +56,7 @@
 		EA0007000000000000000000 /* NotoSansJP-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0008000000000000000000 /* NotoSansJP-Black.ttf */; };
 		EA000E000000000000000000 /* BebasNeue-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA000F000000000000000000 /* BebasNeue-Regular.ttf */; };
 		EA000B000000000000000000 /* SocialCardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000A000000000000000000 /* SocialCardService.swift */; };
-		EA000D000000000000000000 /* SocialCardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000C000000000000000000 /* SocialCardPreviewView.swift */; };
+		EA000D000000000000000000 /* SocialCardShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000C000000000000000000 /* SocialCardShareView.swift */; };
 		EA0011000000000000000000 /* PhotoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0010000000000000000000 /* PhotoAnalyzer.swift */; };
 /* End PBXBuildFile section */
 
@@ -140,7 +140,7 @@
 		EA000F000000000000000000 /* BebasNeue-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BebasNeue-Regular.ttf"; sourceTree = "<group>"; };
 		EA000A000000000000000000 /* SocialCardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardService.swift"; sourceTree = "<group>"; };
 		EA0010000000000000000000 /* PhotoAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoAnalyzer.swift"; sourceTree = "<group>"; };
-		EA000C000000000000000000 /* SocialCardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardPreviewView.swift"; sourceTree = "<group>"; };
+		EA000C000000000000000000 /* SocialCardShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardShareView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -252,7 +252,7 @@
 			isa = PBXGroup;
 			children = (
 				E5100D000000000000000000 /* ShareCollageView.swift */,
-				EA000C000000000000000000 /* SocialCardPreviewView.swift */,
+				EA000C000000000000000000 /* SocialCardShareView.swift */,
 			);
 			path = Share;
 			sourceTree = "<group>";
@@ -397,7 +397,7 @@
 				EA0003000000000000000000 /* PrimaryButtonStyle.swift in Sources */,
 				EA000B000000000000000000 /* SocialCardService.swift in Sources */,
 				EA0011000000000000000000 /* PhotoAnalyzer.swift in Sources */,
-				EA000D000000000000000000 /* SocialCardPreviewView.swift in Sources */,
+				EA000D000000000000000000 /* SocialCardShareView.swift in Sources */,
 				E76000000000000000000000 /* CloudKitAccount.swift in Sources */,
 				E76001000000000000000000 /* AppLinkConfig.swift in Sources */,
 				E52000000000000000000000 /* AppTab.swift in Sources */,

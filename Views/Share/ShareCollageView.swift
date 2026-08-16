@@ -26,7 +26,12 @@ struct ShareCollageView: View {
                     }
                 } else {
                     ForEach(reels) { reel in
-                        ReelCard(reel: reel, eventName: event.name, store: store)
+                        NavigationLink {
+                            SocialCardShareView(event: event, reel: reel)
+                        } label: {
+                            ReelCard(reel: reel, store: store)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -70,18 +75,20 @@ struct ShareCollageView: View {
 
 // MARK: - 1件分のカード
 
+/// 履歴一覧のサムネイル。タップすると`SocialCardShareView`が開き、
+/// そこで大きな画像を見ながらEditorial/Bold/Minimalを選んでシェアできる。
 private struct ReelCard: View {
     let reel: EventReel
-    let eventName: String
     let store: ShareCollageStore
 
     @State private var image: UIImage?
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 10) {
             HStack {
                 Text("Event Reel #\(reel.index)")
                     .font(.headline)
+                    .foregroundColor(.primary)
                 Spacer()
                 Text(reel.builtAt.formatted(date: .abbreviated, time: .shortened))
                     .font(.caption)
@@ -93,25 +100,7 @@ private struct ReelCard: View {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .cornerRadius(16)
-                    .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
                     .padding(.horizontal)
-
-                if let fileURL = store.fileURL(for: reel) {
-                    ShareLink(
-                        item: fileURL,
-                        preview: SharePreview("\(eventName) の思い出", image: Image(uiImage: image))
-                    ) {
-                        Label("シェアする", systemImage: "square.and.arrow.up")
-                            .fontWeight(.semibold)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(16)
-                    }
-                    .padding(.horizontal)
-                }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity)
