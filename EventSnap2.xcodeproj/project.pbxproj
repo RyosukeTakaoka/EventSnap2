@@ -42,7 +42,48 @@
 		F2CAC544E91C5A9FEC4EC5B5 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */; };
 		E76000000000000000000000 /* CloudKitAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75000000000000000000000 /* CloudKitAccount.swift */; };
 		E76001000000000000000000 /* AppLinkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75001000000000000000000 /* AppLinkConfig.swift */; };
+		E90000000000000000000002 /* EventSnapClipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000001 /* EventSnapClipApp.swift */; };
+		E90000000000000000000004 /* AppClipCameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000003 /* AppClipCameraModel.swift */; };
+		E90000000000000000000006 /* EventSnapClipRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000005 /* EventSnapClipRootView.swift */; };
+		E90000000000000000000008 /* GetAppScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000007 /* GetAppScreen.swift */; };
+		E90000000000000000000009 /* CameraOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51003000000000000000000 /* CameraOrientation.swift */; };
+		E9000000000000000000000A /* UIImage+Orientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51004000000000000000000 /* UIImage+Orientation.swift */; };
+		E9000000000000000000000B /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 775673713025AAC40003484E /* AppIcon.icon */; };
+		E9000000000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7760F8AA2F5D236F00F18A2E /* Assets.xcassets */; };
+		E90000000000000000000016 /* EventSnapClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = E9000000000000000000000E /* EventSnapClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E90000000000000000000015 /* Embed App Clips */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				E90000000000000000000016 /* EventSnapClip.app in Embed App Clips */,
+			);
+			name = "Embed App Clips";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
+		E90000000000000000000017 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E9000000000000000000000F;
+			remoteInfo = EventSnapClip;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		E90000000000000000000018 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E9000000000000000000000F /* EventSnapClip */;
+			targetProxy = E90000000000000000000017 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXFileReference section */
 		05ED44B24BF30673E712740A /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
@@ -81,6 +122,11 @@
 		FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		E75000000000000000000000 /* CloudKitAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CloudKitAccount.swift"; sourceTree = "<group>"; };
 		E75001000000000000000000 /* AppLinkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppLinkConfig.swift"; sourceTree = "<group>"; };
+		E90000000000000000000001 /* EventSnapClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipApp.swift; sourceTree = "<group>"; };
+		E90000000000000000000003 /* AppClipCameraModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppClipCameraModel.swift; sourceTree = "<group>"; };
+		E90000000000000000000005 /* EventSnapClipRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipRootView.swift; sourceTree = "<group>"; };
+		E90000000000000000000007 /* GetAppScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetAppScreen.swift; sourceTree = "<group>"; };
+		E9000000000000000000000E /* EventSnapClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnapClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -155,6 +201,7 @@
 		AF726F6A46D7E6C672320238 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				E9000000000000000000000E /* EventSnapClip.app */,
 				BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */,
 			);
 			name = Products;
@@ -202,8 +249,20 @@
 				7EADC30A06EEA49AA9CE8AD4 /* Services */,
 				1E58259F9C4ED7C03B68737C /* ViewModels */,
 				B46D40979E843E46E78EE80A /* Views */,
+				E9000000000000000000000D /* EventSnapClip */,
 				AF726F6A46D7E6C672320238 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		E9000000000000000000000D /* EventSnapClip */ = {
+			isa = PBXGroup;
+			children = (
+				E90000000000000000000001 /* EventSnapClipApp.swift */,
+				E90000000000000000000005 /* EventSnapClipRootView.swift */,
+				E90000000000000000000003 /* AppClipCameraModel.swift */,
+				E90000000000000000000007 /* GetAppScreen.swift */,
+			);
+			path = EventSnapClip;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -215,10 +274,12 @@
 			buildPhases = (
 				6949D50C2CAE67F39314B1AC /* Sources */,
 				54B85DF74363802E2110964A /* Resources */,
+				E90000000000000000000015 /* Embed App Clips */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E90000000000000000000018 /* PBXTargetDependency */,
 			);
 			name = EventSnap2;
 			packageProductDependencies = (
@@ -226,6 +287,24 @@
 			productName = EventSnap2;
 			productReference = BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E9000000000000000000000F /* EventSnapClip */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E90000000000000000000014 /* Build configuration list for PBXNativeTarget "EventSnapClip" */;
+			buildPhases = (
+				E90000000000000000000010 /* Sources */,
+				E90000000000000000000011 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EventSnapClip;
+			packageProductDependencies = (
+			);
+			productName = EventSnapClip;
+			productReference = E9000000000000000000000E /* EventSnapClip.app */;
+			productType = "com.apple.product-type.application.on-demand-install-capable";
 		};
 /* End PBXNativeTarget section */
 
@@ -251,6 +330,7 @@
 			projectRoot = "";
 			targets = (
 				A60D9DB389684BE846D04D06 /* EventSnap2 */,
+				E9000000000000000000000F /* EventSnapClip */,
 			);
 		};
 /* End PBXProject section */
@@ -262,6 +342,15 @@
 			files = (
 				775673723025AAC40003484E /* AppIcon.icon in Resources */,
 				7760F8EA2F5D2CBC00F18A2E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E90000000000000000000011 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9000000000000000000000B /* AppIcon.icon in Resources */,
+				E9000000000000000000000C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,6 +394,19 @@
 				0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */,
 				94A53529D607048BD1840E6E /* QRCodeView.swift in Sources */,
 				34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E90000000000000000000010 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E90000000000000000000002 /* EventSnapClipApp.swift in Sources */,
+				E90000000000000000000006 /* EventSnapClipRootView.swift in Sources */,
+				E90000000000000000000004 /* AppClipCameraModel.swift in Sources */,
+				E90000000000000000000008 /* GetAppScreen.swift in Sources */,
+				E90000000000000000000009 /* CameraOrientation.swift in Sources */,
+				E9000000000000000000000A /* UIImage+Orientation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -490,6 +592,68 @@
 			};
 			name = Debug;
 		};
+		E90000000000000000000012 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 32;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = EventSnapClip/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.AppClip;
+				PRODUCT_NAME = EventSnapClip;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E90000000000000000000013 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 32;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = EventSnapClip/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.AppClip;
+				PRODUCT_NAME = EventSnapClip;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -507,6 +671,15 @@
 			buildConfigurations = (
 				F35EFD58DE283D02C8E36F36 /* Debug */,
 				08FE3C3BF15158B2E0E575BF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E90000000000000000000014 /* Build configuration list for PBXNativeTarget "EventSnapClip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E90000000000000000000012 /* Debug */,
+				E90000000000000000000013 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
