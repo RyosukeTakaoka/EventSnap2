@@ -36,6 +36,26 @@ struct MainTabView: View {
         .sheet(isPresented: $showEventSwitcher) {
             EventSwitcherView(eventViewModel: eventViewModel)
         }
+        // Widgetをタップして開いたEvent Reelを、その場でシェアできる画面として直接開く。
+        // 設定タブ→「Event Reelを見る」まで潜らせると「見る→シェアする」の
+        // 導線が長くなってしまうため、Widgetからの入場だけはショートカットする。
+        .sheet(isPresented: Binding(
+            get: { eventViewModel.pendingReelID != nil },
+            set: { isPresented in if !isPresented { eventViewModel.pendingReelID = nil } }
+        )) {
+            if let event = eventViewModel.currentEvent,
+               let reelID = eventViewModel.pendingReelID,
+               let reel = ShareCollageStore.shared.reels(for: event.id).first(where: { $0.id == reelID }) {
+                NavigationView {
+                    SocialCardShareView(event: event, reel: reel)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("閉じる") { eventViewModel.pendingReelID = nil }
+                            }
+                        }
+                }
+            }
+        }
         .onAppear {
             selectedTab = initialTab
         }

@@ -144,6 +144,8 @@ private struct SmallWidgetView: View {
 private struct MediumWidgetView: View {
     let entry: EventSnapWidgetEntry
 
+    private var hasReel: Bool { entry.state.latestReelID != nil }
+
     var body: some View {
         HStack(spacing: 14) {
             previewThumbnail
@@ -157,10 +159,17 @@ private struct MediumWidgetView: View {
 
                 Spacer(minLength: 2)
 
-                if entry.state.latestReelID != nil {
-                    Text(entry.state.eventState == .ended ? "✨ MEMORY READY" : "新しい思い出ができました")
-                        .font(.caption)
-                        .foregroundStyle(entry.state.eventState == .ended ? WidgetBrand.gradientStart : .secondary)
+                // Live Activity側の「進行中フィードバック」とは役割を分け、
+                // Widgetは「Event Reelを見て、シェアする場所」であることを明示する。
+                if hasReel {
+                    HStack(spacing: 4) {
+                        Image(systemName: "square.and.arrow.up")
+                        Text(entry.state.eventState == .ended ? "MEMORY READY・タップで見る" : "NEW MEMORY・タップで見る")
+                    }
+                    .font(.caption2.bold())
+                    .foregroundStyle(WidgetBrand.gradientStart)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 }
 
                 Text(statsLine(participantCount: entry.state.participantCount, photoCount: entry.state.photoCount))
@@ -192,12 +201,12 @@ private struct MediumWidgetView: View {
             Image(uiImage: image)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
-                .frame(width: 84, height: 84)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .frame(width: 100, height: 100)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
         } else {
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: 16)
                 .fill(Color.secondary.opacity(0.15))
-                .frame(width: 84, height: 84)
+                .frame(width: 100, height: 100)
                 .overlay(Image(systemName: "photo").foregroundStyle(.secondary))
         }
     }
@@ -231,9 +240,12 @@ private struct LargeWidgetView: View {
                     }
 
                     if entry.state.latestReelID != nil {
-                        Text(entry.state.eventState == .ended ? "✨ MEMORY READY" : "✨ NEW MEMORY")
-                            .font(.caption.bold())
-                            .foregroundStyle(WidgetBrand.gradientStart)
+                        HStack(spacing: 4) {
+                            Image(systemName: "square.and.arrow.up")
+                            Text(entry.state.eventState == .ended ? "MEMORY READY・タップで見る" : "NEW MEMORY・タップで見る")
+                        }
+                        .font(.caption.bold())
+                        .foregroundStyle(WidgetBrand.gradientStart)
                     }
                 }
 
@@ -265,13 +277,13 @@ private struct LargeWidgetView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(maxWidth: .infinity)
-                .frame(height: 150)
+                .frame(height: 168)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
         } else {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.secondary.opacity(0.12))
                 .frame(maxWidth: .infinity)
-                .frame(height: 150)
+                .frame(height: 168)
                 .overlay(Image(systemName: "photo.on.rectangle").foregroundStyle(.secondary))
         }
     }

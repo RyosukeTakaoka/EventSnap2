@@ -39,18 +39,26 @@ struct EventSnapApp: App {
     /// 画面遷移スタックが無いため）。指定イベントが現在のイベントでなければ、
     /// 参加履歴の中に見つかる場合のみ切り替える（見つからなければ何もしない＝
     /// 参加していないイベントへは飛ばない）。
+    ///
+    /// **Widgetからの`.eventReel`だけは設定タブへの遷移に留めない**。Widgetの役割は
+    /// 「Event Reelを見せて、その場でシェアしてもらう」ことなので、タブ切り替えに
+    /// 加えて`pendingReelID`をセットし、`MainTabView`がその場でシェア画面を
+    /// シートとして直接開く(Live Activity/Dynamic Islandは`.event`にしか
+    /// リンクしないため、この経路には来ない)。
     private func handleDeepLink(_ url: URL) {
         guard let destination = EventSnapDeepLink.parse(url) else { return }
 
         let eventID: UUID
         let tab: AppTab
+        var reelID: UUID?
         switch destination {
         case .event(let id):
             eventID = id
             tab = .album
-        case .eventReel(let id, _):
+        case .eventReel(let id, let rID):
             eventID = id
-            tab = .settings // 現状Event Reelへの入口は設定タブの「Event Reelを見る」
+            tab = .settings // シート表示に失敗した場合の保険として、設定タブの「Event Reelを見る」にも行けるようにしておく
+            reelID = rID
         case .timeCapsule(let id):
             eventID = id
             tab = .album // タイムカプセルの枠はアルバムタブに混在表示される
@@ -68,6 +76,7 @@ struct EventSnapApp: App {
                 await eventViewModel.switchEvent(to: match)
             }
             eventViewModel.pendingTab = tab
+            eventViewModel.pendingReelID = reelID
         }
     }
 
@@ -172,7 +181,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 enum SyncCoordinator {
     @MainActor
     static func refreshTimeCapsules() async {
-        guard let event = EventRepository.shared.currentEvent else { return }
+        guard let event = EventRepository.shared.currentEvent else {
+            // 参加中のイベントが無くなった(最後のイベントを離脱した等)場合は、
+            // Widgetに前のイベントの情報が残り続けないようクリアする。
+            clearWidgetAndActivityIfNeeded()
+            return
+        }
 
         do {
             try await PhotoRepository.shared.fetchPhotos(for: event.id)
@@ -199,8 +213,14 @@ enum SyncCoordinator {
 
     /// 参加人数・写真枚数・タイムカプセル残数など、Event Reel生成の有無に関わらず
     /// 毎回の同期で変わりうる状態をWidget/Live Activityへ反映する。
+    ///
+    /// `private`にしていない: `CameraViewModel`が撮影のたびにも直接呼ぶ
+    /// (`refreshTimeCapsules`はscenePhaseが`.active`に変わるタイミングでしか
+    /// 走らないため、撮影を連投している間は写真枚数がLive Activityに反映されない
+    /// ままになる。「次の写真が撮られた」という自然な合図でNEW MEMORY表示を
+    /// 通常表示へ戻す仕組みも、この即時反映があって初めて機能する)。
     @MainActor
-    private static func updateWidgetAndActivity(for event: Event) async {
+    static func updateWidgetAndActivity(for event: Event) async {
         let eventPhotos = PhotoRepository.shared.allPhotos.filter { $0.eventID == event.id }
         let photoCount = eventPhotos.count
         let lockedCount = TimeCapsuleService.lockedCapsules(eventPhotos).count
@@ -227,5 +247,15 @@ enum SyncCoordinator {
         await EventActivityManager.updateCounts(
             eventID: event.id, eventName: event.name, participantCount: event.participantIDs.count, photoCount: photoCount
         )
+    }
+
+    /// 参加中のイベントが無い状態を、Widgetにも正しく反映する(すでに空なら何もしない)。
+    @MainActor
+    private static func clearWidgetAndActivityIfNeeded() {
+        guard EventSnapSharedState.load().eventID != nil else { return }
+        EventSnapSharedState.updateEventState(
+            eventID: nil, eventName: nil, participantCount: 0, isActive: false, photoCount: 0, timeCapsuleLockedCount: 0
+        )
+        WidgetCenter.shared.reloadTimelines(ofKind: "EventSnapWidget")
     }
 }

@@ -17,8 +17,21 @@ import Foundation
 /// （プッシュを使わないため`Activity.request`の`pushType`は指定しない）。
 enum EventActivityManager {
 
-    /// 「✨ NEW MEMORY」表示を保つ時間。この間だけ見せてから、通常の進行中表示に戻す。
-    private static let newMemoryDisplayDuration: UInt64 = 20 * 1_000_000_000
+    /// 「✨ NEW MEMORY」表示を保つ上限時間(フォールバック)。
+    ///
+    /// この間に次の写真が撮られなければ、ここでタイムアウトして通常表示に戻す。
+    /// 以前は20秒固定だったが短すぎて見逃されやすかったため延ばした。
+    /// ただし無期限表示は「イベント中に写真を増やしてもらう」という
+    /// Live Activity本来の目的(進行中フィードバック)を損なうため、
+    /// あくまで上限として扱う。実際にはこれより先に`updateCounts`側の
+    /// 早期リターン(次の写真が撮られた、という自然な合図)で戻ることが多い。
+    private static let newMemoryDisplayDuration: UInt64 = 60 * 1_000_000_000
+
+    /// `notifyReelGenerated`の呼び出し世代。短い間隔で複数のEvent Reelが
+    /// 連続生成された場合、古い呼び出しのタイムアウトが新しい呼び出しの
+    /// NEW MEMORY表示を巻き込んで消してしまわないようにするための番号。
+    @MainActor
+    private static var newMemoryGeneration = 0
 
     private static var current: Activity<EventActivityAttributes>? {
         Activity<EventActivityAttributes>.activities.first
@@ -66,11 +79,23 @@ enum EventActivityManager {
         await activity.update(.init(state: state, staleDate: nil))
     }
 
-    /// 新しいEvent Reelが生成された直後に呼ぶ。一時的に「✨ NEW MEMORY」を見せてから、
-    /// 自動で通常の進行中表示に戻す(3〜5枚集まるごとの生成であり、写真1枚ごとではないため、
-    /// 通知疲れになるほどの頻度にはならない)。
+    /// 新しいEvent Reelが生成された直後に呼ぶ。一時的に「✨ NEW MEMORY」を見せる。
+    ///
+    /// **「見せること」自体が目的ではない**。あくまで「EventSnapが裏側で写真を
+    /// まとめて、新しい思い出を作った」という進行中のフィードバックなので、
+    /// 通常表示へ戻る条件は2通りに分けている:
+    /// 1. **自然な条件(主)**: 次の写真が撮られると`updateCounts`が呼ばれ、
+    ///    photoCountが変わった時点で即座に(このタイムアウトを待たずに)
+    ///    通常表示へ戻る。「もう次の瞬間が始まっている」という一番自然な合図。
+    /// 2. **タイムアウト(保険)**: 次の写真がしばらく撮られない場合に備えて、
+    ///    `newMemoryDisplayDuration`だけ待ったら通常表示へ戻す。無期限表示を避けるため。
     static func notifyReelGenerated(eventID: UUID, eventName: String, participantCount: Int, photoCount: Int) async {
         guard let activity = current, activity.attributes.eventID == eventID.uuidString else { return }
+
+        let myGeneration = await MainActor.run { () -> Int in
+            newMemoryGeneration += 1
+            return newMemoryGeneration
+        }
 
         let newMemoryState = EventActivityAttributes.ContentState(
             eventName: eventName, participantCount: participantCount, photoCount: photoCount, phase: .newMemory
@@ -79,7 +104,15 @@ enum EventActivityManager {
 
         try? await Task.sleep(nanoseconds: newMemoryDisplayDuration)
 
-        // 待っている間に別の更新(イベント終了など)が起きていなければ、進行中表示に戻す
+        // 待っている間に別のEvent Reelが新しく生成されていたら(=世代が進んでいたら)、
+        // そちらの表示・タイムアウトに譲って何もしない(古い世代が新しい世代の
+        // NEW MEMORY表示を巻き込んで消してしまうのを防ぐ)。
+        let stillLatestGeneration = await MainActor.run { newMemoryGeneration == myGeneration }
+        guard stillLatestGeneration else { return }
+
+        // 待っている間に次の写真が撮られてphotoCountが変わっていれば、
+        // `updateCounts`側で既に通常表示へ戻っているはず。ここではその後に
+        // 何も変わっていない場合(=タイムアウトで戻す必要がある場合)にだけ戻す。
         guard let stillCurrent = current, stillCurrent.id == activity.id,
               stillCurrent.content.state.phase == .newMemory
         else { return }

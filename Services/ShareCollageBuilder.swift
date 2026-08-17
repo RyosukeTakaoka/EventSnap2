@@ -26,9 +26,22 @@ import WidgetKit
 /// なった場合は `removeFromReels` で該当Reelの中身を更新する。
 enum ShareCollageBuilder {
 
-    /// この枚数の未使用シェアOK写真が集まって初めて、新しいEvent Reelを1件作る。
+    /// この枚数の未使用シェアOK写真が集まって初めて、新しいEvent Reelの生成を試みる。
     /// これ未満では「まだ十分な思い出が集まっていない」として待つ。
     static let minPhotosForNewReel = 3
+
+    /// 実際にEvent Reelとして保存する最小枚数(重複除去後)。
+    ///
+    /// `minPhotosForNewReel`枚の未使用写真が集まっても、同一撮影者の連写や
+    /// 似た構図が`EventReelPhotoSelector`によって束ねられた結果、選び出せる
+    /// 枚数がそれより少なくなることがある(例: 3枚集まっても同じ人の連写で
+    /// 2枚に、あるいは1枚にまとまってしまう)。ここで`minPhotosForNewReel`と
+    /// 同じ値を要求すると、そのバーストが解消されるまで永久にEvent Reelが
+    /// 生成されないまま`remaining`に居座り続けてしまう(「3枚集まっても
+    /// 生成されない」という不具合の原因)。`MultiPhotoRenderer`は1枚からでも
+    /// レイアウトできる設計のため、2枚まで束ねられていれば意味のある
+    /// Reelとして成立するとみなし、そこで妥協して生成する。
+    static let minSelectedPhotosPerReel = 2
 
     /// 1件のEvent Reelに入れる写真の上限。「7枚や10枚を無理に詰め込まない」
     /// という方針のための上限で、これを超える分は次のReelの材料として残る。
@@ -74,10 +87,12 @@ enum ShareCollageBuilder {
             let target = min(candidates.count, maxPhotosPerReel)
             guard target >= minPhotosForNewReel,
                   let selection = EventReelPhotoSelector.select(from: candidates, target: target),
-                  selection.ordered.count >= minPhotosForNewReel
+                  selection.ordered.count >= minSelectedPhotosPerReel
             else {
-                // 解析できた枚数が足りない(ダウンロード失敗が続いた等)。
-                // remainingは変えずに終了し、次回の同期で改めて試す。
+                // 解析できた枚数が足りない(ダウンロード失敗が続いた等)、または
+                // 重複除去後にminSelectedPhotosPerReelすら残らなかった。
+                // remainingは変えずに終了し、次回の同期で改めて試す
+                // (新しい写真が増えれば束ね方も変わるため)。
                 break
             }
 
