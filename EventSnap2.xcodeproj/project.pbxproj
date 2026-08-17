@@ -57,6 +57,18 @@
 		EA000D000000000000000000 /* SocialCardShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000C000000000000000000 /* SocialCardShareView.swift */; };
 		EA0011000000000000000000 /* PhotoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0010000000000000000000 /* PhotoAnalyzer.swift */; };
 		EA0021000000000000000000 /* EventReelPhotoSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0020000000000000000000 /* EventReelPhotoSelector.swift */; };
+		EAF100010000000000000000 /* EventSnapSharedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100000000000000000000 /* EventSnapSharedState.swift */; };
+		EAF100020000000000000000 /* EventSnapSharedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100000000000000000000 /* EventSnapSharedState.swift */; };
+		EAF100040000000000000000 /* EventActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100030000000000000000 /* EventActivityAttributes.swift */; };
+		EAF100050000000000000000 /* EventActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100030000000000000000 /* EventActivityAttributes.swift */; };
+		EAF100070000000000000000 /* EventSnapDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100060000000000000000 /* EventSnapDeepLink.swift */; };
+		EAF100080000000000000000 /* EventSnapDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100060000000000000000 /* EventSnapDeepLink.swift */; };
+		EAF100100000000000000000 /* EventActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100090000000000000000 /* EventActivityManager.swift */; };
+		EAF100120000000000000000 /* WidgetBrand.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100110000000000000000 /* WidgetBrand.swift */; };
+		EAF100140000000000000000 /* EventSnapWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100130000000000000000 /* EventSnapWidget.swift */; };
+		EAF100160000000000000000 /* EventActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100150000000000000000 /* EventActivityWidget.swift */; };
+		EAF100180000000000000000 /* EventSnapWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100170000000000000000 /* EventSnapWidgetBundle.swift */; };
+		EAF100300000000000000000 /* EventSnapWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EAF100190000000000000000 /* EventSnapWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -71,6 +83,17 @@
 			name = "Embed App Clips";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EAF100310000000000000000 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				EAF100300000000000000000 /* EventSnapWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +104,13 @@
 			remoteGlobalIDString = E9000000000000000000000F;
 			remoteInfo = EventSnapClip;
 		};
+		EAF100280000000000000000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EAF100220000000000000000;
+			remoteInfo = EventSnapWidget;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXTargetDependency section */
@@ -88,6 +118,11 @@
 			isa = PBXTargetDependency;
 			target = E9000000000000000000000F /* EventSnapClip */;
 			targetProxy = E90000000000000000000017 /* PBXContainerItemProxy */;
+		};
+		EAF100290000000000000000 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EAF100220000000000000000 /* EventSnapWidget */;
+			targetProxy = EAF100280000000000000000 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -139,6 +174,15 @@
 		EA0010000000000000000000 /* PhotoAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoAnalyzer.swift"; sourceTree = "<group>"; };
 		EA0020000000000000000000 /* EventReelPhotoSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventReelPhotoSelector.swift"; sourceTree = "<group>"; };
 		EA000C000000000000000000 /* SocialCardShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardShareView.swift"; sourceTree = "<group>"; };
+		EAF100000000000000000000 /* EventSnapSharedState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapSharedState.swift; sourceTree = "<group>"; };
+		EAF100030000000000000000 /* EventActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityAttributes.swift; sourceTree = "<group>"; };
+		EAF100060000000000000000 /* EventSnapDeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapDeepLink.swift; sourceTree = "<group>"; };
+		EAF100090000000000000000 /* EventActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityManager.swift; sourceTree = "<group>"; };
+		EAF100110000000000000000 /* WidgetBrand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBrand.swift; sourceTree = "<group>"; };
+		EAF100130000000000000000 /* EventSnapWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapWidget.swift; sourceTree = "<group>"; };
+		EAF100150000000000000000 /* EventActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityWidget.swift; sourceTree = "<group>"; };
+		EAF100170000000000000000 /* EventSnapWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapWidgetBundle.swift; sourceTree = "<group>"; };
+		EAF100190000000000000000 /* EventSnapWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EventSnapWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -187,6 +231,7 @@
 				C600D3D5C6BB4F411ED1607B /* EventRepository.swift */,
 				293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */,
 				38C4572E49ADF53996217172 /* QRCodeService.swift */,
+				EAF100090000000000000000 /* EventActivityManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -217,6 +262,7 @@
 			children = (
 				E9000000000000000000000E /* EventSnapClip.app */,
 				BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */,
+				EAF100190000000000000000 /* EventSnapWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -275,7 +321,9 @@
 				7EADC30A06EEA49AA9CE8AD4 /* Services */,
 				1E58259F9C4ED7C03B68737C /* ViewModels */,
 				B46D40979E843E46E78EE80A /* Views */,
+				EAF100200000000000000000 /* Shared */,
 				E9000000000000000000000D /* EventSnapClip */,
+				EAF100210000000000000000 /* EventSnapWidget */,
 				AF726F6A46D7E6C672320238 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -291,6 +339,27 @@
 			path = EventSnapClip;
 			sourceTree = "<group>";
 		};
+		EAF100200000000000000000 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				EAF100000000000000000000 /* EventSnapSharedState.swift */,
+				EAF100030000000000000000 /* EventActivityAttributes.swift */,
+				EAF100060000000000000000 /* EventSnapDeepLink.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		EAF100210000000000000000 /* EventSnapWidget */ = {
+			isa = PBXGroup;
+			children = (
+				EAF100170000000000000000 /* EventSnapWidgetBundle.swift */,
+				EAF100130000000000000000 /* EventSnapWidget.swift */,
+				EAF100150000000000000000 /* EventActivityWidget.swift */,
+				EAF100110000000000000000 /* WidgetBrand.swift */,
+			);
+			path = EventSnapWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -301,11 +370,13 @@
 				6949D50C2CAE67F39314B1AC /* Sources */,
 				54B85DF74363802E2110964A /* Resources */,
 				E90000000000000000000015 /* Embed App Clips */,
+				EAF100310000000000000000 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				E90000000000000000000018 /* PBXTargetDependency */,
+				EAF100290000000000000000 /* PBXTargetDependency */,
 			);
 			name = EventSnap2;
 			packageProductDependencies = (
@@ -332,6 +403,24 @@
 			productReference = E9000000000000000000000E /* EventSnapClip.app */;
 			productType = "com.apple.product-type.application.on-demand-install-capable";
 		};
+		EAF100220000000000000000 /* EventSnapWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EAF100270000000000000000 /* Build configuration list for PBXNativeTarget "EventSnapWidget" */;
+			buildPhases = (
+				EAF100230000000000000000 /* Sources */,
+				EAF100240000000000000000 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EventSnapWidget;
+			packageProductDependencies = (
+			);
+			productName = EventSnapWidget;
+			productReference = EAF100190000000000000000 /* EventSnapWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -357,6 +446,7 @@
 			targets = (
 				A60D9DB389684BE846D04D06 /* EventSnap2 */,
 				E9000000000000000000000F /* EventSnapClip */,
+				EAF100220000000000000000 /* EventSnapWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -380,6 +470,13 @@
 			files = (
 				E9000000000000000000000B /* AppIcon.icon in Resources */,
 				E9000000000000000000000C /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EAF100240000000000000000 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -407,6 +504,10 @@
 				E52009000000000000000000 /* ShareCollageStore.swift in Sources */,
 				E5200A000000000000000000 /* ShareCollageBuilder.swift in Sources */,
 				EA0021000000000000000000 /* EventReelPhotoSelector.swift in Sources */,
+				EAF100010000000000000000 /* EventSnapSharedState.swift in Sources */,
+				EAF100040000000000000000 /* EventActivityAttributes.swift in Sources */,
+				EAF100070000000000000000 /* EventSnapDeepLink.swift in Sources */,
+				EAF100100000000000000000 /* EventActivityManager.swift in Sources */,
 				E5200D000000000000000000 /* ShareCollageView.swift in Sources */,
 				E5200E000000000000000000 /* EventSwitcherView.swift in Sources */,
 				07CC90BB4A7DF00192BD0076 /* AlbumView.swift in Sources */,
@@ -439,6 +540,20 @@
 				E90000000000000000000008 /* GetAppScreen.swift in Sources */,
 				E90000000000000000000009 /* CameraOrientation.swift in Sources */,
 				E9000000000000000000000A /* UIImage+Orientation.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EAF100230000000000000000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EAF100180000000000000000 /* EventSnapWidgetBundle.swift in Sources */,
+				EAF100140000000000000000 /* EventSnapWidget.swift in Sources */,
+				EAF100160000000000000000 /* EventActivityWidget.swift in Sources */,
+				EAF100120000000000000000 /* WidgetBrand.swift in Sources */,
+				EAF100020000000000000000 /* EventSnapSharedState.swift in Sources */,
+				EAF100050000000000000000 /* EventActivityAttributes.swift in Sources */,
+				EAF100080000000000000000 /* EventSnapDeepLink.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -686,6 +801,64 @@
 			};
 			name = Release;
 		};
+		EAF100250000000000000000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = EventSnapWidget/EventSnapWidget.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 32;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				INFOPLIST_FILE = EventSnapWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		EAF100260000000000000000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = EventSnapWidget/EventSnapWidget.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 32;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				INFOPLIST_FILE = EventSnapWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -712,6 +885,15 @@
 			buildConfigurations = (
 				E90000000000000000000012 /* Debug */,
 				E90000000000000000000013 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EAF100270000000000000000 /* Build configuration list for PBXNativeTarget "EventSnapWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EAF100250000000000000000 /* Debug */,
+				EAF100260000000000000000 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

@@ -1,6 +1,7 @@
 import SwiftUI
 import UserNotifications
 import CloudKit
+import WidgetKit
 
 @main
 struct EventSnapApp: App {
@@ -15,6 +16,9 @@ struct EventSnapApp: App {
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in
                     handleUniversalLink(userActivity)
                 }
+                .onOpenURL { url in
+                    handleDeepLink(url)
+                }
                 .onChange(of: scenePhase) { _, phase in
                     // 復帰のたびに公開通知を予約し直す。
                     // サイレントプッシュを取りこぼしていても、ここで追いつける。
@@ -22,6 +26,45 @@ struct EventSnapApp: App {
                         Task { await SyncCoordinator.refreshTimeCapsules() }
                     }
                 }
+        }
+    }
+
+    /// Widget / Live Activityからの内部ディープリンク(`eventsnap://`)の処理。
+    ///
+    /// 既存のUniversal Link（`https://eventsnap-website.vercel.app/event/{eventID}`、
+    /// `handleUniversalLink`）は「その場に居合わせた人がQR経由で参加する」専用の
+    /// 入口であり、こちらとは役割も入口も別なので、既存の処理には一切手を入れない。
+    ///
+    /// タブ単位のディープリンクに留めている（`AppTab`にEvent Reel/Time Capsule専用の
+    /// 画面遷移スタックが無いため）。指定イベントが現在のイベントでなければ、
+    /// 参加履歴の中に見つかる場合のみ切り替える（見つからなければ何もしない＝
+    /// 参加していないイベントへは飛ばない）。
+    private func handleDeepLink(_ url: URL) {
+        guard let destination = EventSnapDeepLink.parse(url) else { return }
+
+        let eventID: UUID
+        let tab: AppTab
+        switch destination {
+        case .event(let id):
+            eventID = id
+            tab = .album
+        case .eventReel(let id, _):
+            eventID = id
+            tab = .settings // 現状Event Reelへの入口は設定タブの「Event Reelを見る」
+        case .timeCapsule(let id):
+            eventID = id
+            tab = .album // タイムカプセルの枠はアルバムタブに混在表示される
+        }
+
+        Task {
+            if eventViewModel.currentEvent?.id != eventID {
+                guard let match = eventViewModel.recentEvents.first(where: { $0.id == eventID }) else {
+                    print("⚠️ ディープリンク先のイベントは参加履歴に見つかりませんでした: \(eventID)")
+                    return
+                }
+                await eventViewModel.switchEvent(to: match)
+            }
+            eventViewModel.pendingTab = tab
         }
     }
 
@@ -117,7 +160,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
 // MARK: - 同期
 
-/// 写真の同期・タイムカプセル通知の予約・Event Reelの生成チェックをまとめて行う
+/// 写真の同期・タイムカプセル通知の予約・Event Reelの生成チェック・
+/// Widget/Live Activityへの状態反映をまとめて行う。
+///
+/// **重要**: Widget/Live Activity自身はCloudKitにもPhotoAnalyzerにも触れない。
+/// ここ(メインアプリ)が同期・生成した結果をApp Group経由でミラーするだけにする
+/// （`EventSnapSharedState`のコメントを参照）。
 enum SyncCoordinator {
     @MainActor
     static func refreshTimeCapsules() async {
@@ -138,6 +186,32 @@ enum SyncCoordinator {
 
         // イベント中でも、シェアOKの新着写真があれば
         // 新しいEvent Reelを作る（イベント終了を待たない）
+        // ※ Event Reelが新しく生成された場合のWidget/Live Activityへの通知は
+        //   ShareCollageBuilder.notifyNewReel が担う(生成の成功可否を最も
+        //   近くで知っているのがShareCollageBuilder自身のため)。
         await ShareCollageBuilder.buildIfNeeded(for: event)
+
+        await updateWidgetAndActivity(for: event)
+    }
+
+    /// 参加人数・写真枚数・タイムカプセル残数など、Event Reel生成の有無に関わらず
+    /// 毎回の同期で変わりうる状態をWidget/Live Activityへ反映する。
+    @MainActor
+    private static func updateWidgetAndActivity(for event: Event) async {
+        let eventPhotos = PhotoRepository.shared.allPhotos.filter { $0.eventID == event.id }
+        let photoCount = eventPhotos.count
+        let lockedCount = TimeCapsuleService.lockedCapsules(eventPhotos).count
+
+        EventSnapSharedState.updateEventState(
+            eventID: event.id, eventName: event.name, participantCount: event.participantIDs.count,
+            isActive: event.isActive, photoCount: photoCount, timeCapsuleLockedCount: lockedCount
+        )
+        WidgetCenter.shared.reloadTimelines(ofKind: "EventSnapWidget")
+
+        guard event.isActive else { return }
+        EventActivityManager.startIfNeeded(event: event, participantCount: event.participantIDs.count, photoCount: photoCount)
+        await EventActivityManager.updateCounts(
+            eventID: event.id, eventName: event.name, participantCount: event.participantIDs.count, photoCount: photoCount
+        )
     }
 }

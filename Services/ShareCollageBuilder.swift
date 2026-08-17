@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import WidgetKit
 
 /// 「シェアOKのまだ使っていない写真を複数枚選ぶ → 品質と多様性を見て2〜5枚に絞る →
 /// SocialCardServiceで1枚の複数写真Event Reelにする → 履歴に追加保存する」
@@ -88,6 +89,7 @@ enum ShareCollageBuilder {
             do {
                 let reel = try store.addReel(rendered.image, for: event.id, photoIDs: rendered.photoIDs)
                 created.append(reel)
+                notifyNewReel(reel, image: rendered.image, event: event)
             } catch {
                 print("❌ Event Reelの保存に失敗: \(error)")
                 break
@@ -231,15 +233,42 @@ enum ShareCollageBuilder {
         return (image, usedIDs)
     }
 
-    /// `removeFromReels`専用: 選定アルゴリズムを再実行せず、渡された写真だけを
-    /// 「品質最高の1枚をメインに、残りを撮影順で」並べ直して再描画する。
+    /// 新しいEvent Reelが生成された直後に呼ぶ、Widget/Live Activityへの通知。
+    ///
+    /// データの流れ: `ShareCollageBuilder` → `ShareCollageStore`(保存済み) →
+    /// `EventSnapSharedState`更新(App Group) → `WidgetCenter.reloadTimelines` →
+    /// `EventActivityManager`更新、という一方向の流れにする。Widget/Live Activity
+    /// 自身がCloudKitやPhotoAnalyzerに触れることは無い。
+    ///
+    /// `EventActivityManager.notifyReelGenerated`は「✨ NEW MEMORY」を数秒間
+    /// 見せてから元に戻すまで内部で待つため、`buildIfNeeded`の完了を
+    /// (ひいてはカメラアップロード完了の体感を)ブロックしないよう、
+    /// 待たずに`Task`で切り離して呼ぶ。
+    @MainActor
+    private static func notifyNewReel(_ reel: EventReel, image: UIImage, event: Event) {
+        EventSnapSharedState.updateLatestReel(reelID: reel.id, builtAt: reel.builtAt, image: image)
+        WidgetCenter.shared.reloadTimelines(ofKind: "EventSnapWidget")
+
+        let participantCount = event.participantIDs.count
+        let photoCount = PhotoRepository.shared.allPhotos.filter { $0.eventID == event.id }.count
+        Task {
+            await EventActivityManager.notifyReelGenerated(
+                eventID: event.id, eventName: event.name, participantCount: participantCount, photoCount: photoCount
+            )
+        }
+    }
+
+    /// `removeFromReels`専用: 選び直し(多様性ボーナス等)は再実行せず、渡された
+    /// 写真だけを対象に「メインに最も適した1枚を選び、残りを撮影順で」並べ直して
+    /// 再描画する。メインの選び方自体は`select`と同じ`EventReelPhotoSelector.pickMain`
+    /// を使う(Event Memory Valueを踏まえた選定ロジックを重複させない)。
     @MainActor
     private static func rerenderExisting(_ photos: [Photo], event: Event) async -> (image: UIImage, photoIDs: [UUID])? {
         let candidates = await analyzeCandidates(photos)
         guard !candidates.isEmpty else { return nil }
 
         let ordered: [EventReelPhotoSelector.Candidate]
-        if let main = candidates.max(by: { EventReelPhotoSelector.qualityScore($0.analysis) < EventReelPhotoSelector.qualityScore($1.analysis) }) {
+        if let main = EventReelPhotoSelector.pickMain(from: candidates) {
             let subs = candidates
                 .filter { $0.photo.id != main.photo.id }
                 .sorted { $0.photo.uploadedAt < $1.photo.uploadedAt }
