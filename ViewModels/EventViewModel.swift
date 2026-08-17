@@ -22,6 +22,10 @@ class EventViewModel: ObservableObject {
     /// イベント作成／参加の直後に開くべきタブ
     @Published var pendingTab: AppTab?
 
+    /// Widgetからのディープリンクで、その場で開くべきEvent Reel。
+    /// `MainTabView`がこれを見てシェア画面をシートとして直接開く。
+    @Published var pendingReelID: UUID?
+
     private let eventRepository = EventRepository.shared
     private var cancellables = Set<AnyCancellable>()
 
@@ -88,17 +92,24 @@ class EventViewModel: ObservableObject {
     // MARK: - グループ切り替え
 
     func switchEvent(to event: Event) async {
-        // 切り替え前のイベントのLive Activityは、切り替え先で作り直される
-        // (`SyncCoordinator.updateWidgetAndActivity`)ため、ここで即座に閉じておく。
+        // 切り替え前のイベントのLive Activityは、切り替え先で作り直すため、
+        // ここで即座に閉じておく。
         if let previous = currentEvent, previous.id != event.id {
             await EventActivityManager.endImmediately(eventID: previous.id)
         }
         await eventRepository.switchEvent(to: event)
+
+        // 切り替え先イベントの写真・状態をすぐに取り込み、Widget/Live Activityを
+        // 切り替え先の内容で作り直す。これを呼ばないと、次にアプリがフォアグラウンド
+        // 復帰する(`scenePhase == .active`)までWidget/Live Activityが切り替え前の
+        // イベントの情報を表示し続けてしまう(「切り替えたのに反映されない」不具合)。
+        await SyncCoordinator.refreshTimeCapsules()
     }
 
     func leaveEvent(_ event: Event) async {
         await EventActivityManager.endImmediately(eventID: event.id)
         await eventRepository.leaveEvent(event)
+        await SyncCoordinator.refreshTimeCapsules()
     }
 
     func loadRecentEvents() async {

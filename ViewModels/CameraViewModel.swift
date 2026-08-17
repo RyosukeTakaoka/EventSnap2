@@ -336,6 +336,15 @@ class CameraViewModel: ObservableObject {
             if uploaded.isShareOK, let event = eventRepository.currentEvent {
                 await ShareCollageBuilder.buildIfNeeded(for: event)
             }
+
+            // 写真枚数をWidget/Live Activityへ即座に反映する。
+            // (シェアOKかどうかに関わらず、撮影枚数自体はどちらの写真も数えるため)
+            // `SyncCoordinator.refreshTimeCapsules`はアプリのフォアグラウンド復帰時
+            // にしか走らないため、撮影を連投している間もここで都度反映しないと
+            // Live Activityの枚数が古いままになってしまう。
+            if let event = eventRepository.currentEvent {
+                await SyncCoordinator.updateWidgetAndActivity(for: event)
+            }
         } catch {
             print("  ❌ アップロード失敗: \(error.localizedDescription)")
             print("  🔍 エラー詳細: \(error)")
