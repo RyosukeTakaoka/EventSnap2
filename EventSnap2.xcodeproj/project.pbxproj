@@ -56,6 +56,7 @@
 		EA000B000000000000000000 /* SocialCardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000A000000000000000000 /* SocialCardService.swift */; };
 		EA000D000000000000000000 /* SocialCardShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000C000000000000000000 /* SocialCardShareView.swift */; };
 		EA0011000000000000000000 /* PhotoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0010000000000000000000 /* PhotoAnalyzer.swift */; };
+		EA0021000000000000000000 /* EventReelPhotoSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0020000000000000000000 /* EventReelPhotoSelector.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -136,6 +137,7 @@
 		EA000F000000000000000000 /* BebasNeue-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BebasNeue-Regular.ttf"; sourceTree = "<group>"; };
 		EA000A000000000000000000 /* SocialCardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardService.swift"; sourceTree = "<group>"; };
 		EA0010000000000000000000 /* PhotoAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoAnalyzer.swift"; sourceTree = "<group>"; };
+		EA0020000000000000000000 /* EventReelPhotoSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventReelPhotoSelector.swift"; sourceTree = "<group>"; };
 		EA000C000000000000000000 /* SocialCardShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardShareView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -181,6 +183,7 @@
 				EA0010000000000000000000 /* PhotoAnalyzer.swift */,
 				E51009000000000000000000 /* ShareCollageStore.swift */,
 				E5100A000000000000000000 /* ShareCollageBuilder.swift */,
+				EA0020000000000000000000 /* EventReelPhotoSelector.swift */,
 				C600D3D5C6BB4F411ED1607B /* EventRepository.swift */,
 				293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */,
 				38C4572E49ADF53996217172 /* QRCodeService.swift */,
@@ -403,6 +406,7 @@
 				E52007000000000000000000 /* PhotoImageLoader.swift in Sources */,
 				E52009000000000000000000 /* ShareCollageStore.swift in Sources */,
 				E5200A000000000000000000 /* ShareCollageBuilder.swift in Sources */,
+				EA0021000000000000000000 /* EventReelPhotoSelector.swift in Sources */,
 				E5200D000000000000000000 /* ShareCollageView.swift in Sources */,
 				E5200E000000000000000000 /* EventSwitcherView.swift in Sources */,
 				07CC90BB4A7DF00192BD0076 /* AlbumView.swift in Sources */,

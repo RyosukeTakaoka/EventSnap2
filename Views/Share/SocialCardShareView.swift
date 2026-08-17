@@ -7,15 +7,18 @@
 
 import SwiftUI
 
-/// Event Reelの代表写真を大きく表示し、Editorial/Bold/Minimalをワンタップで
-/// 切り替えながらそのままシェアできる画面。
+/// Event Reelの完成画像を大きく表示し、そのままシェアできる画面。
 ///
-/// **体験の軸**: 常に1枚の完成画像を大きく表示する。3枚を並べて比較させることは
-/// しない。写真解析（`PhotoAnalyzer`）はこの画面が開いたときに1回だけ行い、
-/// テンプレートを切り替えるたびに再解析はしない（`SocialCardService.render`は
-/// 軽い描画処理のみ）。
-///
-/// デザインを選ぶことは必須ではない。既定のテンプレートで即シェアできる。
+/// **2種類のReelに対応する**:
+/// - 複数写真Reel（`reel.photoIDs.count > 1`、現行の仕様）: `MultiPhotoRenderer`が
+///   自動編集した画像は`ShareCollageStore`に完成品として保存済みのため、
+///   ここでは読み込んで見せるだけ。デザインを選び直す余地は無い
+///   （EventSnapが「どの写真を選び、どう並べるか」まで決め切っている）。
+/// - 単写真Reel（`reel.photoIDs.count == 1`、旧バージョンで生成され端末に
+///   残っている可能性があるものへの後方互換）: 従来どおりEditorial/Bold/Minimalを
+///   ワンタップで切り替えながらシェアできる。写真解析（`PhotoAnalyzer`）は
+///   この画面が開いたときに1回だけ行い、テンプレート切り替えのたびには
+///   再解析しない（`SocialCardService.render`は軽い描画処理のみ）。
 struct SocialCardShareView: View {
     let event: Event
     let reel: EventReel
@@ -28,6 +31,9 @@ struct SocialCardShareView: View {
     @State private var shareFileURL: URL?
     @State private var isLoading = true
     @State private var loadFailed = false
+
+    /// 過去バージョンで生成された、写真1枚だけのReelかどうか
+    private var isLegacySinglePhotoReel: Bool { reel.photoIDs.count <= 1 }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -53,10 +59,29 @@ struct SocialCardShareView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("シェア画像")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await loadAndAnalyze() }
+        .task {
+            if isLegacySinglePhotoReel {
+                await loadAndAnalyze()
+            } else {
+                loadMultiPhotoImage()
+            }
+        }
         .onChange(of: template) { _, newValue in
             rerender(for: newValue)
         }
+    }
+
+    /// 複数写真Reelは`ShareCollageBuilder`がすでに完成画像として保存済みのため、
+    /// 読み込むだけでよい（再解析・再描画はしない）。
+    private func loadMultiPhotoImage() {
+        guard let image = ShareCollageStore.shared.image(for: reel) else {
+            isLoading = false
+            loadFailed = true
+            return
+        }
+        renderedImage = image
+        shareFileURL = Self.writeTempFile(image)
+        isLoading = false
     }
 
     // MARK: - 画像表示エリア
