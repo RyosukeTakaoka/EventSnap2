@@ -46,25 +46,7 @@ struct CameraView: View {
 
                 Spacer()
 
-                if isEventActive {
-                    // 撮影オプション（シェア許可・タイムカプセル）
-                    HStack(spacing: 12) {
-                        CaptureOptionToggle(
-                            isOn: $viewModel.shareOK,
-                            icon: "square.and.arrow.up",
-                            label: "シェアOK",
-                            tint: .green
-                        )
-
-                        CaptureOptionToggle(
-                            isOn: $viewModel.saveAsTimeCapsule,
-                            icon: "hourglass",
-                            label: "あとで公開",
-                            tint: .orange
-                        )
-                    }
-                    .padding(.bottom, 18)
-                } else {
+                if !isEventActive {
                     // 終了したイベントでは撮影オプションの代わりに案内を出す
                     HStack {
                         Image(systemName: "lock.fill")
@@ -80,22 +62,25 @@ struct CameraView: View {
                     .padding(.bottom, 18)
                 }
 
-                // ボトムコントロール
-                VStack(spacing: 20) {
-                    // 処理中インジケーター
-                    if viewModel.isProcessing {
-                        HStack {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            Text("処理中...")
-                                .foregroundColor(.white)
-                        }
-                        .padding()
-                        .background(Color.black.opacity(0.6))
-                        .cornerRadius(12)
+                // 処理中インジケーター
+                if viewModel.isProcessing {
+                    HStack {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        Text("処理中...")
+                            .foregroundColor(.white)
                     }
+                    .padding()
+                    .background(Color.black.opacity(0.6))
+                    .cornerRadius(12)
+                    .padding(.bottom, 12)
+                }
 
-                    // シャッターボタン
+                // ボトムコントロール
+                // シャッターボタンを中央に固定し、撮影オプション（シェア許可・
+                // タイムカプセル）はその左側に縦に並べる（以前はシャッターの
+                // 真上に横並びで置いていたが、押し間違いを避けるため場所を分けた）。
+                ZStack {
                     Button {
                         viewModel.capturePhoto()
                     } label: {
@@ -111,7 +96,30 @@ struct CameraView: View {
                         .opacity(isEventActive ? 1 : 0.4)
                     }
                     .disabled(viewModel.isProcessing || !isEventActive)
+
+                    if isEventActive {
+                        HStack {
+                            VStack(spacing: 10) {
+                                CaptureOptionToggle(
+                                    isOn: $viewModel.shareOK,
+                                    icon: "square.and.arrow.up",
+                                    label: "シェアOK",
+                                    tint: .green
+                                )
+
+                                CaptureOptionToggle(
+                                    isOn: $viewModel.saveAsTimeCapsule,
+                                    icon: "hourglass",
+                                    label: "あとで公開",
+                                    tint: .orange
+                                )
+                            }
+                            Spacer()
+                        }
+                        .padding(.leading, 28)
+                    }
                 }
+                .frame(maxWidth: .infinity)
                 .padding(.bottom, 40)
             }
         }
@@ -129,7 +137,7 @@ struct CameraView: View {
 
 // MARK: - 撮影オプションのトグル
 
-/// シャッターの上に置く小さなトグル。
+/// シャッターの横に置く小さなトグル。
 /// どちらも **押していない状態が既定** で、撮影のたびにOFFへ戻る。
 ///
 /// アイコンのみの丸ボタンにして画面上の情報量を抑えている（文字ラベルは常時表示しない）。

@@ -68,41 +68,74 @@ struct EventSnapWidgetEntryView: View {
 private struct SmallWidgetView: View {
     let entry: EventSnapWidgetEntry
 
+    private var hasImage: Bool { entry.previewImage != nil }
+    private var primaryColor: Color { hasImage ? .white : .primary }
+    private var secondaryColor: Color { hasImage ? .white.opacity(0.85) : .secondary }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            WidgetBrand.brandMark()
+        ZStack(alignment: .topLeading) {
+            // 最新Event Reelのプレビューがあれば全面に敷き、写真を主役にする
+            // (以前は文字だけで、画像が全く反映されていなかった)。
+            if let image = entry.previewImage {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
+                LinearGradient(
+                    colors: [.black.opacity(0.05), .black.opacity(0.78)],
+                    startPoint: .top, endPoint: .bottom
+                )
+            }
 
-            Spacer(minLength: 4)
+            VStack(alignment: .leading, spacing: 6) {
+                WidgetBrand.brandMark(textColor: secondaryColor)
 
-            if entry.state.eventState == .ended, entry.state.latestReelID != nil {
-                Text("✨ MEMORY READY")
-                    .font(.caption2.bold())
-                    .foregroundStyle(WidgetBrand.gradientStart)
-                Text(entry.state.eventName ?? "")
-                    .font(.headline)
-                    .lineLimit(2)
-                Text("Event Reel")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else if let name = entry.state.eventName {
-                Text(name)
-                    .font(.headline)
-                    .lineLimit(2)
-                Spacer(minLength: 2)
-                Text(statsLine(participantCount: entry.state.participantCount, photoCount: entry.state.photoCount))
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("EventSnap")
-                    .font(.headline)
-                Text("イベントに参加すると\nここに表示されます")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                Spacer(minLength: 4)
+
+                if entry.state.eventState == .ended, entry.state.latestReelID != nil {
+                    Text("✨ MEMORY READY")
+                        .font(.caption2.bold())
+                        .foregroundStyle(hasImage ? .white : WidgetBrand.gradientStart)
+                    Text(entry.state.eventName ?? "")
+                        .font(.headline)
+                        .foregroundStyle(primaryColor)
+                        .lineLimit(2)
+                } else if let name = entry.state.eventName {
+                    Text(name)
+                        .font(.headline)
+                        .foregroundStyle(primaryColor)
+                        .lineLimit(2)
+                    Spacer(minLength: 2)
+                    Text(statsLine(participantCount: entry.state.participantCount, photoCount: entry.state.photoCount))
+                        .font(.caption2)
+                        .foregroundStyle(secondaryColor)
+                } else {
+                    Text("EventSnap")
+                        .font(.headline)
+                        .foregroundStyle(primaryColor)
+                    Text("イベントに参加すると\nここに表示されます")
+                        .font(.caption2)
+                        .foregroundStyle(secondaryColor)
+                }
+            }
+            .padding()
+
+            if let url = cameraURL(eventID: entry.state.eventID) {
+                Link(destination: url) {
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 30, height: 30)
+                        .background(WidgetBrand.gradient, in: Circle())
+                        .contentShape(Circle())
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .padding(10)
             }
         }
-        .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .containerBackground(WidgetBrand.background, for: .widget)
+        .containerBackground(hasImage ? Color.black : WidgetBrand.background, for: .widget)
     }
 }
 
@@ -136,6 +169,17 @@ private struct MediumWidgetView: View {
             }
 
             Spacer(minLength: 0)
+
+            if let url = cameraURL(eventID: entry.state.eventID) {
+                Link(destination: url) {
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 40, height: 40)
+                        .background(WidgetBrand.gradient, in: Circle())
+                        .contentShape(Circle())
+                }
+            }
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -170,24 +214,41 @@ private struct LargeWidgetView: View {
 
             previewImageArea
 
-            Text(entry.state.eventName ?? "EventSnap")
-                .font(.title3.bold())
-                .lineLimit(2)
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(entry.state.eventName ?? "EventSnap")
+                        .font(.title3.bold())
+                        .lineLimit(2)
 
-            Text(statsLine(participantCount: entry.state.participantCount, photoCount: entry.state.photoCount))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                    Text(statsLine(participantCount: entry.state.participantCount, photoCount: entry.state.photoCount))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
 
-            if entry.state.timeCapsuleLockedCount > 0 {
-                Text("\(entry.state.timeCapsuleLockedCount)枚の思い出がまだ眠っています")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+                    if entry.state.timeCapsuleLockedCount > 0 {
+                        Text("\(entry.state.timeCapsuleLockedCount)枚の思い出がまだ眠っています")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
 
-            if entry.state.latestReelID != nil {
-                Text(entry.state.eventState == .ended ? "✨ MEMORY READY" : "✨ NEW MEMORY")
-                    .font(.caption.bold())
-                    .foregroundStyle(WidgetBrand.gradientStart)
+                    if entry.state.latestReelID != nil {
+                        Text(entry.state.eventState == .ended ? "✨ MEMORY READY" : "✨ NEW MEMORY")
+                            .font(.caption.bold())
+                            .foregroundStyle(WidgetBrand.gradientStart)
+                    }
+                }
+
+                Spacer(minLength: 8)
+
+                if let url = cameraURL(eventID: entry.state.eventID) {
+                    Link(destination: url) {
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .background(WidgetBrand.gradient, in: Circle())
+                            .contentShape(Circle())
+                    }
+                }
             }
 
             Spacer(minLength: 0)
@@ -226,6 +287,12 @@ private func statsLine(participantCount: Int, photoCount: Int) -> String {
     let peopleWord = people == 1 ? "PERSON" : "PEOPLE"
     let photoWord = photos == 1 ? "PHOTO" : "PHOTOS"
     return "\(photos) \(photoWord) · \(people) \(peopleWord)"
+}
+
+/// Widgetのシャッターボタン用ディープリンク。イベントが無ければボタン自体を出さない。
+private func cameraURL(eventID: UUID?) -> URL? {
+    guard let eventID else { return nil }
+    return EventSnapDeepLink.url(for: .camera(eventID: eventID))
 }
 
 struct EventSnapWidget: Widget {
