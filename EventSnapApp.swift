@@ -209,6 +209,17 @@ enum SyncCoordinator {
             eventID: event.id, eventName: event.name, participantCount: event.participantIDs.count,
             isActive: event.isActive, photoCount: photoCount, timeCapsuleLockedCount: lockedCount
         )
+
+        // 新規生成時の通知(ShareCollageBuilder.notifyNewReel)だけに頼ると、
+        // 「この機能が入る前から存在したReel」や「App Group側のミラーが
+        // 何らかの理由で欠けたまま」のケースでWidgetに画像が反映されない。
+        // 毎回の同期で、既知の最新Reelと食い違っていれば必ずミラーし直す。
+        if let latestReel = ShareCollageStore.shared.reels(for: event.id).first,
+           latestReel.id != EventSnapSharedState.load().latestReelID,
+           let image = ShareCollageStore.shared.image(for: latestReel) {
+            EventSnapSharedState.updateLatestReel(reelID: latestReel.id, builtAt: latestReel.builtAt, image: image)
+        }
+
         WidgetCenter.shared.reloadTimelines(ofKind: "EventSnapWidget")
 
         guard event.isActive else { return }

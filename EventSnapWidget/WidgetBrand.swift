@@ -18,18 +18,27 @@ enum WidgetBrand {
     static let background = Color(red: 0.98, green: 0.965, blue: 0.945)
     static let ink = Color(red: 0.1, green: 0.1, blue: 0.1)
 
+    /// Live Activity用の暗い背景。Dynamic Islandは常にシステムの黒背景なので、
+    /// ロック画面側もこの色に固定して両方の見た目を揃える(白文字で統一できる)。
+    static let activityBackground = Color(red: 0.07, green: 0.07, blue: 0.09)
+
     static var gradient: LinearGradient {
         LinearGradient(colors: [gradientStart, gradientEnd], startPoint: .topLeading, endPoint: .bottomTrailing)
     }
 
     /// 「EVENTSNAP」の小さなワードマーク。広告的にならないよう、常に控えめなサイズで使う。
-    static func brandMark(dotSize: CGFloat = 6) -> some View {
+    ///
+    /// `textColor`は明示的に指定できるようにしている。Live Activityの
+    /// `activityBackgroundTint`のような独自背景の上では`.secondary`が
+    /// 自動的に反転してくれるとは限らず、白背景の上に白文字が乗って
+    /// 見えなくなる、といった事故が起きうるため。
+    static func brandMark(dotSize: CGFloat = 6, textColor: Color = .secondary) -> some View {
         HStack(spacing: 5) {
             Circle().fill(gradient).frame(width: dotSize, height: dotSize)
             Text("EVENTSNAP")
                 .font(.system(size: 9, weight: .bold, design: .rounded))
                 .tracking(1)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(textColor)
         }
     }
 }
