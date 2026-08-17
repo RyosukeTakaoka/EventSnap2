@@ -47,8 +47,23 @@ struct CameraView: View {
                 Spacer()
 
                 if isEventActive {
-                    PublishSettingPicker(shareOK: $viewModel.shareOK, saveAsTimeCapsule: $viewModel.saveAsTimeCapsule)
-                        .padding(.bottom, 18)
+                    // 撮影オプション（シェア許可・タイムカプセル）
+                    HStack(spacing: 12) {
+                        CaptureOptionToggle(
+                            isOn: $viewModel.shareOK,
+                            icon: "square.and.arrow.up",
+                            label: "シェアOK",
+                            tint: .green
+                        )
+
+                        CaptureOptionToggle(
+                            isOn: $viewModel.saveAsTimeCapsule,
+                            icon: "hourglass",
+                            label: "あとで公開",
+                            tint: .orange
+                        )
+                    }
+                    .padding(.bottom, 18)
                 } else {
                     // 終了したイベントでは撮影オプションの代わりに案内を出す
                     HStack {
@@ -112,96 +127,52 @@ struct CameraView: View {
     }
 }
 
-// MARK: - 公開設定ピッカー
+// MARK: - 撮影オプションのトグル
 
-/// 「シェアOK」「あとで公開」を2つの独立トグルにせず、
-/// 「非公開 / あとで公開 / シェアOK」という1つの排他的な選択として扱う。
+/// シャッターの上に置く小さなトグル。
+/// どちらも **押していない状態が既定** で、撮影のたびにOFFへ戻る。
 ///
-/// `shareOK`がONの間は`saveAsTimeCapsule`は選べない
-/// （`CameraViewModel.shareOK`の`didSet`が自動でOFFに戻すため、内部的にも
-/// 常にどちらか一方だけがtrueになる）。UI側もそれを素直に反映するだけで、
-/// 独自の状態は持たない。
-struct PublishSettingPicker: View {
-    @Binding var shareOK: Bool
-    @Binding var saveAsTimeCapsule: Bool
-
-    private enum Choice: CaseIterable {
-        case `private`, later, share
-
-        var label: String {
-            switch self {
-            case .private: return "非公開"
-            case .later: return "あとで公開"
-            case .share: return "シェアOK"
-            }
-        }
-
-        var icon: String {
-            switch self {
-            case .private: return "lock"
-            case .later: return "hourglass"
-            case .share: return "square.and.arrow.up"
-            }
-        }
-
-        var tint: Color {
-            switch self {
-            case .private: return .gray
-            case .later: return .orange
-            case .share: return .green
-            }
-        }
-    }
-
-    private var current: Choice {
-        if shareOK { return .share }
-        if saveAsTimeCapsule { return .later }
-        return .private
-    }
+/// アイコンのみの丸ボタンにして画面上の情報量を抑えている（文字ラベルは常時表示しない）。
+/// 機能自体（タップでON/OFF）は変わらず、ONのときだけ下に短いラベルを出して
+/// 何がONになっているか分かるようにする。
+struct CaptureOptionToggle: View {
+    @Binding var isOn: Bool
+    let icon: String
+    let label: String
+    let tint: Color
+    var isDisabled: Bool = false
 
     var body: some View {
-        HStack(spacing: 12) {
-            ForEach(Choice.allCases, id: \.self) { choice in
-                Button {
-                    select(choice)
-                } label: {
-                    VStack(spacing: 4) {
-                        Image(systemName: choice.icon)
-                            .font(.system(size: 17, weight: .semibold))
-                            .frame(width: 44, height: 44)
-                            .background(current == choice ? choice.tint.opacity(0.9) : Color.black.opacity(0.55))
-                            .foregroundColor(current == choice ? .black : .white)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle().stroke(current == choice ? Color.clear : Color.white.opacity(0.35), lineWidth: 1)
-                            )
+        Button {
+            withAnimation(.easeInOut(duration: 0.15)) { isOn.toggle() }
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 17, weight: .semibold))
+                    .frame(width: 44, height: 44)
+                    .background(isOn ? tint.opacity(0.9) : Color.black.opacity(0.55))
+                    .foregroundColor(isOn ? .black : .white)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle().stroke(isOn ? Color.clear : Color.white.opacity(0.35), lineWidth: 1)
+                    )
 
-                        Text(choice.label)
-                            .font(.caption2)
-                            .fontWeight(current == choice ? .semibold : .regular)
-                            .foregroundColor(current == choice ? .white : .white.opacity(0.6))
-                    }
+                if isOn {
+                    Text(label)
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.black.opacity(0.55))
+                        .clipShape(Capsule())
                 }
-                .accessibilityLabel(choice.label)
-                .accessibilityAddTraits(current == choice ? .isSelected : [])
             }
+            .opacity(isDisabled ? 0.4 : 1)
         }
-    }
-
-    private func select(_ choice: Choice) {
-        withAnimation(.easeInOut(duration: 0.15)) {
-            switch choice {
-            case .private:
-                shareOK = false
-                saveAsTimeCapsule = false
-            case .later:
-                shareOK = false
-                saveAsTimeCapsule = true
-            case .share:
-                // shareOKのdidSetがsaveAsTimeCapsuleを自動でfalseにする
-                shareOK = true
-            }
-        }
+        .disabled(isDisabled)
+        .accessibilityLabel(label)
+        .accessibilityValue(isOn ? "オン" : "オフ")
     }
 }
 

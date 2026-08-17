@@ -20,20 +20,15 @@ class CameraViewModel: ObservableObject {
     /// **既定はOFF**。一度ONにしたら、本人が明示的にOFFに戻すまで次の撮影にも
     /// 引き継がれる（イベント中はまとめてシェアOKにしたい、という使い方を想定）。
     ///
-    /// シェアOKにした瞬間、「あとで公開」は自動でOFFにする（`didSet`参照）。
-    /// 「シェアOKなのに、あとで公開もON」という、ユーザーから見て
-    /// いつ公開されるのか分かりにくい状態を作らないため。
-    @Published var shareOK = false {
-        didSet {
-            if shareOK, saveAsTimeCapsule {
-                saveAsTimeCapsule = false
-            }
-        }
-    }
+    /// 「あとで公開」との併用を許す。両方ONで撮った写真は一旦タイムカプセルとして
+    /// 伏せられ、Event Reelを組む瞬間にシェアを優先してタイムカプセル状態を解除する
+    /// （`PhotoRepository.releaseSharedTimeCapsules`）。撮影時点でどちらの意図か
+    /// 決めきれないことがあるため、選択肢を狭めず両方選べるようにしている。
+    @Published var shareOK = false
 
     /// この写真をタイムカプセル（遅延公開）にするか（機能A）。
     /// 撮影者本人による明示的な指定。OFFでも一定確率で自動選定される。
-    /// シェアOKがONの間は選べない（`shareOK`の`didSet`で自動的にOFFに戻される）。
+    /// シェアOKと併用可能（詳細は `shareOK` のコメントを参照）。
     @Published var saveAsTimeCapsule = false
 
     /// 直前の撮影がタイムカプセルになったか（撮影後のフィードバック表示用）

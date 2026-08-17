@@ -201,16 +201,17 @@ enum EditorialRenderer: SocialCardRenderer {
         let neutralBase: UIColor = secondaryIsDark ? .black : .white
         SocialCardDrawing.drawScrim(cg: cg, zone: secondaryZone, canvasSize: canvasSize, tint: neutralBase, dark: secondaryIsDark, strength: 0.3)
 
-        var caption = SocialCardDrawing.dateString(date).uppercased()
-        caption += "\nMEMORIES \(String(format: "%02d", max(momentIndex, 1)))"
-        SocialCardDrawing.drawCaptionBlock(
-            cg: cg, canvasSize: canvasSize, zone: secondaryZone, text: caption,
-            color: captionInk.withAlphaComponent(0.85), inset: inset
+        // 添え文字は単なる日付テキストではなく、テープ留め風の装飾＋SNAP番号タグ＋
+        // 日付タグの「ひとかたまり」にする。チェキに手書きで書き足したような、
+        // 雑誌の堅さを少し崩す遊び心をここに集約する。
+        SocialCardDrawing.drawMemoryCluster(
+            cg: cg, canvasSize: canvasSize, zone: secondaryZone,
+            date: date, momentIndex: momentIndex, ink: captionInk, accent: analysis.accentColor, inset: inset
         )
 
         // ブランドは添え文字と同じ帯の反対側の端に、ごく小さく
         let brandCorner = SocialCardDrawing.Corner.corner(endOf: secondaryZone)
-        SocialCardDrawing.drawBrandMark(canvasSize: canvasSize, corner: brandCorner, ink: captionInk, opacity: 0.7)
+        SocialCardDrawing.drawBrandMark(cg: cg, canvasSize: canvasSize, corner: brandCorner, ink: captionInk, opacity: 0.7)
     }
 }
 
@@ -240,11 +241,16 @@ enum BoldRenderer: SocialCardRenderer {
 
         let zoneRect = zone.rect(in: canvasSize)
 
-        // 2. 日付を「背景要素」として使う巨大なゴースト数字。タイトルと同じゾーンの中に
-        //    低い不透明度で置き、タイトルの後ろに沈める（写真そのものを暗くする処理は避け、
-        //    あくまで文字レイヤーの中で完結させる）。
+        // 2. 日付を「背景要素」として使うゴースト数字。以前はゾーン中央に写真幅の
+        //    92%で置いていたため被写体を覆いすぎていた。タイトルと反対側の端に
+        //    寄せてサイズも抑え、「余白から数字がはみ出す」背景グラフィックに変える
+        //    （写真・被写体を覆う面積を最小限にしつつ、Boldらしい強さは残す）。
         let day = Calendar.current.component(.day, from: date)
-        SocialCardDrawing.drawGhostNumber(String(format: "%02d", day), in: zoneRect, ink: ink)
+        let titleIsLeading = zone != .right
+        SocialCardDrawing.drawGhostNumber(
+            String(format: "%02d", day), in: zoneRect, ink: ink,
+            anchor: titleIsLeading ? .trailing : .leading, widthRatio: 0.6, opacity: 0.16
+        )
 
         // 3. 巨大なイベント名。画面幅の70〜100%を狙って攻めたサイズにする。
         let maxWidth: CGFloat = {
@@ -261,25 +267,36 @@ enum BoldRenderer: SocialCardRenderer {
         let blockHeight = CGFloat(lines.count) * lineHeight * 0.94
 
         let x: CGFloat = zone == .right ? canvasSize.width - inset - maxWidth : inset
-        var y: CGFloat = {
+        let blockY: CGFloat = {
             switch zone {
             case .top: return inset + 4
             case .bottom: return canvasSize.height - inset - blockHeight
             case .left, .right: return (canvasSize.height - blockHeight) / 2
             }
         }()
-        SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: x, y: &y, lineHeight: lineHeight * 0.94, softShadow: true, shadowStrength: 1.4)
+
+        // タイトルにごくわずかな傾きを与え、「静止したポスター」ではなく
+        // 「勢いのある1枚」に見せる。傾けすぎると読みにくく安っぽくなるため、
+        // 気づく程度に留める（Bold ≠ 派手、という方針を守る）。
+        let rotation: CGFloat = -0.035
+        cg.saveGState()
+        cg.translateBy(x: x, y: blockY)
+        cg.rotate(by: rotation)
+        var localY: CGFloat = 0
+        SocialCardDrawing.drawLines(lines, font: titleFont, color: ink, x: 0, y: &localY, lineHeight: lineHeight * 0.94, softShadow: true, shadowStrength: 1.4)
+        cg.restoreGState()
 
         // 4. アクセントカラーの太いエッジストライプ。タイトルと反対側の辺に置くので
         //    文字とは絶対にぶつからない。
         SocialCardDrawing.drawAccentStripe(cg: cg, canvasSize: canvasSize, avoiding: zone, color: accent)
 
-        // 5. 端に沿わせた縦書き風の小さな番号(フェス/イベントポスターの定番モチーフ)
-        let figure = "\(String(format: "%02d", max(momentIndex, 1))) / \(String(format: "%02d", max(momentTotal, momentIndex, 1)))"
-        SocialCardDrawing.drawRotatedFigure(cg: cg, text: figure, canvasSize: canvasSize, onRight: zone != .right, ink: ink)
+        // 5. 端に沿わせた縦書き風のSNAP番号ステッカー(フェス/イベントポスターの
+        //    定番モチーフを、ブランドグラデーションで塗ったEventSnap独自のものに)
+        SocialCardDrawing.drawRotatedSnapSticker(cg: cg, canvasSize: canvasSize, momentIndex: momentIndex, onRight: zone != .right)
 
         let creditAtTop = (zone == .bottom)
-        SocialCardDrawing.drawCredit(canvasSize: canvasSize, date: date, ink: ink, atTop: creditAtTop)
+        let creditCorner: SocialCardDrawing.Corner = creditAtTop ? .topLeading : .bottomLeading
+        SocialCardDrawing.drawBrandMark(cg: cg, canvasSize: canvasSize, corner: creditCorner, ink: ink, opacity: 0.8, dateSuffix: date)
     }
 }
 
@@ -315,14 +332,12 @@ enum MinimalRenderer: SocialCardRenderer {
         )
         let lineHeight = font.ascender - font.descender
 
-        let dateFont = SocialCardDrawing.bebasNeue(size: 22)
-        let dateHeight = dateFont.ascender - dateFont.descender
+        let tagHeight = SocialCardDrawing.dateTagSize(date: date).height
         let markHeight: CGFloat = 4
         let gapAboveMark: CGFloat = 14
-        let gapBelowMark: CGFloat = 10
-        let gapAboveDate: CGFloat = 8
+        let gapBelowMark: CGFloat = 12
 
-        let blockHeight = CGFloat(lines.count) * lineHeight * 1.12 + gapAboveMark + markHeight + gapBelowMark + gapAboveDate + dateHeight
+        let blockHeight = CGFloat(lines.count) * lineHeight * 1.12 + gapAboveMark + markHeight + gapBelowMark + tagHeight
 
         let x: CGFloat = zone == .right ? canvasSize.width - inset - maxWidth : inset
         var y: CGFloat = {
@@ -343,10 +358,13 @@ enum MinimalRenderer: SocialCardRenderer {
         cg.restoreGState()
         y += markHeight + gapBelowMark
 
-        SocialCardDrawing.drawTracked(SocialCardDrawing.dateString(date), at: CGPoint(x: x, y: y), font: dateFont, color: ink.withAlphaComponent(0.65), tracking: 2)
+        // 「何もしていない」ように見えないよう、SNAP番号タグ＋日付タグを
+        // ごく小さく1組だけ添える。Minimalの静けさは保ちつつ、要素ゼロにはしない。
+        let snapSize = SocialCardDrawing.drawSnapTag(cg: cg, at: CGPoint(x: x, y: y), index: momentIndex, ink: ink, filled: false)
+        SocialCardDrawing.drawDateTag(cg: cg, at: CGPoint(x: x + snapSize.width + 8, y: y), date: date, ink: ink, filled: false)
 
         let brandCorner: SocialCardDrawing.Corner = (zone == .bottom) ? .topTrailing : .bottomTrailing
-        SocialCardDrawing.drawBrandMark(canvasSize: canvasSize, corner: brandCorner, ink: ink, opacity: 0.55)
+        SocialCardDrawing.drawBrandMark(cg: cg, canvasSize: canvasSize, corner: brandCorner, ink: ink, opacity: 0.55)
     }
 }
 
@@ -368,7 +386,7 @@ enum SocialCardDrawing {
     enum Corner {
         case topLeading, topTrailing, bottomLeading, bottomTrailing
 
-        /// 指定ゾーンの帯・列の「終端」に対応する隅（開始端は`drawCaptionBlock`が使う）
+        /// 指定ゾーンの帯・列の「終端」に対応する隅（開始端は`drawMemoryCluster`が使う）
         static func corner(endOf zone: SafeZone) -> Corner {
             switch zone {
             case .top: return .topTrailing
@@ -379,72 +397,190 @@ enum SocialCardDrawing {
         }
     }
 
-    /// 「EVENTSNAP」の小さなワードマークだけ。バッジ・背景チップ・広告的な文言は使わない。
-    /// 「広告」ではなく「作品のクレジット」として見えることを狙っている。
-    static func drawBrandMark(canvasSize: CGSize, corner: Corner, ink: UIColor, opacity: CGFloat = 0.85, inset: CGFloat = 44) {
-        let text = "EVENTSNAP"
+    /// 「EVENTSNAP」の小さなワードマーク＋ブランドグラデーションのドット。
+    /// バッジ・背景チップ・広告的な文言は使わない。「広告」ではなく
+    /// 「作品のクレジット（フォトクレジット）」として見えることを狙っている。
+    /// ドット1つ添えることで、文字を読まなくても「EventSnapのグラデーション」を
+    /// 手がかりに一目で分かるようにする。
+    static func drawBrandMark(cg: CGContext, canvasSize: CGSize, corner: Corner, ink: UIColor, opacity: CGFloat = 0.85, inset: CGFloat = 44, dateSuffix: Date? = nil) {
+        var text = "EVENTSNAP"
+        if let dateSuffix { text += "  ·  " + dateStringShort(dateSuffix) }
         let font = bebasNeue(size: 26)
-        let width = trackedWidth(text, font: font, tracking: 3)
-        let height = font.ascender - font.descender
+        let textWidth = trackedWidth(text, font: font, tracking: 3)
+        let dotDiameter: CGFloat = 9
+        let dotGap: CGFloat = 9
+        let height = max(font.ascender - font.descender, dotDiameter)
+        let totalWidth = dotDiameter + dotGap + textWidth
+
+        let originX: CGFloat
+        let y: CGFloat
+        switch corner {
+        case .topLeading: originX = inset; y = inset
+        case .topTrailing: originX = canvasSize.width - inset - totalWidth; y = inset
+        case .bottomLeading: originX = inset; y = canvasSize.height - inset - height
+        case .bottomTrailing: originX = canvasSize.width - inset - totalWidth; y = canvasSize.height - inset - height
+        }
+
+        let dotRect = CGRect(x: originX, y: y + (height - dotDiameter) / 2, width: dotDiameter, height: dotDiameter)
+        cg.saveGState()
+        cg.setAlpha(opacity)
+        drawBrandChip(cg: cg, rect: dotRect, cornerRadius: dotDiameter / 2)
+        cg.restoreGState()
+
+        drawTracked(text, at: CGPoint(x: originX + dotDiameter + dotGap, y: y), font: font, color: ink.withAlphaComponent(opacity), tracking: 3)
+    }
+
+    // MARK: EventSnapビジュアル言語(ブランドグラデーション・タグ・デコ)
+
+    /// アプリアイコンから採ったEventSnap固有のグラデーション。大きなロゴとしてではなく、
+    /// 小さなドット・チップ・タグ・テープとして使うことで「広告」ではなく
+    /// 「EventSnapらしい装飾」として機能させる（大きく“EVENTSNAP”と書かない代わりに、
+    /// この色そのものをブランドの手がかりにする）。
+    static let brandGradientStart = UIColor(red: 0.42, green: 0.55, blue: 0.96, alpha: 1)
+    static let brandGradientEnd = UIColor(red: 0.92, green: 0.44, blue: 0.72, alpha: 1)
+
+    private static func brandGradient() -> CGGradient? {
+        CGGradient(
+            colorsSpace: CGColorSpaceCreateDeviceRGB(),
+            colors: [brandGradientStart.cgColor, brandGradientEnd.cgColor] as CFArray,
+            locations: [0, 1]
+        )
+    }
+
+    /// ブランドグラデーションで塗りつぶした角丸チップ。ドット・塗りタグに使う。
+    static func drawBrandChip(cg: CGContext, rect: CGRect, cornerRadius: CGFloat) {
+        guard let gradient = brandGradient() else { return }
+        cg.saveGState()
+        cg.addPath(UIBezierPath(roundedRect: rect, cornerRadius: cornerRadius).cgPath)
+        cg.clip()
+        cg.drawLinearGradient(gradient, start: CGPoint(x: rect.minX, y: rect.minY), end: CGPoint(x: rect.maxX, y: rect.maxY), options: [])
+        cg.restoreGState()
+    }
+
+    private static func pillTagFont() -> UIFont { bebasNeue(size: 20) }
+
+    private static func pillTagSize(_ text: String) -> CGSize {
+        let font = pillTagFont()
+        let textWidth = trackedWidth(text, font: font, tracking: 2)
+        let paddingH: CGFloat = 14
+        let paddingV: CGFloat = 7
+        return CGSize(width: textWidth + paddingH * 2, height: (font.ascender - font.descender) + paddingV * 2)
+    }
+
+    /// 小さな丸ピル型のタグ("SNAP 03" や日付など)。`filled: true` はブランド
+    /// グラデーション塗り（Boldのステッカー用）、`false` は輪郭のみ
+    /// （Editorial/Minimalの控えめな添え物用）。
+    @discardableResult
+    static func drawPillTag(cg: CGContext, at point: CGPoint, text: String, ink: UIColor, filled: Bool) -> CGSize {
+        let font = pillTagFont()
+        let paddingH: CGFloat = 14
+        let size = pillTagSize(text)
+        let rect = CGRect(origin: point, size: size)
+        let cornerRadius = size.height / 2
+
+        cg.saveGState()
+        if filled {
+            drawBrandChip(cg: cg, rect: rect, cornerRadius: cornerRadius)
+        } else {
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: cornerRadius).cgPath
+            cg.addPath(path)
+            cg.setFillColor(ink.withAlphaComponent(0.1).cgColor)
+            cg.fillPath()
+            cg.addPath(path)
+            cg.setStrokeColor(ink.withAlphaComponent(0.75).cgColor)
+            cg.setLineWidth(1.4)
+            cg.strokePath()
+        }
+        cg.restoreGState()
+
+        let textColor: UIColor = filled ? .white : ink.withAlphaComponent(0.92)
+        let textY = rect.minY + (size.height - (font.ascender - font.descender)) / 2
+        drawTracked(text, at: CGPoint(x: rect.minX + paddingH, y: textY), font: font, color: textColor, tracking: 2, shadow: false)
+        return size
+    }
+
+    static func snapTagText(_ index: Int) -> String { "SNAP \(String(format: "%02d", max(index, 1)))" }
+
+    @discardableResult
+    static func drawSnapTag(cg: CGContext, at point: CGPoint, index: Int, ink: UIColor, filled: Bool) -> CGSize {
+        drawPillTag(cg: cg, at: point, text: snapTagText(index), ink: ink, filled: filled)
+    }
+
+    @discardableResult
+    static func drawDateTag(cg: CGContext, at point: CGPoint, date: Date, ink: UIColor, filled: Bool) -> CGSize {
+        drawPillTag(cg: cg, at: point, text: dateStringShort(date), ink: ink, filled: filled)
+    }
+
+    static func snapTagSize(index: Int) -> CGSize { pillTagSize(snapTagText(index)) }
+    static func dateTagSize(date: Date) -> CGSize { pillTagSize(dateStringShort(date)) }
+
+    /// マスキングテープのような、半透明の小さな帯。SNAP/日付タグの近くに
+    /// 少しだけ回転させて重ねることで、チェキ・スクラップブック的な「手で
+    /// 留めた」手作り感を足す（写真そのものには重ねず、タグの周辺だけに使う）。
+    static func drawTapeAccent(cg: CGContext, center: CGPoint, width: CGFloat, height: CGFloat, rotation: CGFloat, tint: UIColor) {
+        cg.saveGState()
+        cg.translateBy(x: center.x, y: center.y)
+        cg.rotate(by: rotation)
+        let rect = CGRect(x: -width / 2, y: -height / 2, width: width, height: height)
+        cg.addPath(UIBezierPath(roundedRect: rect, cornerRadius: 2).cgPath)
+        cg.setFillColor(tint.withAlphaComponent(0.5).cgColor)
+        cg.fillPath()
+        cg.restoreGState()
+    }
+
+    /// Editorial用の「思い出クラスター」: SNAP番号タグ＋日付タグを、テープ留め風の
+    /// 小さな装飾と一緒に指定ゾーンの開始端に置く。単なる添え文字ではなく
+    /// 「チェキに手書きで書き足したような」ひとかたまりの装飾として機能させる。
+    static func drawMemoryCluster(
+        cg: CGContext, canvasSize: CGSize, zone: SafeZone,
+        date: Date, momentIndex: Int, ink: UIColor, accent: UIColor, inset: CGFloat
+    ) {
+        let snapSize = snapTagSize(index: momentIndex)
+        let dateSize = dateTagSize(date: date)
+        let gap: CGFloat = 8
+        let totalWidth = snapSize.width + gap + dateSize.width
+        let clusterHeight = max(snapSize.height, dateSize.height)
 
         let x: CGFloat
         let y: CGFloat
-        switch corner {
-        case .topLeading: x = inset; y = inset
-        case .topTrailing: x = canvasSize.width - inset - width; y = inset
-        case .bottomLeading: x = inset; y = canvasSize.height - inset - height
-        case .bottomTrailing: x = canvasSize.width - inset - width; y = canvasSize.height - inset - height
-        }
-
-        drawTracked(text, at: CGPoint(x: x, y: y), font: font, color: ink.withAlphaComponent(opacity), tracking: 3)
-    }
-
-    /// Editorialの添え文字（日付・MEMORIES番号）を、指定ゾーンの「開始端」に小さく置く。
-    /// 複数行(`\n`区切り)を想定する。
-    static func drawCaptionBlock(cg: CGContext, canvasSize: CGSize, zone: SafeZone, text: String, color: UIColor, inset: CGFloat) {
-        let font = bebasNeue(size: 26)
-        let lineHeight = font.ascender - font.descender
-        let lines = text.components(separatedBy: "\n")
-
-        let x: CGFloat
-        var y: CGFloat
         switch zone {
         case .top: x = inset; y = inset
-        case .bottom: x = inset; y = canvasSize.height - inset - CGFloat(lines.count) * lineHeight * 1.15
+        case .bottom: x = inset; y = canvasSize.height - inset - clusterHeight
         case .left: x = inset; y = inset
-        case .right: x = canvasSize.width - inset - maxTrackedWidth(lines, font: font, tracking: 2); y = inset
+        case .right: x = canvasSize.width - inset - totalWidth; y = inset
         }
 
-        for line in lines {
-            drawTracked(line, at: CGPoint(x: x, y: y), font: font, color: color, tracking: 2)
-            y += lineHeight * 1.15
+        drawTapeAccent(cg: cg, center: CGPoint(x: x + 16, y: y - 7), width: 36, height: 15, rotation: -0.3, tint: accent)
+        drawSnapTag(cg: cg, at: CGPoint(x: x, y: y), index: momentIndex, ink: ink, filled: false)
+        drawDateTag(cg: cg, at: CGPoint(x: x + snapSize.width + gap, y: y), date: date, ink: ink, filled: false)
+    }
+
+    /// ポスターの端に沿わせる、縦書き風に90度回転させたSNAP番号のブランド
+    /// グラデーション・ステッカー。以前はプレーンな文字だけだったが、グラデーションで
+    /// 塗ることで「EventSnapのステッカーが貼られている」ように見せる。
+    ///
+    /// CTMをそのまま回転させて縁の近くの原点から描くと、回転方向によっては
+    /// タグの長辺が画面外へはみ出しうる（原点から縁までの距離がタグの長さより
+    /// 短いため）。そのため先に回転済みの1枚の画像として描画してから、
+    /// 画面内に収まることが明らかな矩形へ配置する。
+    static func drawRotatedSnapSticker(cg: CGContext, canvasSize: CGSize, momentIndex: Int, onRight: Bool) {
+        let tagSize = snapTagSize(index: momentIndex)
+        let rotatedSize = CGSize(width: tagSize.height, height: tagSize.width)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.opaque = false
+        format.scale = 1
+        let rotatedImage = UIGraphicsImageRenderer(size: rotatedSize, format: format).image { ctx in
+            let rcg = ctx.cgContext
+            rcg.translateBy(x: rotatedSize.width / 2, y: rotatedSize.height / 2)
+            rcg.rotate(by: -.pi / 2)
+            rcg.translateBy(x: -tagSize.width / 2, y: -tagSize.height / 2)
+            drawSnapTag(cg: rcg, at: .zero, index: momentIndex, ink: .white, filled: true)
         }
-    }
 
-    private static func maxTrackedWidth(_ lines: [String], font: UIFont, tracking: CGFloat) -> CGFloat {
-        lines.map { trackedWidth($0, font: font, tracking: tracking) }.max() ?? 0
-    }
-
-    /// Bold用の、ポスター下部のクレジット行のような表記("EVENTSNAP · 日付")
-    static func drawCredit(canvasSize: CGSize, date: Date, ink: UIColor, atTop: Bool) {
-        let text = "EVENTSNAP  ·  \(dateString(date))"
-        let font = bebasNeue(size: 24)
-        let y: CGFloat = atTop ? 56 : canvasSize.height - 64
-        drawTracked(text, at: CGPoint(x: 64, y: y), font: font, color: ink.withAlphaComponent(0.8), tracking: 2)
-    }
-
-    /// ポスターの端に沿わせる、縦書き風に90度回転させた小さな番号
-    static func drawRotatedFigure(cg: CGContext, text: String, canvasSize: CGSize, onRight: Bool, ink: UIColor) {
-        let font = bebasNeue(size: 30)
-        cg.saveGState()
-        if onRight {
-            cg.translateBy(x: canvasSize.width - 34, y: canvasSize.height - 64)
-        } else {
-            cg.translateBy(x: 34, y: 64)
-        }
-        cg.rotate(by: -.pi / 2)
-        drawTracked(text, at: .zero, font: font, color: ink.withAlphaComponent(0.85), tracking: 6)
-        cg.restoreGState()
+        let rect: CGRect = onRight
+            ? CGRect(x: canvasSize.width - 40 - rotatedSize.width, y: canvasSize.height - 64 - rotatedSize.height, width: rotatedSize.width, height: rotatedSize.height)
+            : CGRect(x: 40, y: 64, width: rotatedSize.width, height: rotatedSize.height)
+        rotatedImage.draw(in: rect)
     }
 
     /// 写真から抽出したアクセントカラーを混ぜたグラデーションスクリム。ゾーン内だけに敷き、写真を隠さない。
@@ -474,21 +610,34 @@ enum SocialCardDrawing {
         cg.restoreGState()
     }
 
+    enum GhostAnchor { case center, leading, trailing }
+
     /// タイトルの後ろに沈める、日付などの巨大なゴースト数字。Boldの「数字を背景要素にする」用。
     /// 指定した矩形の幅いっぱいに広がるサイズを、基準サイズでの実測幅から比例計算で求める
     /// （Bebas Neueは文字幅がフォントサイズにほぼ線形に比例するため、1回の実測で求まる）。
-    static func drawGhostNumber(_ text: String, in rect: CGRect, ink: UIColor) {
+    ///
+    /// 以前は常にゾーン中央に置いていたが、それだとタイトルにも被写体にも
+    /// 被りやすい。`anchor`でタイトルと反対側の端へ寄せ、「余白から数字が
+    /// はみ出す」レイアウトを取れるようにして、写真を覆う面積を減らす。
+    static func drawGhostNumber(_ text: String, in rect: CGRect, ink: UIColor, anchor: GhostAnchor = .center, widthRatio: CGFloat = 0.92, opacity: CGFloat = 0.14) {
         let referenceSize: CGFloat = 300
         let referenceFont = bebasNeue(size: referenceSize)
         let referenceWidth = (text as NSString).size(withAttributes: [.font: referenceFont]).width
         guard referenceWidth > 0 else { return }
 
-        let targetWidth = rect.width * 0.92
+        let targetWidth = rect.width * widthRatio
         let fontSize = referenceSize * (targetWidth / referenceWidth)
         let font = bebasNeue(size: fontSize)
-        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: ink.withAlphaComponent(0.14)]
+        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: ink.withAlphaComponent(opacity)]
         let size = (text as NSString).size(withAttributes: attrs)
-        let point = CGPoint(x: rect.midX - size.width / 2, y: rect.midY - size.height / 2)
+
+        let x: CGFloat
+        switch anchor {
+        case .center: x = rect.midX - size.width / 2
+        case .leading: x = rect.minX - size.width * 0.06
+        case .trailing: x = rect.maxX - size.width * 0.94
+        }
+        let point = CGPoint(x: x, y: rect.midY - size.height / 2)
         (text as NSString).draw(at: point, withAttributes: attrs)
     }
 
@@ -643,9 +792,10 @@ enum SocialCardDrawing {
         return total - tracking
     }
 
-    static func drawTracked(_ text: String, at point: CGPoint, font: UIFont, color: UIColor, tracking: CGFloat) {
+    static func drawTracked(_ text: String, at point: CGPoint, font: UIFont, color: UIColor, tracking: CGFloat, shadow: Bool = true) {
         var x = point.x
-        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color, .shadow: textShadow(strength: 0.7)]
+        var attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color]
+        if shadow { attrs[.shadow] = textShadow(strength: 0.7) }
         for ch in text {
             let s = String(ch)
             (s as NSString).draw(at: CGPoint(x: x, y: point.y), withAttributes: attrs)
@@ -657,6 +807,15 @@ enum SocialCardDrawing {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ja_JP")
         formatter.dateFormat = "yyyy.MM.dd"
+        return formatter.string(from: date)
+    }
+
+    /// タグ用の短い日付表記("8.17"のような月.日のみ)。小さなピルタグの中では
+    /// フルの年号入りだと窮屈になるため専用フォーマットにする。
+    static func dateStringShort(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.dateFormat = "M.d"
         return formatter.string(from: date)
     }
 
