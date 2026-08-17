@@ -6,7 +6,8 @@
 	<string>development</string>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>webcredentials:example.com</string>
+		<string>applinks:eventsnap-website.vercel.app</string>
+		<string>appclips:eventsnap-website.vercel.app</string>
 	</array>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>

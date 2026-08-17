@@ -2,21 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- App Clip であることを示すフラグ (Boolean) -->
 	<key>com.apple.developer.on-demand-install-capable</key>
-	<dict>
-		<key>bundle-id</key>
-		<string>app.takaoka.com.EventSnap2.AppClip</string>
-	</dict>
+	<true/>
+
+	<!-- 親アプリ (メインアプリ) の Bundle Identifier -->
+	<key>com.apple.developer.parent-application-identifiers</key>
+	<array>
+		<string>$(AppIdentifierPrefix)app.takaoka.com.EventSnap2</string>
+	</array>
+
 	<!--
-	  ⚠️ 出荷前に必ずドメインを実在するものへ差し替えること。
-	  Services/AppLinkConfig.swift の host と必ず同じ値にする。
-	  example.com のままだと、QRコード読み取りやSafariからの起動で
-	  App Clipが一切呼び出せない（詳細は AppLinkConfig.swift を参照）。
+	  Vercel上のEventSnap WebサイトをApp Clip / Universal Linkの入口として使用。
+	  Services/AppLinkConfig.swift の host と同じドメイン。
 	-->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>appclips:eventsnap.example.com</string>
-		<string>applinks:eventsnap.example.com</string>
+		<string>appclips:eventsnap-website.vercel.app</string>
+		<string>applinks:eventsnap-website.vercel.app</string>
 	</array>
 </dict>
 </plist>

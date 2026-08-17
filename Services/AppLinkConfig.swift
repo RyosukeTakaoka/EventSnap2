@@ -45,8 +45,7 @@ import Foundation
 enum AppLinkConfig {
 
     /// QRコードの行き先になるドメイン
-    static let host = "eventsnap.example.com"
-
+    static let host = "eventsnap-website.vercel.app"
     /// このドメインが実在するものに差し替わっているか。
     /// 予約済みドメインのままなら、アプリ外からの参加は成立しない。
     static var isConfigured: Bool {
