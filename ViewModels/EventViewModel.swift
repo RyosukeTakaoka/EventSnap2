@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import Combine
 import CloudKit
+import WidgetKit
 
 @MainActor
 class EventViewModel: ObservableObject {
@@ -87,10 +88,16 @@ class EventViewModel: ObservableObject {
     // MARK: - グループ切り替え
 
     func switchEvent(to event: Event) async {
+        // 切り替え前のイベントのLive Activityは、切り替え先で作り直される
+        // (`SyncCoordinator.updateWidgetAndActivity`)ため、ここで即座に閉じておく。
+        if let previous = currentEvent, previous.id != event.id {
+            await EventActivityManager.endImmediately(eventID: previous.id)
+        }
         await eventRepository.switchEvent(to: event)
     }
 
     func leaveEvent(_ event: Event) async {
+        await EventActivityManager.endImmediately(eventID: event.id)
         await eventRepository.leaveEvent(event)
     }
 
@@ -104,10 +111,27 @@ class EventViewModel: ObservableObject {
     ///
     /// Event Reelはイベント中に随時作られているため、終了をきっかけに
     /// 何かを生成する必要はない（`ShareCollageBuilder.buildIfNeeded` 参照）。
+    ///
+    /// 終了後もWidget/Live Activityは「✨ Event Reel ready」のような形で
+    /// 意味のある状態を見せ続ける（Live Activityはシステムに任せて数時間後に
+    /// 自動的に片付く。Widgetは`eventState = .ended`のまま残り続ける）。
     func endEvent() async {
         do {
-            try await eventRepository.endEvent()
+            guard let ended = try await eventRepository.endEvent() else { return }
             print("✅ イベント終了")
+
+            let eventPhotos = PhotoRepository.shared.allPhotos.filter { $0.eventID == ended.id }
+            let photoCount = eventPhotos.count
+            let lockedCount = TimeCapsuleService.lockedCapsules(eventPhotos).count
+
+            EventSnapSharedState.updateEventState(
+                eventID: ended.id, eventName: ended.name, participantCount: ended.participantIDs.count,
+                isActive: ended.isActive, photoCount: photoCount, timeCapsuleLockedCount: lockedCount
+            )
+            WidgetCenter.shared.reloadTimelines(ofKind: "EventSnapWidget")
+            await EventActivityManager.markEnded(
+                eventID: ended.id, eventName: ended.name, participantCount: ended.participantIDs.count, photoCount: photoCount
+            )
         } catch {
             self.error = Self.message(for: error, fallback: "イベントの終了に失敗しました")
             print("❌ イベント終了エラー: \(error)")

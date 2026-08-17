@@ -30,11 +30,12 @@ import Foundation
 /// - 手動で早めて公開する経路は無い。伏せた写真を捨てたり、
 ///   個人の判断で公開を早めたりしてはいけない
 ///
-/// シェアOKとの重複は禁止しない。**両方trueのまま選定されることを許し、
-/// Event Reel（`ShareCollageBuilder`）を組む直前にシェアを優先して解除する**。
-/// 撮影時点ではどちらの意図で撮ったか本人にも決めきれないことがあるため、
-/// 選定時に片方を機械的に弾くのではなく、実際に共有する瞬間まで判断を遅らせる。
-/// 唯一の例外は `PhotoRepository.releaseSharedTimeCapsules`。
+/// 撮影時点では「シェアOK」と排他にしている（`CameraViewModel.shareOK`/
+/// `saveAsTimeCapsule`のdidSetを参照）。ただし`PhotoRepository.setShareOK`経由で
+/// 事後的にタイムカプセル写真がシェアOKに変更されるなど、両方trueになる経路は
+/// 完全には塞がれていない。そのための安全策として、両方trueのまま
+/// Event Reel（`ShareCollageBuilder`）を組む直前にシェアを優先して解除する処理
+/// （`PhotoRepository.releaseSharedTimeCapsules`）は残している。
 enum TimeCapsuleService {
 
     // MARK: - 調整パラメータ

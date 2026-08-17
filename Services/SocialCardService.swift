@@ -479,10 +479,19 @@ enum MultiPhotoRenderer {
 
         // 「9人で撮影された42枚の思い出」を、広告的にならない範囲で短く伝える
         let statsFont = SocialCardDrawing.bebasNeue(size: 23)
-        let statsText = "\(max(participantCount, 1)) PEOPLE  ·  \(max(photoCount, photos.count)) PHOTOS"
+        let statsText = statsLine(participantCount: participantCount, photoCount: max(photoCount, photos.count))
         SocialCardDrawing.drawTracked(statsText, at: CGPoint(x: x, y: y), font: statsFont, color: secondaryInk, tracking: 2, shadow: false)
 
         SocialCardDrawing.drawBrandMark(cg: cg, canvasSize: canvasSize, corner: .bottomTrailing, ink: ink, opacity: 0.75, shadow: false)
+    }
+
+    /// 「1 PEOPLE」のような不自然な英語を避け、単数/複数を正しく出し分ける。
+    static func statsLine(participantCount: Int, photoCount: Int) -> String {
+        let people = max(participantCount, 1)
+        let photos = max(photoCount, 1)
+        let peopleWord = people == 1 ? "PERSON" : "PEOPLE"
+        let photoWord = photos == 1 ? "PHOTO" : "PHOTOS"
+        return "\(people) \(peopleWord)  ·  \(photos) \(photoWord)"
     }
 
     // MARK: - レイアウト(枚数ごとの行構成)
