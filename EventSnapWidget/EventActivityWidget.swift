@@ -6,6 +6,11 @@
 //  状態(EventActivityAttributes.ContentState)自体はメインアプリの
 //  `EventActivityManager`が更新する。ここは表示を組み立てるだけ。
 //
+//  **配色の注意**: ロック画面(`activityBackgroundTint`)とDynamic Island(常に
+//  システムの黒背景)は前提となる背景色が真逆。`.primary`/`.secondary`任せに
+//  すると、`activityBackgroundTint`で明るい背景に変えても文字色が白いまま
+//  残り「文字が見えなくなる」不具合が起きるため、両方とも常に明示的な色を指定する。
+//
 
 import ActivityKit
 import SwiftUI
@@ -20,32 +25,39 @@ struct EventActivityWidget: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     Text(context.state.icon)
-                        .font(.title2)
+                        .font(.system(size: 30))
+                        .padding(.leading, 4)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(compactTrailingText(for: context.state))
-                        .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                }
-                DynamicIslandExpandedRegion(.center) {
-                    Text(context.state.eventName)
-                        .font(.headline)
-                        .lineLimit(1)
+                    shutterLink(eventIDString: context.attributes.eventID, size: 44)
+                        .padding(.trailing, 4)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text(context.state.subline)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(context.state.eventName)
+                            .font(.title3.bold())
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                        Text(context.state.subline)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.white.opacity(0.75))
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 6)
                 }
             } compactLeading: {
                 Text(context.state.icon)
             } compactTrailing: {
                 Text(compactTrailingText(for: context.state))
-                    .font(.caption2.monospacedDigit())
+                    .font(.caption2.monospacedDigit().bold())
+                    .foregroundStyle(.white)
             } minimal: {
                 Text(context.state.icon)
             }
             .widgetURL(deepLink(for: context))
+            .keylineTint(WidgetBrand.gradientStart)
         }
     }
 
@@ -67,25 +79,48 @@ private struct LockScreenLiveActivityView: View {
     let context: ActivityViewContext<EventActivityAttributes>
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 14) {
             Text(context.state.icon)
-                .font(.title2)
+                .font(.system(size: 36))
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
+                WidgetBrand.brandMark(dotSize: 6)
                 Text(context.state.eventName)
-                    .font(.headline)
+                    .font(.title2.bold())
+                    .foregroundStyle(WidgetBrand.ink)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Text(context.state.subline)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(WidgetBrand.ink.opacity(0.6))
+                    .lineLimit(1)
             }
 
-            Spacer(minLength: 0)
+            Spacer(minLength: 8)
 
-            WidgetBrand.brandMark(dotSize: 5)
+            shutterLink(eventIDString: context.attributes.eventID, size: 54)
         }
-        .padding()
+        .padding(16)
         .activityBackgroundTint(WidgetBrand.background)
         .activitySystemActionForegroundColor(WidgetBrand.ink)
+    }
+}
+
+// MARK: - シャッターボタン(共通)
+
+/// タップするとアプリのカメラ画面を直接開く。Live Activityはウィジェット同様
+/// 実際の撮影処理を行わない(できない)ため、`Link`によるディープリンクで
+/// アプリ側に画面遷移させるだけにする。
+@ViewBuilder
+private func shutterLink(eventIDString: String, size: CGFloat) -> some View {
+    if let eventID = UUID(uuidString: eventIDString),
+       let url = EventSnapDeepLink.url(for: .camera(eventID: eventID)) {
+        Link(destination: url) {
+            Image(systemName: "camera.fill")
+                .font(.system(size: size * 0.42, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: size, height: size)
+                .background(WidgetBrand.gradient, in: Circle())
+        }
     }
 }

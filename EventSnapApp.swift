@@ -54,6 +54,9 @@ struct EventSnapApp: App {
         case .timeCapsule(let id):
             eventID = id
             tab = .album // タイムカプセルの枠はアルバムタブに混在表示される
+        case .camera(let id):
+            eventID = id
+            tab = .camera // Live Activityのシャッターボタンから直接撮影画面へ
         }
 
         Task {

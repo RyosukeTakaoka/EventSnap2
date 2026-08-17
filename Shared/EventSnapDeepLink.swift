@@ -25,6 +25,8 @@ enum EventSnapDeepLink {
         case eventReel(eventID: UUID, reelID: UUID)
         /// 指定イベントのTime Capsuleタブを開く
         case timeCapsule(eventID: UUID)
+        /// 指定イベントのカメラ(撮影画面)を直接開く。Live Activityのシャッターボタン用。
+        case camera(eventID: UUID)
     }
 
     static func url(for destination: Destination) -> URL? {
@@ -35,6 +37,8 @@ enum EventSnapDeepLink {
             return URL(string: "\(scheme)://event/\(eventID.uuidString)/reel/\(reelID.uuidString)")
         case .timeCapsule(let eventID):
             return URL(string: "\(scheme)://event/\(eventID.uuidString)/timecapsule")
+        case .camera(let eventID):
+            return URL(string: "\(scheme)://event/\(eventID.uuidString)/camera")
         }
     }
 
@@ -61,6 +65,9 @@ enum EventSnapDeepLink {
         }
         if parts.count >= 2, parts[1] == "timecapsule" {
             return .timeCapsule(eventID: eventID)
+        }
+        if parts.count >= 2, parts[1] == "camera" {
+            return .camera(eventID: eventID)
         }
         return .event(eventID: eventID)
     }
