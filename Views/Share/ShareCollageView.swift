@@ -63,7 +63,7 @@ struct ShareCollageView: View {
                 .font(.headline)
                 .foregroundColor(.secondary)
 
-            Text("撮影時に「シェアOK」を選んだ写真は、\nその場で自動的にEvent Reelになります。")
+            Text("撮影時に「シェアOK」を選んだ写真が\(ShareCollageBuilder.minPhotosForNewReel)枚以上集まると、\nEventSnapが自動的に1枚の思い出Reelにまとめます。")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

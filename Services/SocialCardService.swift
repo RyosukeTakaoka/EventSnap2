@@ -57,6 +57,36 @@ enum SocialCardService {
         }
     }
 
+    /// 複数写真のEvent Reel(自動編集された縦長シェア画像)を1枚描画する。
+    ///
+    /// 単写真用の`render`/`makeCard`とは別経路にしている。`MultiPhotoRenderer`は
+    /// `SocialCardRenderer`プロトコルに乗らない。写真を複数受け取る都合上、
+    /// 「1枚をキャンバスいっぱいに敷いてから文字を重ねる」という
+    /// `render`の前提(`drawPhotoFullBleed`を先に呼ぶ)と根本的に構造が違うため。
+    static func renderEventReel(
+        photos: [MultiPhotoRenderer.PhotoInput],
+        eventName: String,
+        date: Date,
+        participantCount: Int,
+        photoCount: Int
+    ) -> UIImage {
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        format.opaque = true
+
+        return UIGraphicsImageRenderer(size: canvasSize, format: format).image { ctx in
+            MultiPhotoRenderer.draw(
+                cg: ctx.cgContext,
+                canvasSize: canvasSize,
+                photos: photos,
+                eventName: eventName,
+                date: date,
+                participantCount: participantCount,
+                photoCount: photoCount
+            )
+        }
+    }
+
     /// 解析から描画まで一括で行う便利関数(自動生成される既定画像用)。
     static func makeCard(
         from image: UIImage,
@@ -368,6 +398,148 @@ enum MinimalRenderer: SocialCardRenderer {
     }
 }
 
+// MARK: - D. MultiPhoto(複数写真の自動編集Event Reel)
+
+/// EventSnapが「シェアOKの写真から自動的に選んだ複数枚」を、1枚の縦長画像に
+/// まとめるレンダラー。Editorial/Bold/Minimalとは違い、`SocialCardRenderer`
+/// プロトコルには乗らない(1枚をフルブリードで敷く前提が合わないため)。
+///
+/// **狙い**: 「写真を加工するアプリ」ではなく「複数の写真からイベントの
+/// 思い出を自動編集してくれるアプリ」を、見た瞬間に伝える1枚にする。
+/// 写真そのものはクロップ以外ほぼ無加工。メイン写真を大きく、残りを
+/// 小さく並べ、余白のある雑誌の1ページのような構成にする。
+enum MultiPhotoRenderer {
+
+    /// 描画に必要な最小限の情報。フル解析結果ではなく`importanceCenter`
+    /// (重要領域の重心)だけを受け取る。選定時点(サムネイル解析)で
+    /// 計算済みの正規化座標をそのまま使い回せるため、本番描画のために
+    /// もう一度Visionを走らせる必要が無い。
+    struct PhotoInput {
+        let image: UIImage
+        let importanceCenter: CGPoint
+    }
+
+    /// 背景色。写真同士に余白を作る構成のため、Editorial/Bold/Minimalのような
+    /// 「写真で埋め尽くす」設計ではなく、あえて写真の外側が見える紙面にしている。
+    static let backgroundColor = UIColor(red: 0.98, green: 0.965, blue: 0.945, alpha: 1)
+
+    static func draw(
+        cg: CGContext,
+        canvasSize: CGSize,
+        photos: [PhotoInput],
+        eventName: String,
+        date: Date,
+        participantCount: Int,
+        photoCount: Int
+    ) {
+        guard !photos.isEmpty else { return }
+
+        let ink = UIColor(white: 0.1, alpha: 1)
+        let secondaryInk = ink.withAlphaComponent(0.5)
+        let accent = SocialCardDrawing.brandGradientStart
+
+        backgroundColor.setFill()
+        cg.fill(CGRect(origin: .zero, size: canvasSize))
+
+        let margin: CGFloat = 22
+        let gap: CGFloat = 8
+        let captionHeight: CGFloat = 268
+
+        let photoArea = CGRect(
+            x: margin, y: margin,
+            width: canvasSize.width - margin * 2,
+            height: canvasSize.height - margin - captionHeight
+        )
+
+        let tileRects = computeTileRects(photoArea: photoArea, rows: rows(for: photos.count), gap: gap)
+        for (index, rect) in tileRects.enumerated() where index < photos.count {
+            drawTilePhoto(photos[index].image, importanceCenter: photos[index].importanceCenter, in: rect, cg: cg)
+        }
+
+        // MARK: キャプション(写真とは独立した紙面。写真の邪魔をしない)
+        let captionRect = CGRect(x: margin, y: photoArea.maxY + gap, width: canvasSize.width - margin * 2, height: captionHeight - gap)
+        let inset: CGFloat = 6
+        let x = captionRect.minX + inset
+
+        let (titleLines, titleFont) = SocialCardDrawing.fitTitle(
+            eventName, weight: .black, maxWidth: captionRect.width - inset * 2, maxLines: 2, maxSize: 58, minSize: 34
+        )
+        let titleLineHeight = titleFont.ascender - titleFont.descender
+
+        var y = captionRect.minY + inset + 4
+        SocialCardDrawing.drawLines(titleLines, font: titleFont, color: ink, x: x, y: &y, lineHeight: titleLineHeight * 1.05)
+
+        y += 10
+        SocialCardDrawing.drawRule(cg: cg, from: CGPoint(x: x, y: y), width: 56, color: accent)
+        y += 22
+
+        let dateFont = SocialCardDrawing.bebasNeue(size: 30)
+        SocialCardDrawing.drawTracked(SocialCardDrawing.dateString(date), at: CGPoint(x: x, y: y), font: dateFont, color: ink.withAlphaComponent(0.75), tracking: 2, shadow: false)
+        y += (dateFont.ascender - dateFont.descender) + 12
+
+        // 「9人で撮影された42枚の思い出」を、広告的にならない範囲で短く伝える
+        let statsFont = SocialCardDrawing.bebasNeue(size: 23)
+        let statsText = "\(max(participantCount, 1)) PEOPLE  ·  \(max(photoCount, photos.count)) PHOTOS"
+        SocialCardDrawing.drawTracked(statsText, at: CGPoint(x: x, y: y), font: statsFont, color: secondaryInk, tracking: 2, shadow: false)
+
+        SocialCardDrawing.drawBrandMark(cg: cg, canvasSize: canvasSize, corner: .bottomTrailing, ink: ink, opacity: 0.75, shadow: false)
+    }
+
+    // MARK: - レイアウト(枚数ごとの行構成)
+
+    private struct Row { let heightRatio: CGFloat; let columns: Int }
+
+    /// 写真枚数(2〜5)ごとの行構成。「メイン1枚を大きく、残りを小さく」を
+    /// 基本にしつつ、枚数に応じて自然な段組みになるようにする。
+    /// 6枚以上は呼び出し側(選定アルゴリズム)で作らない前提だが、
+    /// 万一渡された場合も5枚と同じレイアウトで受け止める(クラッシュしない)。
+    private static func rows(for count: Int) -> [Row] {
+        switch count {
+        case ...1: return [Row(heightRatio: 1, columns: 1)]
+        case 2: return [Row(heightRatio: 0.62, columns: 1), Row(heightRatio: 0.38, columns: 1)]
+        case 3: return [Row(heightRatio: 0.58, columns: 1), Row(heightRatio: 0.42, columns: 2)]
+        case 4: return [Row(heightRatio: 0.50, columns: 1), Row(heightRatio: 0.25, columns: 2), Row(heightRatio: 0.25, columns: 1)]
+        default: return [Row(heightRatio: 0.46, columns: 1), Row(heightRatio: 0.27, columns: 2), Row(heightRatio: 0.27, columns: 2)]
+        }
+    }
+
+    private static func computeTileRects(photoArea: CGRect, rows: [Row], gap: CGFloat) -> [CGRect] {
+        var rects: [CGRect] = []
+        let totalGapHeight = gap * CGFloat(max(rows.count - 1, 0))
+        let usableHeight = photoArea.height - totalGapHeight
+        var y = photoArea.minY
+
+        for row in rows {
+            let rowHeight = usableHeight * row.heightRatio
+            let totalGapWidth = gap * CGFloat(max(row.columns - 1, 0))
+            let colWidth = (photoArea.width - totalGapWidth) / CGFloat(row.columns)
+            var x = photoArea.minX
+            for _ in 0..<row.columns {
+                rects.append(CGRect(x: x, y: y, width: colWidth, height: rowHeight))
+                x += colWidth + gap
+            }
+            y += rowHeight + gap
+        }
+        return rects
+    }
+
+    /// タイル矩形にクリップして写真を敷く。`PhotoAnalyzer.coverCrop`は
+    /// 任意の`canvasSize`に対応しているため、キャンバス全体用の
+    /// `drawPhotoFullBleed`と全く同じロジックを1タイル分に適用できる。
+    private static func drawTilePhoto(_ image: UIImage, importanceCenter: CGPoint, in rect: CGRect, cg: CGContext) {
+        guard rect.width > 0, rect.height > 0 else { return }
+        cg.saveGState()
+        cg.clip(to: rect)
+
+        let scale = max(rect.width / image.size.width, rect.height / image.size.height)
+        let crop = PhotoAnalyzer.coverCrop(imageSize: image.size, canvasSize: rect.size, importanceCenter: importanceCenter)
+        let drawSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        image.draw(in: CGRect(x: rect.minX - crop.minX, y: rect.minY - crop.minY, width: drawSize.width, height: drawSize.height))
+
+        cg.restoreGState()
+    }
+}
+
 // MARK: - 共通の描画ヘルパー(全テンプレートが共有する)
 
 enum SocialCardDrawing {
@@ -402,7 +574,7 @@ enum SocialCardDrawing {
     /// 「作品のクレジット（フォトクレジット）」として見えることを狙っている。
     /// ドット1つ添えることで、文字を読まなくても「EventSnapのグラデーション」を
     /// 手がかりに一目で分かるようにする。
-    static func drawBrandMark(cg: CGContext, canvasSize: CGSize, corner: Corner, ink: UIColor, opacity: CGFloat = 0.85, inset: CGFloat = 44, dateSuffix: Date? = nil) {
+    static func drawBrandMark(cg: CGContext, canvasSize: CGSize, corner: Corner, ink: UIColor, opacity: CGFloat = 0.85, inset: CGFloat = 44, dateSuffix: Date? = nil, shadow: Bool = true) {
         var text = "EVENTSNAP"
         if let dateSuffix { text += "  ·  " + dateStringShort(dateSuffix) }
         let font = bebasNeue(size: 26)
@@ -427,7 +599,7 @@ enum SocialCardDrawing {
         drawBrandChip(cg: cg, rect: dotRect, cornerRadius: dotDiameter / 2)
         cg.restoreGState()
 
-        drawTracked(text, at: CGPoint(x: originX + dotDiameter + dotGap, y: y), font: font, color: ink.withAlphaComponent(opacity), tracking: 3)
+        drawTracked(text, at: CGPoint(x: originX + dotDiameter + dotGap, y: y), font: font, color: ink.withAlphaComponent(opacity), tracking: 3, shadow: shadow)
     }
 
     // MARK: EventSnapビジュアル言語(ブランドグラデーション・タグ・デコ)
