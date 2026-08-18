@@ -105,6 +105,19 @@ enum PreviewImageFactory {
         return UIImage(data: data)
     }
 
+    /// カメラ背景専用の実写（`preview-camera-bg.jpg`）を読み込む。
+    ///
+    /// 見つからなければ`nil`を返す。呼び出し側（`PreviewFixtureLoader`）が
+    /// 通常のFixture写真へフォールバックする。
+    static func bundledCameraBackground() -> UIImage? {
+        guard let url = Bundle.main.url(forResource: "preview-camera-bg", withExtension: "jpg")
+                ?? Bundle.main.url(forResource: "preview-camera-bg", withExtension: "jpeg")
+                ?? Bundle.main.url(forResource: "preview-camera-bg", withExtension: "png"),
+              let data = try? Data(contentsOf: url)
+        else { return nil }
+        return UIImage(data: data)
+    }
+
     // MARK: - プレースホルダ生成
 
     /// `index`だけから決まる疑似乱数（xorshift64）。

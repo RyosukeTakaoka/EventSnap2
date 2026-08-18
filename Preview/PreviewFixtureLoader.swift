@@ -81,7 +81,10 @@ enum PreviewFixtureLoader {
             imageIndexByPhotoID: imageIndexByPhotoID
         )
 
-        cameraBackgroundImage = PreviewImageFactory.loadImage(at: cameraBackgroundIndex)
+        // `preview-camera-bg.jpg`が用意されていればそれを、無ければ従来通り
+        // Fixture写真の1枚（`cameraBackgroundIndex`）を背景に使う。
+        cameraBackgroundImage = PreviewImageFactory.bundledCameraBackground()
+            ?? PreviewImageFactory.loadImage(at: cameraBackgroundIndex)
 
         // ── 5. EventRepositoryへ注入 ──────────────────────────
         // `currentEvent`は最後に入れる。HomeViewの fullScreenCover がこれを見て
