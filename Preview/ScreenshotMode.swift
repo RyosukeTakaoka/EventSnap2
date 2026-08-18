@@ -67,18 +67,28 @@ enum ScreenshotMode {
     private static let sceneKey = "EventSnapScreenshotScene"
 
     /// 撮影モードで起動しているか。
+//    static let isActive: Bool = {
+//        if ProcessInfo.processInfo.environment["EVENTSNAP_SCREENSHOT"] == "1" { return true }
+//        return UserDefaults.standard.bool(forKey: flagKey)
+//    }()
+    
+    //強制撮影
     static let isActive: Bool = {
-        if ProcessInfo.processInfo.environment["EVENTSNAP_SCREENSHOT"] == "1" { return true }
-        return UserDefaults.standard.bool(forKey: flagKey)
+        return true  // ← 撮影が終わったら必ずこの行を消して元に戻すこと
     }()
 
-    /// 撮影対象のシーン（指定が無ければアルバム）。
+//    /// 撮影対象のシーン（指定が無ければアルバム）。
+//    static let scene: ScreenshotScene = {
+//        guard let raw = UserDefaults.standard.string(forKey: sceneKey)
+//                ?? ProcessInfo.processInfo.environment["EVENTSNAP_SCREENSHOT_SCENE"],
+//              let scene = ScreenshotScene(rawValue: raw)
+//        else { return .albumGrid }
+//        return scene
+//    }()
+    
+    //撮影シーン固定
     static let scene: ScreenshotScene = {
-        guard let raw = UserDefaults.standard.string(forKey: sceneKey)
-                ?? ProcessInfo.processInfo.environment["EVENTSNAP_SCREENSHOT_SCENE"],
-              let scene = ScreenshotScene(rawValue: raw)
-        else { return .albumGrid }
-        return scene
+        return .albumGrid  // ← .camera / .timeCapsule / .eventReel / .invite に変えれば別シーンが撮れる
     }()
 
     /// カメラ画面の背景に敷く画像。

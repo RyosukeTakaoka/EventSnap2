@@ -29,7 +29,7 @@ import UIKit
 enum PreviewImageFactory {
 
     /// 生成ロジックを変えたらここを上げる。古いキャッシュを無視して作り直される。
-    private static let version = 1
+    private static let version = 3
 
     /// アルバムのグリッド・写真詳細・Event Reelの描画に十分な解像度。
     /// 本番のアップロードは最大1920pxだが、撮影用にそこまでは要らない
