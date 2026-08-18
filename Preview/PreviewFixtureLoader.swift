@@ -103,6 +103,15 @@ enum PreviewFixtureLoader {
         EventRepository.shared.recentEvents = [event, PreviewFixtureData.pastEvent(anchor: anchor)]
         EventRepository.shared.currentEvent = event
 
+        // ── 6. Widget/Live ActivityへFixtureをミラーする ────────────
+        // Widgetは本番同様App Group経由の`EventSnapSharedState`しか見ないため、
+        // ここまでの注入だけではホーム画面のWidgetにFixtureが反映されない。
+        // 本番と同じ経路（`SyncCoordinator.updateWidgetAndActivity`）に流すことで
+        // Widget側の実装には一切手を入れずに済ませる。
+        Task {
+            await SyncCoordinator.updateWidgetAndActivity(for: event)
+        }
+
         let lockedCount = TimeCapsuleService.lockedCapsules(photos).count
         let reelCount = ShareCollageStore.shared.reels(for: event.id).count
         let unseenCount = ShareCollageStore.shared.unseenReelCount(for: event.id)
