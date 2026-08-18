@@ -9,6 +9,13 @@ struct EventSnapApp: App {
     @StateObject private var eventViewModel = EventViewModel()
     @Environment(\.scenePhase) private var scenePhase
 
+    /// App Store提出用スクリーンショットの撮影モードでのみ、Fixtureを注入する。
+    /// 通常起動では何も起きず、Releaseビルドでは呼び出しごと消える
+    /// （`Preview/ScreenshotMode.swift`を参照）。
+    init() {
+        ScreenshotMode.installFixturesIfNeeded()
+    }
+
     var body: some Scene {
         WindowGroup {
             HomeView()
@@ -181,6 +188,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 enum SyncCoordinator {
     @MainActor
     static func refreshTimeCapsules() async {
+        // 撮影モードでは同期しない。注入済みのFixtureをCloudKitの結果で
+        // 上書きしてしまうのを防ぐ（Widget/Live Activityの更新も行わない）。
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+
         guard let event = EventRepository.shared.currentEvent else {
             // 参加中のイベントが無くなった(最後のイベントを離脱した等)場合は、
             // Widgetに前のイベントの情報が残り続けないようクリアする。

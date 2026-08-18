@@ -58,6 +58,9 @@ struct MainTabView: View {
         }
         .onAppear {
             selectedTab = initialTab
+            // Event Reelシーンの撮影時だけ、上のシート提示（Widget導線と同じ経路）
+            // をそのまま使ってシェア画面を開く。通常起動では何もしない。
+            ScreenshotMode.applyPendingReel(to: eventViewModel)
         }
         // イベントを作った直後は招待画面、参加した直後はアルバムへ飛ばす
         .onReceive(eventViewModel.$pendingTab.compactMap { $0 }) { tab in

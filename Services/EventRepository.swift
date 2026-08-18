@@ -74,6 +74,9 @@ class EventRepository: ObservableObject {
     /// 参加処理を走らせ直すと participantIDs を毎回書き換えてしまうので、
     /// 復元は **読み取りのみ** で行う。
     func restoreEvent() async {
+        // 撮影モードでは復元しない（注入済みのFixtureを維持する）
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+
         guard currentEvent == nil, let savedID = savedCurrentEventID else { return }
 
         do {
@@ -174,6 +177,9 @@ class EventRepository: ObservableObject {
 
     /// 参加済みイベントを読み込む（切り替え画面用）
     func loadRecentEvents() async {
+        // 撮影モードでは履歴を読み直さない（注入済みのFixtureを維持する）
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+
         let ids = joinedEventIDs
         guard !ids.isEmpty else {
             recentEvents = []

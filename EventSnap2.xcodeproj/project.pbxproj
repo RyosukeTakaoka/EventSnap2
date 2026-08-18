@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC0000000000000000000065 /* ScreenshotMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000001 /* ScreenshotMode.swift */; };
+		FC0000000000000000000066 /* PreviewFixtureData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000002 /* PreviewFixtureData.swift */; };
+		FC0000000000000000000067 /* PreviewImageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000003 /* PreviewImageFactory.swift */; };
+		FC0000000000000000000068 /* PreviewReelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000004 /* PreviewReelFactory.swift */; };
+		FC0000000000000000000069 /* PreviewFixtureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000005 /* PreviewFixtureLoader.swift */; };
+		FC000000000000000000006A /* ScreenshotScenes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000006 /* ScreenshotScenes.swift */; };
 		01D9DA15894454558A31F2E0 /* EventSnapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D16059709C44664F34BE80 /* EventSnapApp.swift */; };
 		07CC90BB4A7DF00192BD0076 /* AlbumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C236C172F86BEBC915519F /* AlbumView.swift */; };
 		0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38C4572E49ADF53996217172 /* QRCodeService.swift */; };
@@ -34,6 +40,9 @@
 		E5200A000000000000000000 /* ShareCollageBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100A000000000000000000 /* ShareCollageBuilder.swift */; };
 		E5200D000000000000000000 /* ShareCollageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100D000000000000000000 /* ShareCollageView.swift */; };
 		E5200E000000000000000000 /* EventSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100E000000000000000000 /* EventSwitcherView.swift */; };
+		EA1A7497F70CC406621DEF9A /* EventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C600D3D5C6BB4F411ED1607B /* EventRepository.swift */; };
+		F2434A896825B0EDCDFBB10C /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3CB1C550D157424087F6B4 /* Participant.swift */; };
+		F2CAC544E91C5A9FEC4EC5B5 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */; };
 		E76000000000000000000000 /* CloudKitAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75000000000000000000000 /* CloudKitAccount.swift */; };
 		E76001000000000000000000 /* AppLinkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75001000000000000000000 /* AppLinkConfig.swift */; };
 		E90000000000000000000002 /* EventSnapClipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000001 /* EventSnapClipApp.swift */; };
@@ -49,12 +58,11 @@
 		EA0003000000000000000000 /* PrimaryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0004000000000000000000 /* PrimaryButtonStyle.swift */; };
 		EA0005000000000000000000 /* NotoSansJP-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0006000000000000000000 /* NotoSansJP-Bold.ttf */; };
 		EA0007000000000000000000 /* NotoSansJP-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0008000000000000000000 /* NotoSansJP-Black.ttf */; };
+		EA000E000000000000000000 /* BebasNeue-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA000F000000000000000000 /* BebasNeue-Regular.ttf */; };
 		EA000B000000000000000000 /* SocialCardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000A000000000000000000 /* SocialCardService.swift */; };
 		EA000D000000000000000000 /* SocialCardShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000C000000000000000000 /* SocialCardShareView.swift */; };
-		EA000E000000000000000000 /* BebasNeue-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA000F000000000000000000 /* BebasNeue-Regular.ttf */; };
 		EA0011000000000000000000 /* PhotoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0010000000000000000000 /* PhotoAnalyzer.swift */; };
 		EA0021000000000000000000 /* EventReelPhotoSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0020000000000000000000 /* EventReelPhotoSelector.swift */; };
-		EA1A7497F70CC406621DEF9A /* EventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C600D3D5C6BB4F411ED1607B /* EventRepository.swift */; };
 		EAF100010000000000000000 /* EventSnapSharedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100000000000000000000 /* EventSnapSharedState.swift */; };
 		EAF100020000000000000000 /* EventSnapSharedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100000000000000000000 /* EventSnapSharedState.swift */; };
 		EAF100040000000000000000 /* EventActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100030000000000000000 /* EventActivityAttributes.swift */; };
@@ -67,26 +75,7 @@
 		EAF100160000000000000000 /* EventActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100150000000000000000 /* EventActivityWidget.swift */; };
 		EAF100180000000000000000 /* EventSnapWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100170000000000000000 /* EventSnapWidgetBundle.swift */; };
 		EAF100300000000000000000 /* EventSnapWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EAF100190000000000000000 /* EventSnapWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		F2434A896825B0EDCDFBB10C /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3CB1C550D157424087F6B4 /* Participant.swift */; };
-		F2CAC544E91C5A9FEC4EC5B5 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		E90000000000000000000017 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E9000000000000000000000F;
-			remoteInfo = EventSnapClip;
-		};
-		EAF100280000000000000000 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = EAF100220000000000000000;
-			remoteInfo = EventSnapWidget;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		E90000000000000000000015 /* Embed App Clips */ = {
@@ -113,7 +102,44 @@
 		};
 /* End PBXCopyFilesBuildPhase section */
 
+/* Begin PBXContainerItemProxy section */
+		E90000000000000000000017 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E9000000000000000000000F;
+			remoteInfo = EventSnapClip;
+		};
+		EAF100280000000000000000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EAF100220000000000000000;
+			remoteInfo = EventSnapWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		E90000000000000000000018 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E9000000000000000000000F /* EventSnapClip */;
+			targetProxy = E90000000000000000000017 /* PBXContainerItemProxy */;
+		};
+		EAF100290000000000000000 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EAF100220000000000000000 /* EventSnapWidget */;
+			targetProxy = EAF100280000000000000000 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXFileReference section */
+		FC0000000000000000000001 /* ScreenshotMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotMode.swift; sourceTree = "<group>"; };
+		FC0000000000000000000002 /* PreviewFixtureData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewFixtureData.swift; sourceTree = "<group>"; };
+		FC0000000000000000000003 /* PreviewImageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewImageFactory.swift; sourceTree = "<group>"; };
+		FC0000000000000000000004 /* PreviewReelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewReelFactory.swift; sourceTree = "<group>"; };
+		FC0000000000000000000005 /* PreviewFixtureLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewFixtureLoader.swift; sourceTree = "<group>"; };
+		FC0000000000000000000006 /* ScreenshotScenes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotScenes.swift; sourceTree = "<group>"; };
+		FC000000000000000000005A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		05ED44B24BF30673E712740A /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRepository.swift; sourceTree = "<group>"; };
 		32B6F77360BB3B5ED718507C /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
@@ -142,22 +168,25 @@
 		E5100A000000000000000000 /* ShareCollageBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageBuilder.swift; sourceTree = "<group>"; };
 		E5100D000000000000000000 /* ShareCollageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageView.swift; sourceTree = "<group>"; };
 		E5100E000000000000000000 /* EventSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSwitcherView.swift; sourceTree = "<group>"; };
-		E75000000000000000000000 /* CloudKitAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitAccount.swift; sourceTree = "<group>"; };
-		E75001000000000000000000 /* AppLinkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLinkConfig.swift; sourceTree = "<group>"; };
+		F5210C5AE9EB4A64A7585DAC /* EventReel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventReel.swift; sourceTree = "<group>"; };
+		F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewModel.swift; sourceTree = "<group>"; };
+		FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
+		E75000000000000000000000 /* CloudKitAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CloudKitAccount.swift"; sourceTree = "<group>"; };
+		E75001000000000000000000 /* AppLinkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppLinkConfig.swift"; sourceTree = "<group>"; };
 		E90000000000000000000001 /* EventSnapClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipApp.swift; sourceTree = "<group>"; };
 		E90000000000000000000003 /* AppClipCameraModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppClipCameraModel.swift; sourceTree = "<group>"; };
 		E90000000000000000000005 /* EventSnapClipRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipRootView.swift; sourceTree = "<group>"; };
 		E90000000000000000000007 /* GetAppScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetAppScreen.swift; sourceTree = "<group>"; };
 		E9000000000000000000000E /* EventSnapClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnapClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		EA0001000000000000000000 /* UnreadBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnreadBadge.swift; sourceTree = "<group>"; };
-		EA0004000000000000000000 /* PrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButtonStyle.swift; sourceTree = "<group>"; };
+		EA0001000000000000000000 /* UnreadBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnreadBadge.swift"; sourceTree = "<group>"; };
+		EA0004000000000000000000 /* PrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PrimaryButtonStyle.swift"; sourceTree = "<group>"; };
 		EA0006000000000000000000 /* NotoSansJP-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansJP-Bold.ttf"; sourceTree = "<group>"; };
 		EA0008000000000000000000 /* NotoSansJP-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansJP-Black.ttf"; sourceTree = "<group>"; };
-		EA000A000000000000000000 /* SocialCardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialCardService.swift; sourceTree = "<group>"; };
-		EA000C000000000000000000 /* SocialCardShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialCardShareView.swift; sourceTree = "<group>"; };
 		EA000F000000000000000000 /* BebasNeue-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BebasNeue-Regular.ttf"; sourceTree = "<group>"; };
-		EA0010000000000000000000 /* PhotoAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAnalyzer.swift; sourceTree = "<group>"; };
-		EA0020000000000000000000 /* EventReelPhotoSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventReelPhotoSelector.swift; sourceTree = "<group>"; };
+		EA000A000000000000000000 /* SocialCardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardService.swift"; sourceTree = "<group>"; };
+		EA0010000000000000000000 /* PhotoAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoAnalyzer.swift"; sourceTree = "<group>"; };
+		EA0020000000000000000000 /* EventReelPhotoSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventReelPhotoSelector.swift"; sourceTree = "<group>"; };
+		EA000C000000000000000000 /* SocialCardShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardShareView.swift"; sourceTree = "<group>"; };
 		EAF100000000000000000000 /* EventSnapSharedState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapSharedState.swift; sourceTree = "<group>"; };
 		EAF100030000000000000000 /* EventActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityAttributes.swift; sourceTree = "<group>"; };
 		EAF100060000000000000000 /* EventSnapDeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapDeepLink.swift; sourceTree = "<group>"; };
@@ -167,9 +196,6 @@
 		EAF100150000000000000000 /* EventActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityWidget.swift; sourceTree = "<group>"; };
 		EAF100170000000000000000 /* EventSnapWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapWidgetBundle.swift; sourceTree = "<group>"; };
 		EAF100190000000000000000 /* EventSnapWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EventSnapWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		F5210C5AE9EB4A64A7585DAC /* EventReel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventReel.swift; sourceTree = "<group>"; };
-		F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewModel.swift; sourceTree = "<group>"; };
-		FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -287,6 +313,35 @@
 			path = Share;
 			sourceTree = "<group>";
 		};
+		EA0009000000000000000000 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				EA0006000000000000000000 /* NotoSansJP-Bold.ttf */,
+				EA0008000000000000000000 /* NotoSansJP-Black.ttf */,
+				EA000F000000000000000000 /* BebasNeue-Regular.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
+		EE37BEE979FB00FB2D8DFAF6 = {
+			isa = PBXGroup;
+			children = (
+				7760F8AA2F5D236F00F18A2E /* Assets.xcassets */,
+				775673713025AAC40003484E /* AppIcon.icon */,
+				EA0009000000000000000000 /* Fonts */,
+				A2D16059709C44664F34BE80 /* EventSnapApp.swift */,
+				BC50DA07C3F6CCC4452B93EF /* Models */,
+				7EADC30A06EEA49AA9CE8AD4 /* Services */,
+				1E58259F9C4ED7C03B68737C /* ViewModels */,
+				B46D40979E843E46E78EE80A /* Views */,
+				FC00000000000000000000C9 /* Preview */,
+				EAF100200000000000000000 /* Shared */,
+				E9000000000000000000000D /* EventSnapClip */,
+				EAF100210000000000000000 /* EventSnapWidget */,
+				AF726F6A46D7E6C672320238 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
 		E9000000000000000000000D /* EventSnapClip */ = {
 			isa = PBXGroup;
 			children = (
@@ -296,16 +351,6 @@
 				E90000000000000000000007 /* GetAppScreen.swift */,
 			);
 			path = EventSnapClip;
-			sourceTree = "<group>";
-		};
-		EA0009000000000000000000 /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-				EA0006000000000000000000 /* NotoSansJP-Bold.ttf */,
-				EA0008000000000000000000 /* NotoSansJP-Black.ttf */,
-				EA000F000000000000000000 /* BebasNeue-Regular.ttf */,
-			);
-			path = Fonts;
 			sourceTree = "<group>";
 		};
 		EAF100200000000000000000 /* Shared */ = {
@@ -329,22 +374,26 @@
 			path = EventSnapWidget;
 			sourceTree = "<group>";
 		};
-		EE37BEE979FB00FB2D8DFAF6 = {
+		FC00000000000000000000C9 /* Preview */ = {
 			isa = PBXGroup;
 			children = (
-				7760F8AA2F5D236F00F18A2E /* Assets.xcassets */,
-				775673713025AAC40003484E /* AppIcon.icon */,
-				EA0009000000000000000000 /* Fonts */,
-				A2D16059709C44664F34BE80 /* EventSnapApp.swift */,
-				BC50DA07C3F6CCC4452B93EF /* Models */,
-				7EADC30A06EEA49AA9CE8AD4 /* Services */,
-				1E58259F9C4ED7C03B68737C /* ViewModels */,
-				B46D40979E843E46E78EE80A /* Views */,
-				EAF100200000000000000000 /* Shared */,
-				E9000000000000000000000D /* EventSnapClip */,
-				EAF100210000000000000000 /* EventSnapWidget */,
-				AF726F6A46D7E6C672320238 /* Products */,
+				FC0000000000000000000001 /* ScreenshotMode.swift */,
+				FC0000000000000000000002 /* PreviewFixtureData.swift */,
+				FC0000000000000000000003 /* PreviewImageFactory.swift */,
+				FC0000000000000000000004 /* PreviewReelFactory.swift */,
+				FC0000000000000000000005 /* PreviewFixtureLoader.swift */,
+				FC0000000000000000000006 /* ScreenshotScenes.swift */,
+				FC00000000000000000000CA /* Fixtures */,
 			);
+			path = Preview;
+			sourceTree = "<group>";
+		};
+		FC00000000000000000000CA /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				FC000000000000000000005A /* README.md */,
+			);
+			path = Fixtures;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -514,6 +563,12 @@
 				0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */,
 				94A53529D607048BD1840E6E /* QRCodeView.swift in Sources */,
 				34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */,
+				FC0000000000000000000065 /* ScreenshotMode.swift in Sources */,
+				FC0000000000000000000066 /* PreviewFixtureData.swift in Sources */,
+				FC0000000000000000000067 /* PreviewImageFactory.swift in Sources */,
+				FC0000000000000000000068 /* PreviewReelFactory.swift in Sources */,
+				FC0000000000000000000069 /* PreviewFixtureLoader.swift in Sources */,
+				FC000000000000000000006A /* ScreenshotScenes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -545,19 +600,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		E90000000000000000000018 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E9000000000000000000000F /* EventSnapClip */;
-			targetProxy = E90000000000000000000017 /* PBXContainerItemProxy */;
-		};
-		EAF100290000000000000000 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = EAF100220000000000000000 /* EventSnapWidget */;
-			targetProxy = EAF100280000000000000000 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		08FE3C3BF15158B2E0E575BF /* Release */ = {
@@ -623,7 +665,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = EventSnap.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 35;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 5B2NQ74986;
 				ENABLE_PREVIEWS = YES;
@@ -633,7 +675,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.0;
+				MARKETING_VERSION = 3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2;
 				PRODUCT_NAME = EventSnap;
 				SDKROOT = iphoneos;
@@ -653,7 +695,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = EventSnap.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 35;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 5B2NQ74986;
 				ENABLE_PREVIEWS = YES;
@@ -663,130 +705,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.0;
+				MARKETING_VERSION = 3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2;
 				PRODUCT_NAME = EventSnap;
 				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Release;
-		};
-		E90000000000000000000012 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 35;
-				DEVELOPMENT_TEAM = 5B2NQ74986;
-				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = EventSnapClip/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 4.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.AppClip;
-				PRODUCT_NAME = EventSnapClip;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Debug;
-		};
-		E90000000000000000000013 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 35;
-				DEVELOPMENT_TEAM = 5B2NQ74986;
-				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = EventSnapClip/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 4.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.AppClip;
-				PRODUCT_NAME = EventSnapClip;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Release;
-		};
-		EAF100250000000000000000 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = EventSnapWidget/EventSnapWidget.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 35;
-				DEVELOPMENT_TEAM = 5B2NQ74986;
-				INFOPLIST_FILE = EventSnapWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 4.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Widget;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Debug;
-		};
-		EAF100260000000000000000 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = EventSnapWidget/EventSnapWidget.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 35;
-				DEVELOPMENT_TEAM = 5B2NQ74986;
-				INFOPLIST_FILE = EventSnapWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 4.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Widget;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -858,6 +780,126 @@
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
+		};
+		E90000000000000000000012 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 32;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = EventSnapClip/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.AppClip;
+				PRODUCT_NAME = EventSnapClip;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E90000000000000000000013 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 32;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = EventSnapClip/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.AppClip;
+				PRODUCT_NAME = EventSnapClip;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		EAF100250000000000000000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = EventSnapWidget/EventSnapWidget.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 32;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				INFOPLIST_FILE = EventSnapWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		EAF100260000000000000000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = EventSnapWidget/EventSnapWidget.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 32;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				INFOPLIST_FILE = EventSnapWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
