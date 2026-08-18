@@ -96,13 +96,7 @@ enum PreviewImageFactory {
     // MARK: - 実写の取り込み
 
     private static func bundledPhoto(index: Int) -> UIImage? {
-        let name = String(format: "preview-photo-%02d", index + 1)
-        guard let url = Bundle.main.url(forResource: name, withExtension: "jpg")
-                ?? Bundle.main.url(forResource: name, withExtension: "jpeg")
-                ?? Bundle.main.url(forResource: name, withExtension: "png"),
-              let data = try? Data(contentsOf: url)
-        else { return nil }
-        return UIImage(data: data)
+        bundledImage(named: String(format: "preview-photo-%02d", index + 1))
     }
 
     /// カメラ背景専用の実写（`preview-camera-bg.jpg`）を読み込む。
@@ -110,9 +104,20 @@ enum PreviewImageFactory {
     /// 見つからなければ`nil`を返す。呼び出し側（`PreviewFixtureLoader`）が
     /// 通常のFixture写真へフォールバックする。
     static func bundledCameraBackground() -> UIImage? {
-        guard let url = Bundle.main.url(forResource: "preview-camera-bg", withExtension: "jpg")
-                ?? Bundle.main.url(forResource: "preview-camera-bg", withExtension: "jpeg")
-                ?? Bundle.main.url(forResource: "preview-camera-bg", withExtension: "png"),
+        bundledImage(named: "preview-camera-bg")
+    }
+
+    /// QR読み取りファインダー背景専用の実写（`preview-qrscan-bg.jpg`）を読み込む。
+    /// 見つからなければ`nil`を返す。
+    static func bundledQRScanBackground() -> UIImage? {
+        bundledImage(named: "preview-qrscan-bg")
+    }
+
+    /// アプリバンドルから`name`.jpg/.jpeg/.pngのいずれかを探して読み込む。
+    private static func bundledImage(named name: String) -> UIImage? {
+        guard let url = Bundle.main.url(forResource: name, withExtension: "jpg")
+                ?? Bundle.main.url(forResource: name, withExtension: "jpeg")
+                ?? Bundle.main.url(forResource: name, withExtension: "png"),
               let data = try? Data(contentsOf: url)
         else { return nil }
         return UIImage(data: data)

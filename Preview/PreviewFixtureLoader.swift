@@ -31,6 +31,9 @@ enum PreviewFixtureLoader {
     /// カメラ画面の背景に敷く画像
     private(set) static var cameraBackgroundImage: UIImage?
 
+    /// QR読み取りファインダーの背景に敷く画像（`.inviteOverlay`シーン用）
+    private(set) static var qrScanBackgroundImage: UIImage?
+
     private static var installed = false
 
     /// Fixtureが注入済みか。本番コード側の guard（`ScreenshotMode.suppressesLiveServices`）が
@@ -85,6 +88,10 @@ enum PreviewFixtureLoader {
         // Fixture写真の1枚（`cameraBackgroundIndex`）を背景に使う。
         cameraBackgroundImage = PreviewImageFactory.bundledCameraBackground()
             ?? PreviewImageFactory.loadImage(at: cameraBackgroundIndex)
+
+        // QR読み取りファインダーの背景は専用ファイルのみを見る
+        // （フォールバック用の適当な写真流用は「読み取り中」らしく見えないため）。
+        qrScanBackgroundImage = PreviewImageFactory.bundledQRScanBackground()
 
         // ── 5. EventRepositoryへ注入 ──────────────────────────
         // `currentEvent`は最後に入れる。HomeViewの fullScreenCover がこれを見て

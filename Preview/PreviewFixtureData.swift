@@ -123,7 +123,7 @@ enum PreviewFixtureData {
         case .timeCapsule:
             // 上位3行に集中させ、砂時計が主役に見える構成にする
             return [0, 2, 3, 5, 6, 8, 11]
-        case .albumGrid, .camera, .eventReel, .invite:
+        case .albumGrid, .camera, .eventReel, .invite, .inviteOverlay:
             // 実写がグリッドを埋め尽くす中に、ロックが控えめに混ざる構成
             return [7, 16]
         }

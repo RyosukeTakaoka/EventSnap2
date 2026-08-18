@@ -23,13 +23,15 @@ enum ScreenshotScene: String, CaseIterable {
     case eventReel
     /// ⑤ 招待: QRをかざすだけで参加
     case invite
+    /// ⑥ 招待+読み取りの合成カット: QRコードとスキャン画面を重ねて見せる
+    case inviteOverlay
 
     /// このシーンを撮るときに最初に開くタブ。
     var initialTab: AppTab {
         switch self {
         case .albumGrid, .timeCapsule, .eventReel: return .album
         case .camera:                              return .camera
-        case .invite:                              return .invite
+        case .invite, .inviteOverlay:              return .invite
         }
     }
 }
@@ -105,6 +107,15 @@ enum ScreenshotMode {
         PreviewFixtureLoader.cameraBackgroundImage
     }
 
+    /// QR読み取りファインダーの背景に敷く画像（`.inviteOverlay`シーン用）。
+    ///
+    /// `cameraBackgroundImage`と同じ理由で、撮影モードのときだけ静止画に
+    /// 差し替える。
+    @MainActor
+    static var qrScanBackgroundImage: UIImage? {
+        PreviewFixtureLoader.qrScanBackgroundImage
+    }
+
     /// Event Reelシーンで、その場でシェア画面を開くためのReel ID。
     ///
     /// `ShareCollageStore.addReel`はReelのUUIDを内部で採番するため、Fixture側で
@@ -121,6 +132,7 @@ enum ScreenshotMode {
     static var isActive: Bool { false }
     static var scene: ScreenshotScene { .albumGrid }
     @MainActor static var cameraBackgroundImage: UIImage? { nil }
+    @MainActor static var qrScanBackgroundImage: UIImage? { nil }
     @MainActor static var pendingReelID: UUID? { nil }
 
 #endif

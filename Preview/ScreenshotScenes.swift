@@ -87,6 +87,10 @@ private struct EventReelSceneView: View {
     }
 }
 
+// MARK: - ⑥ 招待+読み取りの合成カット
+
+#Preview("⑥ Invite Overlay") { QROverlayScreenshotView() }
+
 // MARK: - 通しで確認する（タブ構成込み）
 
 #Preview("MainTabView (Album)") {
