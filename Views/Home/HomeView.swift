@@ -18,6 +18,12 @@ struct HomeView: View {
     @State private var eventName = ""
 
     var body: some View {
+        // ⑥ 招待+読み取りの合成カットは、通常のHomeView→MainTabViewの導線とは
+        // 別物（QRコードとスキャン画面を重ねた専用View）なので、このシーンの
+        // ときだけ丸ごと差し替える。それ以外のシーン・通常起動では影響しない。
+        if ScreenshotMode.isActive && ScreenshotMode.scene == .inviteOverlay {
+            QROverlayScreenshotView()
+        } else {
         NavigationView {
             ZStack {
                 // 背景グラデーション
@@ -97,6 +103,7 @@ struct HomeView: View {
         }
         .task {
             await eventViewModel.loadRecentEvents()
+        }
         }
     }
 

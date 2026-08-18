@@ -20,7 +20,16 @@ import SwiftUI
 struct QROverlayScreenshotView: View {
 
     init() {
-        PreviewFixtureLoader.install(scene: .inviteOverlay)
+        // `install`はEventRepository.sharedの@Publishedプロパティを書き換える。
+        // このViewはHomeView.bodyの分岐に直接埋め込まれているため、無条件に
+        // 呼ぶとEventRepositoryの変更→HomeView再描画→この`init`が再度走る…
+        // という無限ループになる（`ScreenshotMode.isActive`側のアプリ起動経路では
+        // `EventSnapApp.init()`が既に`installIfNeeded()`で1回注入済みなので、
+        // ここでの再注入は不要）。SwiftUI Previewから直接使う場合だけ、
+        // ここで初回の注入を行う。
+        if !PreviewFixtureLoader.isInstalled {
+            PreviewFixtureLoader.install(scene: .inviteOverlay)
+        }
     }
 
     var body: some View {
