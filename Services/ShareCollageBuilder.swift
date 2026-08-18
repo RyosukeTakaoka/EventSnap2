@@ -66,6 +66,10 @@ enum ShareCollageBuilder {
     @MainActor
     @discardableResult
     static func buildIfNeeded(for event: Event) async -> [EventReel] {
+        // 撮影モードでは自動生成しない。Fixtureが用意したEvent Reelを
+        // 作り直してしまうと、撮影のたびに中身が変わってしまうため。
+        guard !ScreenshotMode.suppressesLiveServices else { return [] }
+
         // シェアOKとタイムカプセルが両方trueのまま残っている写真は、
         // ここでシェアを優先して解除する。「両立を許し、実際に使う瞬間に解決する」
         // という設計のため、shareApprovedPhotosを読む前に必ず呼ぶこと。

@@ -71,7 +71,9 @@ struct HomeView: View {
             )) {
                 // 作成直後は招待画面、参加直後はアルバム。
                 // どちらに飛ばすかは EventViewModel.pendingTab が決める。
-                MainTabView(initialTab: eventViewModel.pendingTab ?? .album)
+                // 撮影モードのときだけ、撮りたいシーンのタブを優先する
+                // （通常起動・Releaseでは `initialTab` は常に nil）。
+                MainTabView(initialTab: ScreenshotMode.initialTab ?? eventViewModel.pendingTab ?? .album)
             }
             // 失敗の理由を必ず画面に出す。以前は print だけだったので、
             // iCloud未サインインで作成に失敗しても何も起きないように見えていた。

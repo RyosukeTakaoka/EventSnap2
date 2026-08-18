@@ -148,6 +148,9 @@ class PhotoRepository: ObservableObject {
 
     /// イベントの写真一覧を取得
     func fetchPhotos(for eventID: UUID) async throws {
+        // 撮影モードではCloudKitに問い合わせない（注入済みのFixtureを維持する）
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+
         let predicate = NSPredicate(format: "eventID == %@", eventID.uuidString)
         let query = CKQuery(recordType: "Photo", predicate: predicate)
         query.sortDescriptors = [NSSortDescriptor(key: "uploadedAt", ascending: false)]
@@ -336,6 +339,9 @@ class PhotoRepository: ObservableObject {
 
     /// CloudKit Subscriptionを設定（リアルタイム同期）
     func setupSubscription(for eventID: UUID) async {
+        // 撮影モードではサブスクリプションを作らない
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+
         let predicate = NSPredicate(format: "eventID == %@", eventID.uuidString)
         let subscription = CKQuerySubscription(
             recordType: "Photo",

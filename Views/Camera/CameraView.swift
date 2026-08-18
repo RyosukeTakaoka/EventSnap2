@@ -19,8 +19,20 @@ struct CameraView: View {
 
     var body: some View {
         ZStack {
-            CameraPreview(session: viewModel.captureSession, mirrored: viewModel.cameraPosition == .front)
-                .ignoresSafeArea()
+            // 通常は本物のカメラプレビュー。撮影モードのときだけFixture画像を敷く
+            // （シミュレータのAVCaptureSessionは黒い映像しか返さず、実機でも
+            //  「撮影中の画」を再現性のある形では作れないため）。
+            // `cameraBackgroundImage`はReleaseビルドでは常にnilで、
+            // このifごと最適化で消える＝出荷時の挙動は従来と同一。
+            if let background = ScreenshotMode.cameraBackgroundImage {
+                Image(uiImage: background)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .ignoresSafeArea()
+            } else {
+                CameraPreview(session: viewModel.captureSession, mirrored: viewModel.cameraPosition == .front)
+                    .ignoresSafeArea()
+            }
 
             // UI オーバーレイ
             VStack {

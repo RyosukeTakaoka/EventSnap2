@@ -74,6 +74,11 @@ class CameraViewModel: ObservableObject {
     // MARK: - カメラ権限確認
 
     func checkCameraPermission() async {
+        // 撮影モードではカメラ権限を要求しない。
+        // 許可ダイアログがスクリーンショットに写り込むのを防ぐ。
+        // プレビュー映像の代わりはCameraViewがFixture画像を敷いて用意する。
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+
         print("🔍 カメラ権限を確認中...")
 
         switch AVCaptureDevice.authorizationStatus(for: .video) {
@@ -212,6 +217,11 @@ class CameraViewModel: ObservableObject {
     // MARK: - 撮影
 
     func capturePhoto() {
+        // 撮影モードではシャッターを実際に切らない。
+        // セッションが動いていないためコールバックが返らず、
+        // 「処理中...」が出たまま止まってしまうのを防ぐ。
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("📸 撮影開始")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -354,6 +364,9 @@ class CameraViewModel: ObservableObject {
     // MARK: - カメラ制御
 
     func startSession() {
+        // 撮影モードではキャプチャセッションを動かさない
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+
         print("▶️ カメラセッション開始をリクエスト")
         orientation.start()
         updatePhotoOutputOrientation()
