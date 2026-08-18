@@ -49,6 +49,10 @@ final class NotificationService {
 
     @discardableResult
     func requestAuthorization() async -> Bool {
+        // 撮影モードでは通知許可を要求しない。
+        // 許可ダイアログがスクリーンショットに写り込むのを防ぐ。
+        guard !ScreenshotMode.suppressesLiveServices else { return false }
+
         do {
             let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
             print(granted ? "✅ 通知が許可されました" : "⚠️ 通知が拒否されました")
@@ -73,6 +77,9 @@ final class NotificationService {
     ///
     /// 同じ写真IDで予約し直すと上書きされるので、何度呼んでも重複しない。
     func scheduleReveals(for photos: [Photo], event: Event, viewerID: String) async {
+        // 撮影モードではローカル通知を予約しない
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+
         guard await isAuthorized else {
             print("⚠️ 通知が許可されていないため予約をスキップします")
             return

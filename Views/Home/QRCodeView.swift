@@ -113,11 +113,15 @@ struct QRCodeView: View {
                 .foregroundColor(.secondary)
 
                 // デバッグ情報（開発中のみ表示）
+                // 撮影モードでは出さない。App Store提出用のスクリーンショットに
+                // イベントUUIDが写り込んでしまうため。
                 #if DEBUG
-                Text("イベントID: \(eventViewModel.currentEvent?.id.uuidString ?? "なし")")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-                    .padding(.top, 4)
+                if !ScreenshotMode.suppressesLiveServices {
+                    Text("イベントID: \(eventViewModel.currentEvent?.id.uuidString ?? "なし")")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                        .padding(.top, 4)
+                }
                 #endif
             }
             .padding()

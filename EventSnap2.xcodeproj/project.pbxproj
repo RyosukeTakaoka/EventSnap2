@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC0000000000000000000065 /* ScreenshotMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000001 /* ScreenshotMode.swift */; };
+		FC0000000000000000000066 /* PreviewFixtureData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000002 /* PreviewFixtureData.swift */; };
+		FC0000000000000000000067 /* PreviewImageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000003 /* PreviewImageFactory.swift */; };
+		FC0000000000000000000068 /* PreviewReelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000004 /* PreviewReelFactory.swift */; };
+		FC0000000000000000000069 /* PreviewFixtureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000005 /* PreviewFixtureLoader.swift */; };
+		FC000000000000000000006A /* ScreenshotScenes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000006 /* ScreenshotScenes.swift */; };
 		01D9DA15894454558A31F2E0 /* EventSnapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D16059709C44664F34BE80 /* EventSnapApp.swift */; };
 		07CC90BB4A7DF00192BD0076 /* AlbumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C236C172F86BEBC915519F /* AlbumView.swift */; };
 		0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38C4572E49ADF53996217172 /* QRCodeService.swift */; };
@@ -127,6 +133,13 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXFileReference section */
+		FC0000000000000000000001 /* ScreenshotMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotMode.swift; sourceTree = "<group>"; };
+		FC0000000000000000000002 /* PreviewFixtureData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewFixtureData.swift; sourceTree = "<group>"; };
+		FC0000000000000000000003 /* PreviewImageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewImageFactory.swift; sourceTree = "<group>"; };
+		FC0000000000000000000004 /* PreviewReelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewReelFactory.swift; sourceTree = "<group>"; };
+		FC0000000000000000000005 /* PreviewFixtureLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewFixtureLoader.swift; sourceTree = "<group>"; };
+		FC0000000000000000000006 /* ScreenshotScenes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotScenes.swift; sourceTree = "<group>"; };
+		FC000000000000000000005A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		05ED44B24BF30673E712740A /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRepository.swift; sourceTree = "<group>"; };
 		32B6F77360BB3B5ED718507C /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
@@ -321,6 +334,7 @@
 				7EADC30A06EEA49AA9CE8AD4 /* Services */,
 				1E58259F9C4ED7C03B68737C /* ViewModels */,
 				B46D40979E843E46E78EE80A /* Views */,
+				FC00000000000000000000C9 /* Preview */,
 				EAF100200000000000000000 /* Shared */,
 				E9000000000000000000000D /* EventSnapClip */,
 				EAF100210000000000000000 /* EventSnapWidget */,
@@ -358,6 +372,28 @@
 				EAF100110000000000000000 /* WidgetBrand.swift */,
 			);
 			path = EventSnapWidget;
+			sourceTree = "<group>";
+		};
+		FC00000000000000000000C9 /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				FC0000000000000000000001 /* ScreenshotMode.swift */,
+				FC0000000000000000000002 /* PreviewFixtureData.swift */,
+				FC0000000000000000000003 /* PreviewImageFactory.swift */,
+				FC0000000000000000000004 /* PreviewReelFactory.swift */,
+				FC0000000000000000000005 /* PreviewFixtureLoader.swift */,
+				FC0000000000000000000006 /* ScreenshotScenes.swift */,
+				FC00000000000000000000CA /* Fixtures */,
+			);
+			path = Preview;
+			sourceTree = "<group>";
+		};
+		FC00000000000000000000CA /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				FC000000000000000000005A /* README.md */,
+			);
+			path = Fixtures;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -527,6 +563,12 @@
 				0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */,
 				94A53529D607048BD1840E6E /* QRCodeView.swift in Sources */,
 				34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */,
+				FC0000000000000000000065 /* ScreenshotMode.swift in Sources */,
+				FC0000000000000000000066 /* PreviewFixtureData.swift in Sources */,
+				FC0000000000000000000067 /* PreviewImageFactory.swift in Sources */,
+				FC0000000000000000000068 /* PreviewReelFactory.swift in Sources */,
+				FC0000000000000000000069 /* PreviewFixtureLoader.swift in Sources */,
+				FC000000000000000000006A /* ScreenshotScenes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
