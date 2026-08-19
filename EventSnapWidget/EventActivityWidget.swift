@@ -20,8 +20,13 @@ import WidgetKit
 struct EventActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: EventActivityAttributes.self) { context in
+            // ロック画面はコンテナ全体が単一のビュー階層としてホストされるため、
+            // ここに`.widgetURL`を付けると内部の`shutterLink`（カメラへのLink）より
+            // 優先されてしまい、シャッターをタップしてもアルバムへ遷移するバグの
+            // 原因になっていた。コンテナへの`.widgetURL`はやめ、
+            // `LockScreenLiveActivityView`内でシャッター以外の領域にだけ
+            // 個別に`Link`を持たせる。
             LockScreenLiveActivityView(context: context)
-                .widgetURL(deepLink(for: context))
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -29,10 +34,18 @@ struct EventActivityWidget: Widget {
                         .font(.system(size: 34))
                         .padding(.leading, 6)
                 }
+                .widgetURL(deepLink(for: context))
                 DynamicIslandExpandedRegion(.trailing) {
                     shutterLink(eventIDString: context.attributes.eventID, size: 50)
                         .padding(.trailing, 6)
                 }
+                // Dynamic Islandの展開表示は各リージョンが独立したタップ領域として
+                // システムに管理されるため、ロック画面のような競合は起きにくい。
+                // ただし`shutterLink`自身のLinkに完全に頼らず、このリージョン専用の
+                // widgetURLもカメラ行き先に明示しておくことで、万一コンテナ側の
+                // widgetURLが優先されるケースがあっても誤ってアルバムへ飛ばない
+                // ようにしている（アルバムURLとの取り違えを防ぐ念のための保険）。
+                .widgetURL(cameraDeepLink(for: context))
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(context.state.eventName)
@@ -48,6 +61,7 @@ struct EventActivityWidget: Widget {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, 8)
                 }
+                .widgetURL(deepLink(for: context))
             } compactLeading: {
                 Text(context.state.icon)
             } compactTrailing: {
@@ -74,6 +88,13 @@ struct EventActivityWidget: Widget {
         guard let eventID = UUID(uuidString: context.attributes.eventID) else { return nil }
         return EventSnapDeepLink.url(for: .event(eventID: eventID))
     }
+
+    /// `.trailing`リージョン専用。`shutterLink`が使うカメラ行き先と同じURLを、
+    /// そのリージョンのwidgetURLとしても明示しておくための補助（上のコメント参照）。
+    private func cameraDeepLink(for context: ActivityViewContext<EventActivityAttributes>) -> URL? {
+        guard let eventID = UUID(uuidString: context.attributes.eventID) else { return nil }
+        return EventSnapDeepLink.url(for: .camera(eventID: eventID))
+    }
 }
 
 /// ロック画面のLive Activity。「最大限の存在感」を狙い、ブランド行と
@@ -84,28 +105,34 @@ private struct LockScreenLiveActivityView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                WidgetBrand.brandMark(dotSize: 7, textColor: .white.opacity(0.6))
-                Spacer()
-                Text(context.state.icon)
-                    .font(.system(size: 26))
+            albumLink {
+                HStack {
+                    WidgetBrand.brandMark(dotSize: 7, textColor: .white.opacity(0.6))
+                    Spacer()
+                    Text(context.state.icon)
+                        .font(.system(size: 26))
+                }
             }
 
             HStack(alignment: .center, spacing: 16) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(context.state.eventName)
-                        .font(.title.bold())
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                    Text(context.state.subline)
-                        .font(.title3.weight(.medium))
-                        .foregroundStyle(.white.opacity(0.72))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                albumLink {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(context.state.eventName)
+                            .font(.title.bold())
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                        Text(context.state.subline)
+                            .font(.title3.weight(.medium))
+                            .foregroundStyle(.white.opacity(0.72))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                    // Spacerの代わりに横幅いっぱいへ広げることで、テキストと
+                    // シャッターの間の余白部分もこのLinkのタップ領域に含める
+                    // （元の見た目・余白は変えず、タップできる範囲だけ広げる）。
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-
-                Spacer(minLength: 8)
 
                 shutterLink(eventIDString: context.attributes.eventID, size: 64)
             }
@@ -113,6 +140,24 @@ private struct LockScreenLiveActivityView: View {
         .padding(18)
         .activityBackgroundTint(WidgetBrand.activityBackground)
         .activitySystemActionForegroundColor(.white)
+    }
+
+    /// シャッター以外の領域（ブランド行・イベント名/状況テキスト）専用のLink。
+    ///
+    /// 以前はコンテナ全体に`.widgetURL`を付けてこの遷移を担わせていたが、
+    /// ロック画面のLive Activityは単一のビュー階層としてホストされるため、
+    /// それだと内部の`shutterLink`（カメラへのLink）より優先されてしまい、
+    /// シャッターをタップしてもアルバムへ飛ぶ不具合になっていた。
+    /// `shutterLink`の領域は絶対に包含せず、それ以外の部分にだけ個別に
+    /// `Link`を当てることで、タップ領域の競合そのものを無くす。
+    @ViewBuilder
+    private func albumLink<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        if let eventID = UUID(uuidString: context.attributes.eventID),
+           let url = EventSnapDeepLink.url(for: .event(eventID: eventID)) {
+            Link(destination: url) { content() }
+        } else {
+            content()
+        }
     }
 }
 
