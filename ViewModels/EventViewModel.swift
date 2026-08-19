@@ -26,6 +26,10 @@ class EventViewModel: ObservableObject {
     /// `MainTabView`がこれを見てシェア画面をシートとして直接開く。
     @Published var pendingReelID: UUID?
 
+    /// 公開通知をタップして、その場で開くべき写真。
+    /// `MainTabView`がこれを見てフルスクリーンで直接開く。
+    @Published var pendingRevealPhotoID: UUID?
+
     private let eventRepository = EventRepository.shared
     private var cancellables = Set<AnyCancellable>()
 

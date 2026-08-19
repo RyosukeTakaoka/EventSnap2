@@ -33,6 +33,7 @@ class CameraViewModel: ObservableObject {
             if shareOK, saveAsTimeCapsule {
                 saveAsTimeCapsule = false
             }
+            TutorialManager.shared.handleShareOKChanged(shareOK)
         }
     }
 
@@ -44,6 +45,7 @@ class CameraViewModel: ObservableObject {
             if saveAsTimeCapsule, shareOK {
                 shareOK = false
             }
+            TutorialManager.shared.handleTimeCapsuleChanged(saveAsTimeCapsule)
         }
     }
 
@@ -330,6 +332,7 @@ class CameraViewModel: ObservableObject {
             )
 
             lastCaptureWasTimeCapsule = uploaded.isTimeCapsule
+            TutorialManager.shared.handleCaptureCompleted(wasTimeCapsule: uploaded.isTimeCapsule)
 
             // シェアOKは一度ONにしたら、本人がOFFにするまで継続する仕様。
             // 撮影のたびに自動でリセットしない（「あとで公開」は毎回リセットする）。

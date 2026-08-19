@@ -7,6 +7,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @StateObject private var eventViewModel = EventViewModel()
+    @ObservedObject private var tutorial = TutorialManager.shared
 
     /// 最初に開くタブ。既定は最もよく見るアルバム。
     var initialTab: AppTab = .album
@@ -33,8 +34,25 @@ struct MainTabView: View {
                 .tag(AppTab.settings)
         }
         .accentColor(.blue)
+        .onChange(of: selectedTab) { _, newTab in
+            tutorial.handleTabChanged(newTab)
+        }
         .sheet(isPresented: $showEventSwitcher) {
             EventSwitcherView(eventViewModel: eventViewModel)
+        }
+        // 公開通知をタップして開いた対象写真を、画面いっぱいに直接見せる。
+        // 閉じると通常のアルバムに戻る（`pendingRevealPhotoID`は
+        // `EventSnapApp.handleNotificationReveal`がセットする）。
+        .fullScreenCover(isPresented: Binding(
+            get: { eventViewModel.pendingRevealPhotoID != nil },
+            set: { isPresented in if !isPresented { eventViewModel.pendingRevealPhotoID = nil } }
+        )) {
+            if let photoID = eventViewModel.pendingRevealPhotoID,
+               let photo = PhotoRepository.shared.allPhotos.first(where: { $0.id == photoID }) {
+                RevealedPhotoFullScreenView(photo: photo) {
+                    eventViewModel.pendingRevealPhotoID = nil
+                }
+            }
         }
         // Widgetをタップして開いたEvent Reelを、その場でシェアできる画面として直接開く。
         // 設定タブ→「Event Reelを見る」まで潜らせると「見る→シェアする」の
@@ -94,6 +112,19 @@ struct EventSettingsView: View {
     var body: some View {
         NavigationView {
             List {
+                Section {
+                    Button {
+                        // カメラタブへ切り替えたうえで、実際のUIを使う
+                        // インタラクティブチュートリアルを最初からやり直す。
+                        eventViewModel.pendingTab = .camera
+                        TutorialManager.shared.restart()
+                    } label: {
+                        Label("EventSnapの使い方", systemImage: "questionmark.circle")
+                    }
+                } footer: {
+                    Text("撮影・シェアOK・あとで公開の使い方を、実際の画面で操作しながら確認できます。")
+                }
+
                 Section("イベント情報") {
                     LabeledRow(title: "イベント名",
                                value: eventViewModel.currentEvent?.name ?? "読み込み中...")
