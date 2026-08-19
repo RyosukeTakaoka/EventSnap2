@@ -26,13 +26,11 @@ struct HomeView: View {
         } else {
         NavigationView {
             ZStack {
-                // 背景グラデーション
-                LinearGradient(
-                    colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                // 背景色。以前は装飾目的のグラデーション(Color.blue/purple)だったが、
+                // Widget/Event Reelと統一したブランドカラー(DesignTokens.primary)の
+                // 単色背景に置き換える。
+                DesignTokens.primary
+                    .ignoresSafeArea()
 
                 GeometryReader { proxy in
                     ScrollView {
@@ -40,6 +38,8 @@ struct HomeView: View {
                             Spacer(minLength: 24)
 
                             titleSection
+
+                            qrFinderSection
 
                             actionsSection
 
@@ -123,6 +123,35 @@ struct HomeView: View {
                 .font(.subheadline)
                 .foregroundColor(.white.opacity(0.9))
         }
+    }
+
+    // MARK: - QRファインダー
+
+    /// カメラファインダー風の大きな四角。QRコードで参加する導線を視覚的に
+    /// 目立たせるための装飾で、タップ時の処理は`actionsSection`のQRスキャン
+    /// ボタンと同じ`showQRScanner = true`を呼ぶだけ（QRScannerView自体は
+    /// 一切変更しない）。既存のボタン・遷移ロジックはそのまま残す。
+    ///
+    /// 枠線は背景（DesignTokens.primaryの単色）に対してコントラストを保つため
+    /// 白で描く。他のカードや文字と同じ「primary背景に白」の配色に揃えている。
+    private var qrFinderSection: some View {
+        Button {
+            showQRScanner = true
+        } label: {
+            RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusLarge, style: .continuous)
+                .stroke(Color.white, lineWidth: 3)
+                .background(
+                    RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusLarge, style: .continuous)
+                        .fill(Color.white.opacity(0.12))
+                )
+                .frame(width: 180, height: 180)
+                .overlay {
+                    Image(systemName: "qrcode.viewfinder")
+                        .font(.system(size: 56, weight: .light))
+                        .foregroundColor(.white)
+                }
+        }
+        .accessibilityLabel("QRコードで参加")
     }
 
     // MARK: - メインアクション
@@ -255,14 +284,11 @@ struct EventCreationSheet: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // HomeViewの青紫グラデーションを、ここでは主張しすぎない濃度で
+                // HomeViewのブランドカラーを、ここでは主張しすぎない濃度で
                 // 引き継ぐ。真っ白なシートが唐突に被さる違和感を無くすため。
-                LinearGradient(
-                    colors: [Color.blue.opacity(0.12), Color.purple.opacity(0.12)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                // DesignTokens統一に合わせ、二色グラデーションから単色ベースに変更。
+                DesignTokens.primary.opacity(0.12)
+                    .ignoresSafeArea()
 
                 VStack(spacing: 28) {
                     VStack(spacing: 8) {
