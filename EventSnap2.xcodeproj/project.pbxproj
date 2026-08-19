@@ -27,6 +27,7 @@
 		0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38C4572E49ADF53996217172 /* QRCodeService.swift */; };
 		120F1A928552A6F94B2863A5 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603E3322F12D494691F2AB55 /* CameraViewModel.swift */; };
 		1406BD85B5F92142777FAFB0 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B6F77360BB3B5ED718507C /* Event.swift */; };
+		EA0010000000000000000000 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0011000000000000000000 /* DesignTokens.swift */; };
 		1AF10605D40D9A743104DEE5 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */; };
 		34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */; };
 		4BA45F6E7F014F81B165E400 /* EventReel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5210C5AE9EB4A64A7585DAC /* EventReel.swift */; };
@@ -163,6 +164,7 @@
 		05ED44B24BF30673E712740A /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRepository.swift; sourceTree = "<group>"; };
 		32B6F77360BB3B5ED718507C /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		EA0011000000000000000000 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		38C4572E49ADF53996217172 /* QRCodeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeService.swift; sourceTree = "<group>"; };
 		54C236C172F86BEBC915519F /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
 		5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewModel.swift; sourceTree = "<group>"; };
@@ -320,6 +322,7 @@
 			isa = PBXGroup;
 			children = (
 				E51000000000000000000000 /* AppTab.swift */,
+				EA0011000000000000000000 /* DesignTokens.swift */,
 				32B6F77360BB3B5ED718507C /* Event.swift */,
 				F5210C5AE9EB4A64A7585DAC /* EventReel.swift */,
 				CB3CB1C550D157424087F6B4 /* Participant.swift */,
@@ -566,6 +569,7 @@
 			files = (
 				EA0002000000000000000000 /* UnreadBadge.swift in Sources */,
 				EA0003000000000000000000 /* PrimaryButtonStyle.swift in Sources */,
+				EA0010000000000000000000 /* DesignTokens.swift in Sources */,
 				EA000B000000000000000000 /* SocialCardService.swift in Sources */,
 				EA0011000000000000000000 /* PhotoAnalyzer.swift in Sources */,
 				EA000D000000000000000000 /* SocialCardShareView.swift in Sources */,
