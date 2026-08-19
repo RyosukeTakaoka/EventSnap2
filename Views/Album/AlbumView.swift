@@ -219,31 +219,18 @@ struct LockedPhotoCell: View {
 
     var body: some View {
         Rectangle()
-            // 単色のグレーだと「読み込み失敗」に見えるため、暖色のグラデーションで
-            // 「これから届く」ワクワク感を出す。
-            .fill(
-                LinearGradient(
-                    colors: [Color.orange.opacity(0.55), Color.pink.opacity(0.45)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
+            // 単色のグレーだと「読み込み失敗」に見えるため、DesignTokensの
+            // ゴールド系グラデーションで「これから届く」ワクワク感を出す
+            // （Widget/Event Reelと統一したブランドカラーの一部）。
+            .fill(DesignTokens.capsuleGradient)
             .aspectRatio(1, contentMode: .fit)
             .overlay {
-                VStack(spacing: 6) {
-                    Image(systemName: "hourglass")
-                        .font(.title3)
-                        .foregroundColor(.white)
-
-                    Text(TimeCapsuleService.vagueCountdown(for: photo))
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.white.opacity(0.95))
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.6)
-                        .padding(.horizontal, 6)
-                }
+                // 残り時間のテキストは視覚的に消し、砂時計アイコンのみで
+                // 「待機中」であることを伝える（情報量を絞ってすっきり見せる）。
+                // カウントダウンの文言はVoiceOver向けにaccessibilityLabelへ残す。
+                Image(systemName: "hourglass")
+                    .font(.title2)
+                    .foregroundColor(.white)
             }
             // PhotoCellと角丸を揃え、グリッド上で浮いて見えないようにする
             .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
