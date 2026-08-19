@@ -122,7 +122,7 @@ struct CameraView: View {
                                     isOn: $viewModel.shareOK,
                                     icon: "square.and.arrow.up",
                                     label: "シェアOK",
-                                    tint: .green
+                                    tint: DesignTokens.primary
                                 )
                                 .tutorialTarget(.shareOK)
 
@@ -130,7 +130,7 @@ struct CameraView: View {
                                     isOn: $viewModel.saveAsTimeCapsule,
                                     icon: "hourglass",
                                     label: "あとで公開",
-                                    tint: .orange
+                                    tint: DesignTokens.capsuleGold
                                 )
                                 .tutorialTarget(.laterReveal)
                             }
