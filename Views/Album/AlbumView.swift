@@ -225,12 +225,20 @@ struct LockedPhotoCell: View {
             .fill(DesignTokens.capsuleGradient)
             .aspectRatio(1, contentMode: .fit)
             .overlay {
-                // 残り時間のテキストは視覚的に消し、砂時計アイコンのみで
-                // 「待機中」であることを伝える（情報量を絞ってすっきり見せる）。
+                // アイコンだけだと初見のユーザーには何のセルか伝わらないため、
+                // ゴールド背景の上に白文字でテキストも添える。
                 // カウントダウンの文言はVoiceOver向けにaccessibilityLabelへ残す。
-                Image(systemName: "hourglass")
-                    .font(.title2)
-                    .foregroundColor(.white)
+                VStack(spacing: 6) {
+                    Image(systemName: "hourglass")
+                        .font(.title2)
+                    Text("公開まで\nお待ちください")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
+                .foregroundColor(.white)
+                .padding(4)
             }
             // PhotoCellと角丸を揃え、グリッド上で浮いて見えないようにする
             .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
