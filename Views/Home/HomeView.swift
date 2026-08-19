@@ -26,10 +26,12 @@ struct HomeView: View {
         } else {
         NavigationView {
             ZStack {
-                // 背景色。以前は装飾目的のグラデーション(Color.blue/purple)だったが、
-                // Widget/Event Reelと統一したブランドカラー(DesignTokens.primary)の
-                // 単色背景に置き換える。
-                DesignTokens.primary
+                // 背景は白（ごく薄いDesignTokens.primaryのティント）。
+                // 一時期DesignTokens.primaryの単色ベタ塗りにしていたが、
+                // 「新しいイベントを作成」ボタンやQRファインダー枠のような
+                // ブランドカラーの要素が背景に溶けて見づらくなったため、
+                // 白背景の上にそれらの要素だけ単色で乗せる形に戻す。
+                DesignTokens.primary.opacity(0.06)
                     .ignoresSafeArea()
 
                 GeometryReader { proxy in
@@ -113,15 +115,15 @@ struct HomeView: View {
         VStack(spacing: 8) {
             Image(systemName: "photo.on.rectangle.angled")
                 .font(.system(size: 80))
-                .foregroundColor(.white)
+                .foregroundColor(DesignTokens.primary)
 
             Text("EventSnap")
                 .font(.system(size: 40, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(DesignTokens.primary)
 
             Text("思い出を、みんなで")
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.9))
+                .foregroundColor(.secondary)
         }
     }
 
@@ -132,24 +134,22 @@ struct HomeView: View {
     /// ボタンと同じ`showQRScanner = true`を呼ぶだけ（QRScannerView自体は
     /// 一切変更しない）。既存のボタン・遷移ロジックはそのまま残す。
     ///
-    /// 枠線は背景（DesignTokens.primaryの単色）に対してコントラストを保つため
-    /// 白で描く。他のカードや文字と同じ「primary背景に白」の配色に揃えている。
+    /// 背景が白に戻ったため、枠自体をDesignTokens.primaryの濃い単色で塗り、
+    /// 白背景に対してくっきり見えるコントラストを確保する
+    /// （以前は白背景ベタ塗りに対して白い枠線を重ねる配色だったため、逆転させている）。
     private var qrFinderSection: some View {
         Button {
             showQRScanner = true
         } label: {
             RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusLarge, style: .continuous)
-                .stroke(Color.white, lineWidth: 3)
-                .background(
-                    RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusLarge, style: .continuous)
-                        .fill(Color.white.opacity(0.12))
-                )
+                .fill(DesignTokens.primary)
                 .frame(width: 180, height: 180)
                 .overlay {
                     Image(systemName: "qrcode.viewfinder")
                         .font(.system(size: 56, weight: .light))
                         .foregroundColor(.white)
                 }
+                .shadow(color: DesignTokens.primary.opacity(0.3), radius: 10, y: 4)
         }
         .accessibilityLabel("QRコードで参加")
     }
@@ -158,18 +158,25 @@ struct HomeView: View {
 
     private var actionsSection: some View {
         VStack(spacing: 20) {
-            // イベント作成ボタン
+            // イベント作成ボタン。白背景の上でくっきり見えるよう、
+            // 共通のPrimaryButtonStyle（白背景+青文字。薄い背景の画面向け）ではなく、
+            // DesignTokens.primaryの濃い単色塗りにする。
             Button {
                 showEventCreation = true
             } label: {
                 HStack {
                     Image(systemName: "plus.circle.fill")
                     Text("新しいイベントを作成")
+                        .fontWeight(.semibold)
                 }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(DesignTokens.primary)
+                .foregroundColor(.white)
+                .cornerRadius(16)
             }
-            .buttonStyle(.primary)
 
-            // QRスキャンボタン
+            // QRスキャンボタン（アウトライン、primaryカラー）
             Button {
                 showQRScanner = true
             } label: {
@@ -180,12 +187,11 @@ struct HomeView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.white.opacity(0.2))
-                .foregroundColor(.white)
+                .foregroundColor(DesignTokens.primary)
                 .cornerRadius(16)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white, lineWidth: 2)
+                        .stroke(DesignTokens.primary, lineWidth: 2)
                 )
             }
 
@@ -194,7 +200,7 @@ struct HomeView: View {
             // 伝えるだけで参加できる手段は用意しない。
             Text("参加できるのはQRコードを読み取った人だけです")
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.85))
+                .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.top, 4)
         }
@@ -229,7 +235,7 @@ struct HomeView: View {
             Text(title)
                 .font(.caption)
                 .fontWeight(.semibold)
-                .foregroundColor(.white.opacity(0.85))
+                .foregroundColor(.secondary)
 
             VStack(spacing: 8) {
                 ForEach(events) { event in
@@ -240,7 +246,7 @@ struct HomeView: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(event.name)
                                     .fontWeight(.medium)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                                     .lineLimit(1)
 
                                 HStack(spacing: 8) {
@@ -249,23 +255,23 @@ struct HomeView: View {
                                         Text("終了")
                                             .padding(.horizontal, 6)
                                             .padding(.vertical, 1)
-                                            .background(Color.white.opacity(0.25))
+                                            .background(Color.secondary.opacity(0.18))
                                             .cornerRadius(4)
                                     }
                                 }
                                 .font(.caption2)
-                                .foregroundColor(.white.opacity(0.75))
+                                .foregroundColor(.secondary)
                             }
 
                             Spacer()
 
                             Image(systemName: "chevron.right")
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(.secondary)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
-                        .background(Color.white.opacity(0.15))
+                        .background(Color(.secondarySystemBackground))
                         .cornerRadius(14)
                     }
                 }
