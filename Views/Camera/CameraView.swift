@@ -176,6 +176,33 @@ struct CameraView: View {
         .onDisappear {
             viewModel.stopSession()
         }
+        // iPhone 16以降のカメラコントロールボタン（と音量ボタン）でもシャッターを切れるようにする。
+        // シャッターボタンの`.disabled`と同じ条件でしか反応させない。
+        .cameraControlCapture(isEnabled: !viewModel.isProcessing && isEventActive) {
+            viewModel.capturePhoto()
+        }
+    }
+}
+
+// MARK: - カメラコントロール（iPhone 16以降の物理ボタン）対応
+
+private extension View {
+    /// カメラコントロールボタンが押し切られた（`.ended`）タイミングでシャッターを切る。
+    ///
+    /// `onCameraCaptureEvent`はiOS 18以降のAPIで、それ未満の端末では
+    /// このメソッド自体が存在しないため`#available`で分岐し、古い端末では何もしない
+    /// （その場合も画面上のシャッターボタンは従来どおり使える）。
+    @ViewBuilder
+    func cameraControlCapture(isEnabled: Bool, action: @escaping () -> Void) -> some View {
+        if #available(iOS 18.0, *) {
+            onCameraCaptureEvent(isEnabled: isEnabled) { event in
+                if event.phase == .ended {
+                    action()
+                }
+            }
+        } else {
+            self
+        }
     }
 }
 
