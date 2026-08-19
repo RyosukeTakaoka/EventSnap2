@@ -33,6 +33,35 @@ struct EventSnapApp: App {
                         Task { await SyncCoordinator.refreshTimeCapsules() }
                     }
                 }
+                .onReceive(NotificationService.shared.$pendingReveal.compactMap { $0 }) { target in
+                    handleNotificationReveal(target)
+                }
+        }
+    }
+
+    /// 公開通知をタップしたときの行き先を解決する。
+    ///
+    /// `handleDeepLink`と同じ「参加履歴に見つかる場合だけイベントを切り替える」
+    /// 方針を踏襲する。見つかった場合はアルバムタブへ切り替えたうえで、対象写真の
+    /// フルスクリーン表示を`MainTabView`に依頼する（`pendingRevealPhotoID`経由）。
+    private func handleNotificationReveal(_ target: NotificationService.RevealTarget) {
+        Task {
+            defer { NotificationService.shared.pendingReveal = nil }
+
+            if eventViewModel.currentEvent?.id != target.eventID {
+                guard let match = eventViewModel.recentEvents.first(where: { $0.id == target.eventID }) else {
+                    print("⚠️ 通知タップ先のイベントは参加履歴に見つかりませんでした: \(target.eventID)")
+                    return
+                }
+                await eventViewModel.switchEvent(to: match)
+            }
+
+            // 通知が届いた直後で、まだこの端末に写真一覧が同期されていない場合に備えて
+            // 取り直しておく（見つからなければフルスクリーンは開かず、アルバムだけ開く）。
+            try? await PhotoRepository.shared.fetchPhotos(for: target.eventID)
+
+            eventViewModel.pendingTab = .album
+            eventViewModel.pendingRevealPhotoID = target.photoID
         }
     }
 
@@ -174,6 +203,19 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
         [.banner, .sound, .list]
+    }
+
+    /// 公開通知がタップされたときの入口。
+    /// ここでは行き先を`NotificationService.pendingReveal`にセットするだけで、
+    /// 実際のイベント切り替え・タブ遷移・フルスクリーン表示は`EventSnapApp`側で行う
+    /// （`SwiftUI`の状態はそちらが真の情報源のため）。
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        await NotificationService.shared.handleNotificationTap(
+            userInfo: response.notification.request.content.userInfo
+        )
     }
 }
 

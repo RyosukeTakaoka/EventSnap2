@@ -15,6 +15,11 @@ struct AlbumView: View {
     @ObservedObject var eventViewModel: EventViewModel
     @Binding var showEventSwitcher: Bool
     @StateObject private var collageStore = ShareCollageStore.shared
+    @ObservedObject private var tutorial = TutorialManager.shared
+
+    /// アルバム画面が扱う初回チュートリアルのステップ
+    /// （カメラ側のステップは`CameraView`が別途面倒を見る）。
+    private static let albumSteps: Set<TutorialStep> = [.albumGrid, .lockedPhoto, .notificationHint]
 
     let columns = [
         GridItem(.flexible(), spacing: 2),
@@ -50,6 +55,7 @@ struct AlbumView: View {
                     // 写真グリッド。タイムカプセルでまだ公開されていない写真は、
                     // プレビューできないグレーの枠として同じグリッドに混ぜて並べる
                     // （砂時計マークで見分ける）。
+                    let firstLockedID = viewModel.locked.first?.id
                     LazyVGrid(columns: columns, spacing: 2) {
                         ForEach(viewModel.items) { item in
                             switch item {
@@ -57,11 +63,12 @@ struct AlbumView: View {
                                 NavigationLink(destination: PhotoDetailView(photo: photo, viewModel: viewModel)) {
                                     PhotoCell(photo: photo, viewModel: viewModel)
                                 }
-                            case .locked:
-                                LockedPhotoCell()
+                            case .locked(let photo):
+                                LockedPhotoCell(photo: photo, isTutorialTarget: photo.id == firstLockedID)
                             }
                         }
                     }
+                    .tutorialTarget(.albumGrid)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -109,6 +116,22 @@ struct AlbumView: View {
                 await viewModel.fetchPhotos()
             }
         }
+        // 初回チュートリアル: 実際のグリッド・公開待ちの枠をハイライトするだけで、
+        // 偽物のUIは作らない（`TutorialManager`のコメント参照）。
+        .overlayPreferenceValue(TutorialAnchorKey.self) { anchors in
+            if let step = tutorial.currentStep, Self.albumSteps.contains(step) {
+                let content = step.content
+                TutorialSpotlightOverlay(
+                    manager: tutorial,
+                    anchors: anchors,
+                    target: content.target,
+                    title: content.title,
+                    message: content.message,
+                    actionLabel: content.actionLabel,
+                    onAdvance: { tutorial.advance(hasLockedPhotos: !viewModel.locked.isEmpty) }
+                )
+            }
+        }
         .task {
             await viewModel.fetchPhotos()
             await viewModel.setupRealtimeSync()
@@ -121,7 +144,7 @@ struct AlbumView: View {
 struct PhotoCell: View {
     let photo: Photo
     let viewModel: AlbumViewModel
-    
+
     @State private var image: UIImage?
     @State private var isLoading = true
 
@@ -151,6 +174,15 @@ struct PhotoCell: View {
             // グリッド全体が真四角のタイル敷き詰めだと硬い印象になるため、
             // ごく小さい角丸だけ付けて柔らかく見せる（Instagramのグリッドに近い調整）。
             .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+            .overlay(alignment: .topTrailing) {
+                // 「あとで公開」の写真が公開された直後だけ、写真を邪魔しない
+                // 小さなNEWバッジを添える。一定時間で自動的に消える
+                // （`TimeCapsuleService.isRecentlyRevealed`参照）ので、
+                // アルバムは最終的に普通の思い出アルバムに戻る。
+                if TimeCapsuleService.isRecentlyRevealed(photo) {
+                    NewlyRevealedBadge()
+                }
+            }
             .task {
                 await loadImage()
             }
@@ -180,42 +212,63 @@ struct PhotoCell: View {
 /// 中身はプレビューできない（タップ不可）。参加者全員が同じ枠を見る。
 ///
 /// グレーのまま何も出さないと「画像が正しく読み込めていない」ように見えてしまうため、
-/// 待ってほしい旨の文言を添えている。
+/// 待機中であることが一目で分かるアイコンと、ぼかした残り時間（`vagueCountdown`）を添えている。
 struct LockedPhotoCell: View {
+    let photo: Photo
+    var isTutorialTarget: Bool = false
+
     var body: some View {
         Rectangle()
-            .fill(Color(.systemGray4))
+            // 単色のグレーだと「読み込み失敗」に見えるため、暖色のグラデーションで
+            // 「これから届く」ワクワク感を出す。
+            .fill(
+                LinearGradient(
+                    colors: [Color.orange.opacity(0.55), Color.pink.opacity(0.45)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
             .aspectRatio(1, contentMode: .fit)
             .overlay {
-                Text("公開まで\nお待ちください")
-                    .font(.caption2)
-                    .fontWeight(.medium)
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.white.opacity(0.9))
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.6)
-                    .padding(.horizontal, 6)
-            }
-            .overlay(alignment: .topTrailing) {
-                // 単色だと質素に見えるので、暖色のグラデーションでポップに見せる
-                Image(systemName: "hourglass")
-                    .font(.caption)
-                    .foregroundColor(.white)
-                    .padding(6)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.orange, Color.pink],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        in: Circle()
-                    )
-                    .shadow(color: Color.orange.opacity(0.5), radius: 3, y: 1)
-                    .padding(5)
+                VStack(spacing: 6) {
+                    Image(systemName: "hourglass")
+                        .font(.title3)
+                        .foregroundColor(.white)
+
+                    Text(TimeCapsuleService.vagueCountdown(for: photo))
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white.opacity(0.95))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.6)
+                        .padding(.horizontal, 6)
+                }
             }
             // PhotoCellと角丸を揃え、グリッド上で浮いて見えないようにする
             .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
-            .accessibilityLabel("公開前のタイムカプセル写真。公開までお待ちください")
+            .tutorialTarget(.lockedPhoto, isActive: isTutorialTarget)
+            .accessibilityLabel("公開前のタイムカプセル写真。\(TimeCapsuleService.vagueCountdown(for: photo))")
+    }
+}
+
+// MARK: - 最近公開されたバッジ
+
+/// 「あとで公開」の写真が公開された直後だけ表示する、小さなNEWバッジ。
+/// 写真そのものより目立たせず、隅に添えるだけに留める。
+struct NewlyRevealedBadge: View {
+    var body: some View {
+        Text("✨ NEW")
+            .font(.system(size: 10, weight: .bold))
+            .foregroundColor(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(
+                LinearGradient(colors: [Color.pink, Color.orange], startPoint: .leading, endPoint: .trailing),
+                in: Capsule()
+            )
+            .padding(5)
+            .accessibilityLabel("最近公開された写真")
     }
 }
 
@@ -365,6 +418,78 @@ struct PhotoDetailView: View {
         showingSaveConfirmation = true
         
         print("✅ カメラロールに保存完了")
+    }
+}
+
+// MARK: - 公開通知タップ時のフルスクリーン表示
+
+/// 公開通知をタップしたときに開く、対象写真のフルスクリーン表示。
+///
+/// 通常のアルバムを開くだけでなく、「今公開されたその写真」を直接、画面いっぱいに
+/// 見せる（`MainTabView`が`EventViewModel.pendingRevealPhotoID`を見てこれを
+/// `fullScreenCover`として提示する）。写真を主役にし、説明文は最小限に留める。
+struct RevealedPhotoFullScreenView: View {
+    let photo: Photo
+    let onClose: () -> Void
+
+    @State private var image: UIImage?
+    @State private var isLoading = true
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            if isLoading {
+                ProgressView()
+                    .tint(.white)
+                    .scaleEffect(1.5)
+            } else if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            } else {
+                VStack(spacing: 16) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 60))
+                        .foregroundColor(.white.opacity(0.7))
+                    Text("画像の読み込みに失敗しました")
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.7))
+                }
+            }
+
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        onClose()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(.ultraThinMaterial, in: Circle())
+                            .environment(\.colorScheme, .dark)
+                    }
+                    .padding(.trailing, 16)
+                    .accessibilityLabel("閉じる")
+                }
+                .padding(.top, 8)
+
+                Spacer()
+
+                HStack {
+                    Spacer()
+                    NewlyRevealedBadge()
+                        .padding(.trailing, 10)
+                        .padding(.bottom, 24)
+                }
+            }
+        }
+        .task {
+            image = await PhotoImageLoader.shared.image(for: photo)
+            isLoading = false
+        }
     }
 }
 

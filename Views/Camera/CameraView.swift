@@ -11,6 +11,11 @@ import AVFoundation
 struct CameraView: View {
     @StateObject private var viewModel = CameraViewModel()
     @ObservedObject private var eventRepository = EventRepository.shared
+    @ObservedObject private var tutorial = TutorialManager.shared
+
+    /// カメラ画面で扱う初回チュートリアルのステップだけを対象にする
+    /// （アルバム側のステップは`AlbumView`が別途面倒を見る）。
+    private static let cameraSteps: Set<TutorialStep> = [.shutter, .shareOK, .laterReveal, .shutterForLaterReveal]
 
     /// 終了したイベントには新しい写真を追加できない
     private var isEventActive: Bool {
@@ -108,6 +113,7 @@ struct CameraView: View {
                         .opacity(isEventActive ? 1 : 0.4)
                     }
                     .disabled(viewModel.isProcessing || !isEventActive)
+                    .tutorialTarget(.shutter)
 
                     if isEventActive {
                         HStack {
@@ -118,6 +124,7 @@ struct CameraView: View {
                                     label: "シェアOK",
                                     tint: .green
                                 )
+                                .tutorialTarget(.shareOK)
 
                                 CaptureOptionToggle(
                                     isOn: $viewModel.saveAsTimeCapsule,
@@ -125,6 +132,7 @@ struct CameraView: View {
                                     label: "あとで公開",
                                     tint: .orange
                                 )
+                                .tutorialTarget(.laterReveal)
                             }
                             Spacer()
                         }
@@ -134,12 +142,36 @@ struct CameraView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 40)
             }
+
+            // カメラのタブ切り替えを促す案内だけは、対象UIがこの画面に無い
+            // （タブバー自体をハイライト対象にしていない）ため、スポットライトではなく
+            // 下向き矢印の小さな案内にする。
+            if tutorial.currentStep == .goToAlbum {
+                TutorialBottomHint(text: "次はアルバムを見てみよう")
+            }
+        }
+        // 初回チュートリアル: 実際のシャッター・トグルの実測フレームを読み取り、
+        // その上にハイライトを重ねるだけで、偽物のUIは一切作らない
+        // （`TutorialManager`のコメント参照）。
+        .overlayPreferenceValue(TutorialAnchorKey.self) { anchors in
+            if let step = tutorial.currentStep, Self.cameraSteps.contains(step) {
+                let content = step.content
+                TutorialSpotlightOverlay(
+                    manager: tutorial,
+                    anchors: anchors,
+                    target: content.target,
+                    title: content.title,
+                    message: content.message,
+                    actionLabel: content.actionLabel
+                )
+            }
         }
         .task {
             await viewModel.checkCameraPermission()
         }
         .onAppear {
             viewModel.startSession()
+            tutorial.startIfNeeded()
         }
         .onDisappear {
             viewModel.stopSession()

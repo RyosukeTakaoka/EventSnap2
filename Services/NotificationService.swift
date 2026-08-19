@@ -7,6 +7,7 @@
 
 import Foundation
 import UserNotifications
+import Combine
 
 /// タイムカプセルが公開されたことを知らせる通知。
 ///
@@ -29,8 +30,18 @@ import UserNotifications
 /// サーバーを増やさずに「全員に、公開の瞬間に」通知できる。
 /// アプリ起動時にも予約し直すので、silent push を取りこぼしても復帰する。
 @MainActor
-final class NotificationService {
+final class NotificationService: ObservableObject {
     static let shared = NotificationService()
+
+    /// 公開通知をタップして、対象の写真をフルスクリーンで開くための行き先。
+    struct RevealTarget: Equatable {
+        let eventID: UUID
+        let photoID: UUID
+    }
+
+    /// 公開通知がタップされたときに立つ。`EventSnapApp`が監視し、対象イベントへ
+    /// 切り替えたうえで対象写真をフルスクリーン表示する。処理し終えたら`nil`に戻す。
+    @Published var pendingReveal: RevealTarget?
 
     private init() {}
 
@@ -168,6 +179,21 @@ final class NotificationService {
         let ids = photoIDs.map { Self.prefix + $0.uuidString }
         center.removePendingNotificationRequests(withIdentifiers: ids)
         print("🔕 \(ids.count) 件の公開通知を取り消しました（シェア優先による解除）")
+    }
+
+    // MARK: - 通知タップ
+
+    /// 通知の`userInfo`から対象イベント・対象写真を取り出し、`pendingReveal`にセットする。
+    /// 公開通知(`timeCapsuleReveal`)以外は無視する。
+    func handleNotificationTap(userInfo: [AnyHashable: Any]) {
+        guard (userInfo["type"] as? String) == "timeCapsuleReveal",
+              let eventIDString = userInfo["eventID"] as? String,
+              let eventID = UUID(uuidString: eventIDString),
+              let photoIDString = userInfo["photoID"] as? String,
+              let photoID = UUID(uuidString: photoIDString)
+        else { return }
+
+        pendingReveal = RevealTarget(eventID: eventID, photoID: photoID)
     }
 
     // MARK: - 文言

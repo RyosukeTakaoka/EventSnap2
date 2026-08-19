@@ -114,4 +114,19 @@ enum TimeCapsuleService {
         default:    return "2週間以内に公開"
         }
     }
+
+    // MARK: - 最近公開された写真（NEW表示）
+
+    /// 公開直後、「最近公開された」として特別扱いする期間。
+    /// これを過ぎたら普通の写真として扱い、NEW表示は自動的に終わる。
+    /// アルバムが最終的に自然な思い出アルバムに戻ることを優先するため、
+    /// 「これはタイムカプセルでした」という印を永久には残さない。
+    static let recentlyRevealedWindow: TimeInterval = 24 * 60 * 60 // 24時間
+
+    /// 公開されてからまだ間もないか（NEWバッジの表示対象か）。
+    /// 新しい永続フラグは持たず、既存の`revealDate`との差分だけで判定する。
+    static func isRecentlyRevealed(_ photo: Photo, now: Date = Date()) -> Bool {
+        guard photo.isTimeCapsule, let revealDate = photo.revealDate, revealDate <= now else { return false }
+        return now.timeIntervalSince(revealDate) <= recentlyRevealedWindow
+    }
 }
