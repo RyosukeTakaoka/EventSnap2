@@ -43,6 +43,16 @@ enum ShareCollageBuilder {
     /// Reelとして成立するとみなし、そこで妥協して生成する。
     static let minSelectedPhotosPerReel = 2
 
+    /// 未使用のシェアOK写真の総数がこの枚数以下のうちは"序盤"として扱い、
+    /// 間引き後1枚だけになってもEvent Reelとして即座に成立させる
+    /// （`minSelectedPhotosPerReel`ではなく1を要求する）。
+    ///
+    /// イベント立ち上がり時、最初のReelがいつできるかユーザーから見て予測できない
+    /// という体験を避けるための措置（最初の数枚だけは緩く出す、という考え方）。
+    /// 写真が集まってきたら(この枚数を超えたら)、多様性重視で複数枚を選ぶ
+    /// 従来の`minSelectedPhotosPerReel`（2枚以上）に切り替える。
+    static let earlyEventPhotoThreshold = 5
+
     /// 1件のEvent Reelに入れる写真の上限。「7枚や10枚を無理に詰め込まない」
     /// という方針のための上限で、これを超える分は次のReelの材料として残る。
     static let maxPhotosPerReel = 5
@@ -83,6 +93,15 @@ enum ShareCollageBuilder {
         var created: [EventReel] = []
 
         while remaining.count >= minPhotosForNewReel {
+            // 序盤（このバッチ開始時点で未使用のシェアOK写真がearlyEventPhotoThreshold
+            // 枚以下）は、間引き後1枚だけになってもReelとして即座に成立させる。
+            // 「いつ最初のReelができるか分からない」という体験を避けるための措置で、
+            // 写真が貯まってきたら(この枚数を超えたら)多様性重視の
+            // minSelectedPhotosPerReel（2枚以上）に切り替える。
+            let requiredSelectedCount = remaining.count <= earlyEventPhotoThreshold
+                ? 1
+                : minSelectedPhotosPerReel
+
             // 古い順から一定数だけを解析対象にする（撮影時間の分散を見る都合上、
             // 常に一番古い未使用写真から評価を始めるのが自然なため）。
             let pool = Array(remaining.prefix(analysisPoolCap))
@@ -91,10 +110,10 @@ enum ShareCollageBuilder {
             let target = min(candidates.count, maxPhotosPerReel)
             guard target >= minPhotosForNewReel,
                   let selection = EventReelPhotoSelector.select(from: candidates, target: target),
-                  selection.ordered.count >= minSelectedPhotosPerReel
+                  selection.ordered.count >= requiredSelectedCount
             else {
                 // 解析できた枚数が足りない(ダウンロード失敗が続いた等)、または
-                // 重複除去後にminSelectedPhotosPerReelすら残らなかった。
+                // 重複除去後にrequiredSelectedCountすら残らなかった。
                 // remainingは変えずに終了し、次回の同期で改めて試す
                 // (新しい写真が増えれば束ね方も変わるため)。
                 break
