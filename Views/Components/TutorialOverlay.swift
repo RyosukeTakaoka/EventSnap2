@@ -219,20 +219,32 @@ struct TutorialBottomHint: View {
     let text: String
 
     var body: some View {
-        VStack {
-            Spacer()
-            HStack(spacing: 6) {
-                Text(text)
-                    .font(.subheadline.weight(.semibold))
-                Image(systemName: "arrow.down")
+        GeometryReader { proxy in
+            // タブバーは画面幅をタブ数で均等分割した1番目（左端）が「アルバム」
+            // （`AppTab`参照）。TabView標準のタブバーはこの均等分割に従うため、
+            // 「1/タブ数」を1区画とみなし、その中心のX座標を狙う。
+            //
+            // タブの並び・個数が変わったら（現状はalbum/camera/invite/settingsの
+            // 4個固定）、この計算式も見直すこと。
+            let tabCount: CGFloat = 4
+            let albumTabCenterX = proxy.size.width * (0.5 / tabCount)
+
+            VStack {
+                Spacer()
+                HStack(spacing: 6) {
+                    Text(text)
+                        .font(.subheadline.weight(.semibold))
+                    Image(systemName: "arrow.down")
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color.black.opacity(0.75), in: Capsule())
+                .position(x: albumTabCenterX, y: proxy.size.height - 90)
             }
-            .foregroundColor(.white)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(Color.black.opacity(0.75), in: Capsule())
-            .padding(.bottom, 6)
         }
         .allowsHitTesting(false)
         .transition(.opacity)
+        .ignoresSafeArea()
     }
 }
