@@ -150,6 +150,14 @@ struct CameraView: View {
                 TutorialBottomHint(text: "次はアルバムを見てみよう")
             }
         }
+        // 内側のCameraPreview/背景Imageだけが`.ignoresSafeArea()`でセーフエリアの
+        // 外まで描画される一方、このZStack自体はセーフエリアを避けた通常のフレームの
+        // ままだったため、`.overlayPreferenceValue`が付けるオーバーレイ
+        // （TutorialSpotlightOverlay内のGeometryReader）の座標系と、
+        // `.tutorialTarget`が記録する実際のUIの絶対座標系がズレて、スポットライトが
+        // セーフエリアの高さ分だけ上にずれて表示される原因になっていた。
+        // ZStack自体もセーフエリアを無視させ、両者の基準を一致させる。
+        .ignoresSafeArea()
         // 初回チュートリアル: 実際のシャッター・トグルの実測フレームを読み取り、
         // その上にハイライトを重ねるだけで、偽物のUIは一切作らない
         // （`TutorialManager`のコメント参照）。
