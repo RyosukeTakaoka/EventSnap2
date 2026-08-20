@@ -8,6 +8,7 @@
 import CoreGraphics
 import Foundation
 import UIKit
+import SwiftUI
 
 /// 「EventSnapで撮った写真をSNSに載せたくなる」ことを目的にした、写真主役のシェア画像を作る。
 ///
@@ -83,6 +84,32 @@ enum SocialCardService {
                 date: date,
                 participantCount: participantCount,
                 photoCount: photoCount
+            )
+        }
+    }
+
+    /// 「フォトダンプ」スタイル(均等グリッドに余白なく敷き詰める)のEvent Reelを
+    /// 1枚描画する。`MultiPhotoRenderer`（メイン写真を大きく、残りを雑誌風に配置）
+    /// とは独立した、選べるもう1つのレイアウト。
+    ///
+    /// **現時点ではUI上の選択肢としては使わない**（既存のEvent Reel生成フローは
+    /// 一切変更していない）。呼び出し側が明示的にこの関数を呼んだときだけ使われる。
+    static func renderGridPhotoDump(
+        photos: [MultiPhotoRenderer.PhotoInput],
+        eventName: String,
+        date: Date
+    ) -> UIImage {
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        format.opaque = true
+
+        return UIGraphicsImageRenderer(size: canvasSize, format: format).image { ctx in
+            GridPhotoDumpRenderer.draw(
+                cg: ctx.cgContext,
+                canvasSize: canvasSize,
+                photos: photos,
+                eventName: eventName,
+                date: date
             )
         }
     }
@@ -546,6 +573,163 @@ enum MultiPhotoRenderer {
         image.draw(in: CGRect(x: rect.minX - crop.minX, y: rect.minY - crop.minY, width: drawSize.width, height: drawSize.height))
 
         cg.restoreGState()
+    }
+}
+
+// MARK: - E. GridPhotoDump(均等グリッドで敷き詰める「フォトダンプ」スタイル)
+
+/// Instagram等で実際に流行している「photo dump」スタイル(均等なグリッドに
+/// 余白なく写真を敷き詰め、文字を写真の上に直接重ねる)を再現する。
+///
+/// `MultiPhotoRenderer`（メイン写真を大きく、残りを雑誌風の余白付きレイアウトで
+/// 並べる）とは対照的に、「全ての写真を対等に、隙間なく並べる」ことを狙う。
+/// `MultiPhotoRenderer`は一切変更せず、独立した実装として追加する。
+///
+/// **現時点ではUI上の選択肢としては使わない**（既存のEvent Reel生成フローは
+/// 変更していない）。`SocialCardService.renderGridPhotoDump(...)`から
+/// 明示的に呼び出せる、独立したレンダラー関数として用意するだけ。
+enum GridPhotoDumpRenderer {
+
+    static func draw(
+        cg: CGContext,
+        canvasSize: CGSize,
+        photos: [MultiPhotoRenderer.PhotoInput],
+        eventName: String,
+        date: Date
+    ) {
+        guard !photos.isEmpty else { return }
+
+        let layout = gridLayout(for: photos.count)
+        let cellCount = layout.rows * layout.columns
+
+        // 枚数がレイアウトのマス目数に満たない場合(3,5,7枚など)は、選ばれた
+        // 写真を1枚も間引かず、最後の写真を引き伸ばして余ったマス目を埋める。
+        var tilePhotos = Array(photos.prefix(cellCount))
+        if let last = tilePhotos.last {
+            while tilePhotos.count < cellCount {
+                tilePhotos.append(last)
+            }
+        }
+
+        let rects = gridRects(rows: layout.rows, columns: layout.columns, canvasSize: canvasSize)
+        for (index, rect) in rects.enumerated() where index < tilePhotos.count {
+            drawTile(tilePhotos[index], in: rect, cg: cg)
+        }
+
+        drawCaption(cg: cg, canvasSize: canvasSize, eventName: eventName, date: date)
+
+        // 写真で埋め尽くされた背景の上に乗るため、MultiPhotoRenderer（紙面色の
+        // 背景に対して濃いink）とは異なりinkは白にしている。それ以外(corner・
+        // opacity・shadow: false)はMultiPhotoRendererの呼び出しと同じ、控えめな
+        // 主張度合いに揃えている。
+        SocialCardDrawing.drawBrandMark(cg: cg, canvasSize: canvasSize, corner: .bottomTrailing, ink: .white, opacity: 0.85, shadow: false)
+    }
+
+    // MARK: - レイアウト(枚数ごとのグリッド構成)
+
+    private struct Layout {
+        let rows: Int
+        let columns: Int
+    }
+
+    /// 2/4/6/8枚を基本形とする。これらに一致しない枚数(3,5,7枚など)は、
+    /// 直近の大きい方の基本形に丸める(余ったマス目は最後の写真の引き伸ばしで埋める。
+    /// `draw(cg:canvasSize:photos:eventName:date:)`参照)。9枚以上は8枠に丸め、
+    /// 先頭8枚だけを使う(呼び出し側で目標2〜5枚程度に絞る想定のため、実運用では
+    /// 起こりにくい)。
+    private static func gridLayout(for count: Int) -> Layout {
+        switch count {
+        case ...2: return Layout(rows: 2, columns: 1)
+        case 3...4: return Layout(rows: 2, columns: 2)
+        case 5...6: return Layout(rows: 3, columns: 2)
+        default: return Layout(rows: 4, columns: 2)
+        }
+    }
+
+    /// 行・列とも均等なマス目に分割する。`MultiPhotoRenderer.computeTileRects`と
+    /// 違い、行の高さ比率が可変ではなく完全に均等、かつ余白(gap)も無いため、
+    /// より単純な計算で済む。
+    private static func gridRects(rows: Int, columns: Int, canvasSize: CGSize) -> [CGRect] {
+        let cellWidth = canvasSize.width / CGFloat(columns)
+        let cellHeight = canvasSize.height / CGFloat(rows)
+
+        var rects: [CGRect] = []
+        for row in 0..<rows {
+            for col in 0..<columns {
+                rects.append(CGRect(
+                    x: CGFloat(col) * cellWidth,
+                    y: CGFloat(row) * cellHeight,
+                    width: cellWidth,
+                    height: cellHeight
+                ))
+            }
+        }
+        return rects
+    }
+
+    /// タイル矩形にクリップして写真を敷く。`MultiPhotoRenderer.drawTilePhoto`と
+    /// 同じ考え方(`PhotoAnalyzer.coverCrop`)だが、gapが無い分クリップ矩形の
+    /// 計算がより単純なため、`MultiPhotoRenderer`を変更せずに独立して実装している。
+    private static func drawTile(_ input: MultiPhotoRenderer.PhotoInput, in rect: CGRect, cg: CGContext) {
+        guard rect.width > 0, rect.height > 0 else { return }
+        cg.saveGState()
+        cg.clip(to: rect)
+
+        let image = input.image
+        let scale = max(rect.width / image.size.width, rect.height / image.size.height)
+        let crop = PhotoAnalyzer.coverCrop(imageSize: image.size, canvasSize: rect.size, importanceCenter: input.importanceCenter)
+        let drawSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        image.draw(in: CGRect(x: rect.minX - crop.minX, y: rect.minY - crop.minY, width: drawSize.width, height: drawSize.height))
+
+        cg.restoreGState()
+    }
+
+    // MARK: - キャプション(写真の上に直接重ねる)
+
+    /// イベント名・日付を画面中央あたりに、写真の上へ直接重ねる。独立したカードや
+    /// 矩形の背景は作らない。文字色は要件通り常に白固定で、影・縁取り・
+    /// 半透明の背景板などの視認性補助は一切付けない。
+    ///
+    /// **簡略化した実装（既知の限界）**: どの写真の上に重なっても読める配置を
+    /// Vision解析等で厳密に自動判定するのではなく、常にキャンバス中央に固定して
+    /// いる。偶数行・偶数列のグリッド(2×2, 4×2等)では、中央はちょうど4枚の
+    /// タイルの継ぎ目が交わる点になるため、被写体の中心がそこに来る構図は
+    /// 比較的少ないという前提に基づく簡易ヒューリスティック(3行グリッド(3×2)では
+    /// 継ぎ目の片側だけになるため、必ずしもこの前提は成り立たない)。文字色が
+    /// 常に白固定という制約上、明るい写真が中央に来た場合は視認性が落ちる
+    /// 可能性がある。実写真で読みにくいケースが多いようであれば、中央タイルだけ
+    /// 簡易的な明度サンプリングを行って配置を上下にずらす、といった改善が今後の課題。
+    private static func drawCaption(cg: CGContext, canvasSize: CGSize, eventName: String, date: Date) {
+        let ink = UIColor.white
+        let maxWidth = canvasSize.width * 0.82
+
+        let (nameLines, nameFont) = SocialCardDrawing.fitTitle(
+            eventName, weight: .black, maxWidth: maxWidth, maxLines: 2, maxSize: 76, minSize: 40
+        )
+        let nameLineHeight = nameFont.ascender - nameFont.descender
+
+        let dateFont = SocialCardDrawing.notoSansJP(weight: .bold, size: 32)
+        let dateLineHeight = dateFont.ascender - dateFont.descender
+
+        let gapBetween: CGFloat = 14
+        let blockHeight = CGFloat(nameLines.count) * nameLineHeight * 1.08 + gapBetween + dateLineHeight
+
+        var y = canvasSize.height / 2 - blockHeight / 2
+
+        for line in nameLines {
+            let width = (line as NSString).size(withAttributes: [.font: nameFont]).width
+            let x = canvasSize.width / 2 - width / 2
+            (line as NSString).draw(at: CGPoint(x: x, y: y), withAttributes: [.font: nameFont, .foregroundColor: ink])
+            y += nameLineHeight * 1.08
+        }
+
+        y += gapBetween
+        let dateText = SocialCardDrawing.dateString(date)
+        let dateWidth = (dateText as NSString).size(withAttributes: [.font: dateFont]).width
+        (dateText as NSString).draw(
+            at: CGPoint(x: canvasSize.width / 2 - dateWidth / 2, y: y),
+            withAttributes: [.font: dateFont, .foregroundColor: ink.withAlphaComponent(0.88)]
+        )
     }
 }
 
@@ -1043,5 +1227,54 @@ private extension SafeZone {
         case .left: return .right
         case .right: return .left
         }
+    }
+}
+
+// MARK: - Preview (GridPhotoDumpRenderer動作確認用)
+
+/// 単色のプレースホルダー画像を敷き詰めるだけの簡易プレビュー。
+/// 実際の写真素材が無くても、2/4/6/8枚それぞれのグリッド構成・文字の
+/// 中央配置・ブランドマークの見た目をXcode Canvasで確認できる。
+#Preview("GridPhotoDump - 4枚") {
+    GridPhotoDumpPreview(count: 4, eventName: "文化祭2026", colors: [.systemRed, .systemBlue, .systemGreen, .systemOrange])
+}
+
+#Preview("GridPhotoDump - 6枚") {
+    GridPhotoDumpPreview(
+        count: 6,
+        eventName: "サマーキャンプ",
+        colors: [.systemRed, .systemBlue, .systemGreen, .systemOrange, .systemPurple, .systemTeal]
+    )
+}
+
+#Preview("GridPhotoDump - 3枚(端数、最後の写真で埋める)") {
+    GridPhotoDumpPreview(count: 3, eventName: "同窓会2026", colors: [.systemRed, .systemBlue, .systemGreen])
+}
+
+private struct GridPhotoDumpPreview: View {
+    let count: Int
+    let eventName: String
+    let colors: [UIColor]
+
+    var body: some View {
+        Image(uiImage: renderedImage)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+    }
+
+    private var renderedImage: UIImage {
+        let inputs = colors.prefix(count).map { color -> MultiPhotoRenderer.PhotoInput in
+            let placeholder = UIGraphicsImageRenderer(size: CGSize(width: 400, height: 600)).image { _ in
+                color.setFill()
+                UIRectFill(CGRect(x: 0, y: 0, width: 400, height: 600))
+            }
+            return MultiPhotoRenderer.PhotoInput(image: placeholder, importanceCenter: CGPoint(x: 0.5, y: 0.5))
+        }
+
+        return SocialCardService.renderGridPhotoDump(
+            photos: Array(inputs),
+            eventName: eventName,
+            date: Date()
+        )
     }
 }
