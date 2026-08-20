@@ -139,23 +139,24 @@ struct TutorialSpotlightOverlay: View {
 
                 calloutCard
                     .position(calloutPosition(for: rect, in: proxy.size))
-
-                // このZStack自体は`.ignoresSafeArea()`されたスポットライトの
-                // 座標系に合わせて配置されているため、`.padding(.top, 8)`だけでは
-                // 画面の物理的な最上部（ステータスバーの高さ）から8pt程度しか
-                // 離れず、バッテリー表示等と重なって見えていた。
-                // `proxy.safeAreaInsets.top`を明示的に足し、常にセーフエリアの
-                // 下にスキップボタンが来るようにする。
-                VStack {
-                    HStack {
-                        Spacer()
-                        skipButton
-                    }
-                    Spacer()
-                }
-                .padding(.top, proxy.safeAreaInsets.top + 8)
-                .padding(.trailing, 16)
             }
+        }
+        // スキップボタンはGeometryReaderの外側（セーフエリアを尊重する通常の
+        // 座標系）にオーバーレイとして追加する。
+        //
+        // 以前は`proxy.safeAreaInsets.top`を使って手動で余白を足していたが、
+        // このGeometryReader自体がCameraView側で`.ignoresSafeArea()`された
+        // ビュー階層の内側にあるため、`proxy.safeAreaInsets`がゼロ（またはそれに
+        // 近い値）を返してしまい、実質的に効果が出ていなかった
+        // （SwiftUIの既知の癖: `.ignoresSafeArea()`されたビューの内側の
+        // GeometryReaderはsafeAreaInsetsを正しく取得できないことがある）。
+        // GeometryReaderの外側に出せば、この`.overlay`自体は通常の
+        // セーフエリアを尊重する座標系で配置されるため、固定の`.padding(.top, 8)`
+        // だけで確実にステータスバーの下に来る。
+        .overlay(alignment: .topTrailing) {
+            skipButton
+                .padding(.top, 8)
+                .padding(.trailing, 16)
         }
         .animation(.easeInOut(duration: 0.25), value: target)
         .transition(.opacity)
@@ -218,20 +219,32 @@ struct TutorialBottomHint: View {
     let text: String
 
     var body: some View {
-        VStack {
-            Spacer()
-            HStack(spacing: 6) {
-                Text(text)
-                    .font(.subheadline.weight(.semibold))
-                Image(systemName: "arrow.down")
+        GeometryReader { proxy in
+            // タブバーは画面幅をタブ数で均等分割した1番目（左端）が「アルバム」
+            // （`AppTab`参照）。TabView標準のタブバーはこの均等分割に従うため、
+            // 「1/タブ数」を1区画とみなし、その中心のX座標を狙う。
+            //
+            // タブの並び・個数が変わったら（現状はalbum/camera/invite/settingsの
+            // 4個固定）、この計算式も見直すこと。
+            let tabCount: CGFloat = 4
+            let albumTabCenterX = proxy.size.width * (0.5 / tabCount)
+
+            VStack {
+                Spacer()
+                HStack(spacing: 6) {
+                    Text(text)
+                        .font(.subheadline.weight(.semibold))
+                    Image(systemName: "arrow.down")
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color.black.opacity(0.75), in: Capsule())
+                .position(x: albumTabCenterX, y: proxy.size.height - 90)
             }
-            .foregroundColor(.white)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(Color.black.opacity(0.75), in: Capsule())
-            .padding(.bottom, 6)
         }
         .allowsHitTesting(false)
         .transition(.opacity)
+        .ignoresSafeArea()
     }
 }
