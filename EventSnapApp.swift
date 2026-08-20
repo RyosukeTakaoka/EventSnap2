@@ -18,8 +18,12 @@ struct EventSnapApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
-                .environmentObject(eventViewModel)
+            // HomeViewには必ずこのインスタンスを渡す。このアプリは
+            // `@EnvironmentObject`を使っていないため、`.environmentObject(...)`で
+            // 渡すだけではHomeView側の独自インスタンスに上書きされ、
+            // handleDeepLink等でのpendingTab更新が一切届かなくなる
+            // （詳細はHomeView.swiftのコメント参照）。
+            HomeView(eventViewModel: eventViewModel)
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in
                     handleUniversalLink(userActivity)
                 }
