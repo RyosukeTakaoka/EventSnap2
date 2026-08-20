@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import AVKit
 
 struct CameraView: View {
     @StateObject private var viewModel = CameraViewModel()
@@ -150,20 +151,25 @@ struct CameraView: View {
                 TutorialBottomHint(text: "次はアルバムを見てみよう")
             }
         }
-        // 内側のCameraPreview/背景Imageだけが`.ignoresSafeArea()`でセーフエリアの
-        // 外まで描画される一方、このZStack自体はセーフエリアを避けた通常のフレームの
-        // ままだったため、`.overlayPreferenceValue`が付けるオーバーレイ
-        // （TutorialSpotlightOverlay内のGeometryReader）の座標系と、
-        // `.tutorialTarget`が記録する実際のUIの絶対座標系がズレて、スポットライトが
-        // セーフエリアの高さ分だけ上にずれて表示される原因になっていた。
-        // ZStack自体もセーフエリアを無視させ、両者の基準を一致させる。
-        .ignoresSafeArea()
+        // 前回、このZStack自体に`.ignoresSafeArea()`を付けてスポットライトの
+        // 座標ズレを直そうとしたが、これは誤りだった。ZStack全体がセーフエリアを
+        // 無視するようになった結果、内部のVStack（トップバーのカメラ切り替え
+        // ボタン、ボトムのシャッター/トグル）まで巻き込まれて位置がズレ、
+        // 通常時のレイアウトが崩れてしまっていた。ZStack自体は元の
+        // （セーフエリアを尊重する）レイアウトに戻す。内側のCameraPreview/
+        // 背景Imageに個別に付いている`.ignoresSafeArea()`は変更しない。
+        //
         // 初回チュートリアル: 実際のシャッター・トグルの実測フレームを読み取り、
         // その上にハイライトを重ねるだけで、偽物のUIは一切作らない
         // （`TutorialManager`のコメント参照）。
         .overlayPreferenceValue(TutorialAnchorKey.self) { anchors in
             if let step = tutorial.currentStep, Self.cameraSteps.contains(step) {
                 let content = step.content
+                // 座標ズレの解決はレイアウト側ではなく、このオーバーレイ自体の
+                // 座標系をセーフエリア無視に揃えることで行う。CameraPreview/
+                // 背景Imageが`.ignoresSafeArea()`で描画される絶対座標と、
+                // `.tutorialTarget`が記録する実際のUIの絶対座標は元々
+                // 一致しているため、オーバーレイ側だけをそれに合わせる。
                 TutorialSpotlightOverlay(
                     manager: tutorial,
                     anchors: anchors,
@@ -172,6 +178,7 @@ struct CameraView: View {
                     message: content.message,
                     actionLabel: content.actionLabel
                 )
+                .ignoresSafeArea()
             }
         }
         .task {
