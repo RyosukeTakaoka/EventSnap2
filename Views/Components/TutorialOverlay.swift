@@ -140,6 +140,12 @@ struct TutorialSpotlightOverlay: View {
                 calloutCard
                     .position(calloutPosition(for: rect, in: proxy.size))
 
+                // このZStack自体は`.ignoresSafeArea()`されたスポットライトの
+                // 座標系に合わせて配置されているため、`.padding(.top, 8)`だけでは
+                // 画面の物理的な最上部（ステータスバーの高さ）から8pt程度しか
+                // 離れず、バッテリー表示等と重なって見えていた。
+                // `proxy.safeAreaInsets.top`を明示的に足し、常にセーフエリアの
+                // 下にスキップボタンが来るようにする。
                 VStack {
                     HStack {
                         Spacer()
@@ -147,7 +153,7 @@ struct TutorialSpotlightOverlay: View {
                     }
                     Spacer()
                 }
-                .padding(.top, 8)
+                .padding(.top, proxy.safeAreaInsets.top + 8)
                 .padding(.trailing, 16)
             }
         }
