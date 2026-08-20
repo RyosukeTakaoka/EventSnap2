@@ -17,6 +17,11 @@ struct AlbumView: View {
     @StateObject private var collageStore = ShareCollageStore.shared
     @ObservedObject private var tutorial = TutorialManager.shared
 
+    /// アルバムを開いた際に見せる、タイムカプセル公開のお祝い演出。
+    /// 対象写真がセットされている間だけ全画面オーバーレイとして出す。
+    @State private var revealOverlayPhoto: Photo?
+    @State private var revealOverlayImage: UIImage?
+
     /// アルバム画面が扱う初回チュートリアルのステップ
     /// （カメラ側のステップは`CameraView`が別途面倒を見る）。
     private static let albumSteps: Set<TutorialStep> = [.albumGrid, .lockedPhoto, .notificationHint]
@@ -132,9 +137,46 @@ struct AlbumView: View {
                 )
             }
         }
+        // タイムカプセル公開のお祝い演出。表示専用の追加で、Event Reel生成や
+        // CloudKit同期のロジックには一切触れない。
+        .overlay {
+            if let photo = revealOverlayPhoto {
+                TimeCapsuleRevealOverlay(photo: photo, image: revealOverlayImage) {
+                    dismissRevealOverlay()
+                }
+                .transition(.opacity)
+            }
+        }
         .task {
             await viewModel.fetchPhotos()
             await viewModel.setupRealtimeSync()
+            await checkForNewlyRevealedCapsule()
+        }
+    }
+
+    // MARK: - タイムカプセル公開演出
+
+    /// 前回訪問時から新しく公開されたタイムカプセル写真があれば1件だけ選び、
+    /// お祝い演出を出す。新規公開の判定は、NEWバッジ判定と同じ
+    /// `TimeCapsuleService.isRecentlyRevealed`をそのまま再利用する
+    /// （新しいrevealDate比較のロジックを別に作らない）。
+    private func checkForNewlyRevealedCapsule() async {
+        guard revealOverlayPhoto == nil else { return }
+        guard let candidate = viewModel.photos.first(where: {
+            TimeCapsuleService.isRecentlyRevealed($0) && !TimeCapsuleRevealHistory.hasShown($0.id)
+        }) else { return }
+
+        // 演出を出す前に「表示済み」として記録し、途中でアルバムを離れても
+        // 次回また出てしまわないようにする。
+        TimeCapsuleRevealHistory.markShown(candidate.id)
+        revealOverlayImage = await viewModel.downloadImage(for: candidate)
+        revealOverlayPhoto = candidate
+    }
+
+    private func dismissRevealOverlay() {
+        withAnimation(.easeOut(duration: 0.2)) {
+            revealOverlayPhoto = nil
+            revealOverlayImage = nil
         }
     }
 }

@@ -28,6 +28,7 @@
 		120F1A928552A6F94B2863A5 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603E3322F12D494691F2AB55 /* CameraViewModel.swift */; };
 		1406BD85B5F92142777FAFB0 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B6F77360BB3B5ED718507C /* Event.swift */; };
 		EA0022000000000000000000 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0023000000000000000000 /* DesignTokens.swift */; };
+		3F512E3A41AA0F44F05BFF20 /* TimeCapsuleRevealOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AAA260EFF4A8528AE1697E6 /* TimeCapsuleRevealOverlay.swift */; };
 		1AF10605D40D9A743104DEE5 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */; };
 		34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */; };
 		4BA45F6E7F014F81B165E400 /* EventReel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5210C5AE9EB4A64A7585DAC /* EventReel.swift */; };
@@ -165,6 +166,7 @@
 		293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRepository.swift; sourceTree = "<group>"; };
 		32B6F77360BB3B5ED718507C /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		EA0023000000000000000000 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		6AAA260EFF4A8528AE1697E6 /* TimeCapsuleRevealOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeCapsuleRevealOverlay.swift; sourceTree = "<group>"; };
 		38C4572E49ADF53996217172 /* QRCodeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeService.swift; sourceTree = "<group>"; };
 		54C236C172F86BEBC915519F /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
 		5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewModel.swift; sourceTree = "<group>"; };
@@ -245,6 +247,7 @@
 			isa = PBXGroup;
 			children = (
 				54C236C172F86BEBC915519F /* AlbumView.swift */,
+				6AAA260EFF4A8528AE1697E6 /* TimeCapsuleRevealOverlay.swift */,
 			);
 			path = Album;
 			sourceTree = "<group>";
@@ -594,6 +597,7 @@
 				EC0000000000000000000002 /* OnboardingTutorialManager.swift in Sources */,
 				EC0000000000000000000004 /* TutorialOverlay.swift in Sources */,
 				07CC90BB4A7DF00192BD0076 /* AlbumView.swift in Sources */,
+				3F512E3A41AA0F44F05BFF20 /* TimeCapsuleRevealOverlay.swift in Sources */,
 				6672E15CA9D7AD5E2FC592FC /* AlbumViewModel.swift in Sources */,
 				7C142E68F84DD7505B638AC5 /* CameraView.swift in Sources */,
 				120F1A928552A6F94B2863A5 /* CameraViewModel.swift in Sources */,
