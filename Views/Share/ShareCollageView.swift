@@ -67,6 +67,15 @@ struct ShareCollageView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
+
+            // 似た写真同士はまとめて1枚に絞り込まれるため、「シェアOKが3枚集まった
+            // 瞬間」に必ず生成されるとは限らない。この仕様がユーザーに伝わっておらず
+            // 「3枚撮ったのに作られない」という混乱を招くことがあったため、
+            // 生成タイミングが写真の内容によって変わることを明示しておく。
+            Text("似た写真はまとめられるため、生成のタイミングは写真の内容によって変わります。")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
         }
         .padding(.vertical, 60)
         .padding(.horizontal, 32)

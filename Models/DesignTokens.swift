@@ -27,8 +27,10 @@ enum DesignTokens {
     )
 
     // MARK: - タイムカプセル（ゴールド系）
-    static let capsuleGold = Color(red: 0.83, green: 0.68, blue: 0.21)
-    static let capsuleGoldLight = Color(red: 0.96, green: 0.87, blue: 0.55)
+    // 実機では旧値(0.83, 0.68, 0.21)が茶色/くすんだ黄色に見えていたため、
+    // より明るく鮮やかな金色に調整。
+    static let capsuleGold = Color(red: 1.0, green: 0.76, blue: 0.03)       // 鮮やかな金色
+    static let capsuleGoldLight = Color(red: 1.0, green: 0.88, blue: 0.51)  // 明るいハイライト
 
     /// タイムカプセルの未公開セル・「あとで公開」トグル専用グラデーション。
     static let capsuleGradient = LinearGradient(

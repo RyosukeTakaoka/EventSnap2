@@ -134,8 +134,13 @@ struct EventSwitcherView: View {
             }
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: isCurrent ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(isCurrent ? .blue : .secondary)
+                // 単一選択（タップで即座に切り替わる）ことが伝わるよう、
+                // 選択中の行だけチェックマークを出す。未選択行には「空丸」を
+                // 置かない（複数選択可能なチェックリストに見えるのを避けるため）。
+                // 選択有無で行の左端が揃わなくならないよう、非選択行では
+                // 同じ大きさのアイコンを透明にして場所だけ確保する。
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(isCurrent ? .blue : .clear)
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(event.name)
