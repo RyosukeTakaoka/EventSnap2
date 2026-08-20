@@ -6,7 +6,13 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @StateObject private var eventViewModel = EventViewModel()
+    // HomeViewが持つインスタンスをそのまま受け取る。以前は@StateObjectで
+    // 独自インスタンスを作っていたため、HomeView側のeventViewModel（Live Activity/
+    // Widgetのディープリンクでpendingtabが更新される、実際にアプリの状態を持つ
+    // インスタンス）とは別物になっていた。アプリがすでに起動している状態で
+    // ディープリンクを受けても、この別インスタンスのpendingTabは変化せず、
+    // タブが切り替わらないバグの原因になっていたため、共有する形に変更する。
+    @ObservedObject var eventViewModel: EventViewModel
     @ObservedObject private var tutorial = TutorialManager.shared
 
     /// 最初に開くタブ。既定は最もよく見るアルバム。
@@ -242,5 +248,5 @@ private struct MonospacedIfNeeded: ViewModifier {
 }
 
 #Preview {
-    MainTabView()
+    MainTabView(eventViewModel: EventViewModel())
 }

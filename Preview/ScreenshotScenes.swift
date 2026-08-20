@@ -95,7 +95,7 @@ private struct EventReelSceneView: View {
 
 #Preview("MainTabView (Album)") {
     ScreenshotPreviewHost(.albumGrid) {
-        MainTabView(initialTab: .album)
+        MainTabView(eventViewModel: EventViewModel(), initialTab: .album)
     }
 }
 

@@ -8,7 +8,15 @@
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject private var eventViewModel = EventViewModel()
+    // EventSnapAppが持つインスタンスをそのまま受け取る。以前は@StateObjectで
+    // 独自インスタンスを作っていたため、`.environmentObject(eventViewModel)`で
+    // 渡されるEventSnapApp側のインスタンス（Live Activity/Widgetのディープリンクで
+    // `handleDeepLink`が`pendingTab`を更新する、実際にアプリの状態を持つ
+    // インスタンス）とは別物になっていた。このアプリは`@EnvironmentObject`を
+    // 一切使っていないため、そのenvironmentObject注入は実質どこにも読まれず、
+    // ディープリンクの更新がUIへ一切届かないバグの原因になっていた。
+    // 共有する形に変更する。
+    @ObservedObject var eventViewModel: EventViewModel
     // MainTabViewを出すかどうかは、EventViewModel経由の間接的な状態ではなく
     // EventRepository.shared（真の情報源）から直接判定する。
     // 別インスタンスのEventViewModel同士が同期しきれない可能性を排除するため。
@@ -81,7 +89,15 @@ struct HomeView: View {
                 // どちらに飛ばすかは EventViewModel.pendingTab が決める。
                 // 撮影モードのときだけ、撮りたいシーンのタブを優先する
                 // （通常起動・Releaseでは `initialTab` は常に nil）。
-                MainTabView(initialTab: ScreenshotMode.initialTab ?? eventViewModel.pendingTab ?? .album)
+                //
+                // MainTabViewには必ずこの画面と同じeventViewModelインスタンスを渡す。
+                // 別インスタンスを渡すと、アプリ起動中にLive Activity/Widgetから
+                // ディープリンクを受けてもMainTabView側のpendingTabが更新されず、
+                // タブが切り替わらなくなる。
+                MainTabView(
+                    eventViewModel: eventViewModel,
+                    initialTab: ScreenshotMode.initialTab ?? eventViewModel.pendingTab ?? .album
+                )
             }
             // 失敗の理由を必ず画面に出す。以前は print だけだったので、
             // iCloud未サインインで作成に失敗しても何も起きないように見えていた。
@@ -331,5 +347,5 @@ struct EventCreationSheet: View {
 }
 
 #Preview {
-    HomeView()
+    HomeView(eventViewModel: EventViewModel())
 }
