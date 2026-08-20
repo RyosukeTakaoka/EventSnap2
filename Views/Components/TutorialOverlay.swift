@@ -54,18 +54,58 @@ extension View {
 }
 
 /// 全画面を覆うが、ハイライト対象の矩形だけ穴が空いた形。
-/// `clipShape`に使うことで、穴の内側は本物のUIがそのままタップできる
-/// （見た目をぼかすだけの`.mask`と違い、穴の部分は当たり判定も素通しになる）。
-private struct SpotlightHoleShape: Shape {
-    var rect: CGRect
-    var cornerRadius: CGFloat
+///
+/// 以前は1枚の黒背景に`clipShape`（`SpotlightHoleShape` + 偶奇塗りつぶし）で
+/// 穴をくり抜いていたが、SwiftUIの`clipShape`は見た目上の描画を切り抜くだけで、
+/// ヒットテストはクリップ前の元の矩形全体に対して行われる。そのため穴の内側は
+/// 視覚的に「何もない」ように見えても、実際にはその位置にも黒いオーバーレイの
+/// 透明な当たり判定が残ってしまい、下にある本物のUI（シャッターボタン等）への
+/// タップを吸収して反応しなくなっていた。
+///
+/// 「穴を含む1枚をくり抜く」のではなく、「穴の四辺を、穴を含まない4枚（上下左右）
+/// の黒い矩形で囲む」方式に変更する。この方式なら穴の位置には物理的に
+/// どのビューも存在しないため、ヒットテストの問題がそもそも起こらない。
+private struct SpotlightMask: View {
+    let rect: CGRect
+    let fullSize: CGSize
+    let dimColor = Color.black.opacity(0.62)
 
-    func path(in bounds: CGRect) -> Path {
-        var path = Path(bounds)
-        if rect != .zero {
-            path.addPath(Path(roundedRect: rect, cornerRadius: cornerRadius))
+    var body: some View {
+        if rect == .zero {
+            dimColor.ignoresSafeArea()
+        } else {
+            // 4枚とも`.position(x:y:)`で絶対座標に直接配置する。
+            // `.frame(alignment:)`によるZStack内での暗黙の位置合わせに頼ると、
+            // `maxHeight`を同時に指定しない限り期待通りに端へ寄らない
+            // （高さがcontentの自然なサイズのままZStackの既定alignment(.center)で
+            // 中央に置かれてしまう）ため、既存の白枠線と同じ`.position`方式に揃える。
+            ZStack {
+                // 上（穴の上端まで、幅いっぱい）
+                let topHeight = max(rect.minY, 0)
+                dimColor
+                    .frame(width: fullSize.width, height: topHeight)
+                    .position(x: fullSize.width / 2, y: topHeight / 2)
+
+                // 下（穴の下端から画面下まで、幅いっぱい）
+                let bottomHeight = max(fullSize.height - rect.maxY, 0)
+                dimColor
+                    .frame(width: fullSize.width, height: bottomHeight)
+                    .position(x: fullSize.width / 2, y: rect.maxY + bottomHeight / 2)
+
+                // 左（穴の高さの範囲だけ、穴の左端まで）
+                let leftWidth = max(rect.minX, 0)
+                dimColor
+                    .frame(width: leftWidth, height: rect.height)
+                    .position(x: leftWidth / 2, y: rect.midY)
+
+                // 右（穴の高さの範囲だけ、穴の右端から画面右まで）
+                let rightWidth = max(fullSize.width - rect.maxX, 0)
+                dimColor
+                    .frame(width: rightWidth, height: rect.height)
+                    .position(x: rect.maxX + rightWidth / 2, y: rect.midY)
+            }
+            .ignoresSafeArea()
         }
-        return path
     }
 }
 
@@ -87,9 +127,7 @@ struct TutorialSpotlightOverlay: View {
             let rect = spotlightRect(in: proxy)
 
             ZStack {
-                Color.black.opacity(0.62)
-                    .clipShape(SpotlightHoleShape(rect: rect, cornerRadius: 18), style: FillStyle(eoFill: true))
-                    .ignoresSafeArea()
+                SpotlightMask(rect: rect, fullSize: proxy.size)
 
                 if rect != .zero {
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
