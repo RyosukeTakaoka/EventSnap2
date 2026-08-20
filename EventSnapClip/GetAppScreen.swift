@@ -28,7 +28,7 @@ struct GetAppScreen: View {
                         .font(.title2)
                         .fontWeight(.bold)
 
-                    Text("この写真をイベントの参加者と共有するには、\nEventSnapアプリが必要です。\n無料でダウンロードできます。")
+                    Text("あなたも撮影に参加したり、もっと写真を見るには、\nEventSnapアプリが必要です。\n無料でダウンロードできます。")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
