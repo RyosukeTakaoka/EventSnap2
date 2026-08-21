@@ -265,7 +265,29 @@ enum SyncCoordinator {
         //   近くで知っているのがShareCollageBuilder自身のため)。
         await ShareCollageBuilder.buildIfNeeded(for: event)
 
+        await refreshRelay(for: event)
+
         await updateWidgetAndActivity(for: event)
+    }
+
+    /// Relayの期限切れ繰り上げ反映と通知の予約更新。
+    ///
+    /// `NotificationService`と同じ理由で、アプリのフォアグラウンド復帰・silent push
+    /// 受信のたびにここを通す（取りこぼしても次のタイミングで必ず復帰する）。
+    /// 前の人が前倒しで撮り終えて自分の枠が見込みより早く開いた場合は、
+    /// 予約済みの通知をその場で即時発火に差し替える。
+    @MainActor
+    private static func refreshRelay(for event: Event) async {
+        let previousStatus = RelayRepository.shared.currentSession?.slot(for: DeviceIdentity.current)?.status
+
+        guard let session = try? await RelayRepository.shared.fetchSession(for: event.id) else { return }
+
+        let newStatus = session.slot(for: DeviceIdentity.current)?.status
+        if previousStatus == .waiting, newStatus == .open {
+            await RelayNotificationService.shared.notifyTurnOpenedNow(event: event, viewerID: DeviceIdentity.current)
+        }
+
+        await RelayNotificationService.shared.scheduleIfNeeded(session: session, event: event, viewerID: DeviceIdentity.current)
     }
 
     /// 参加人数・写真枚数・タイムカプセル残数など、Event Reel生成の有無に関わらず
