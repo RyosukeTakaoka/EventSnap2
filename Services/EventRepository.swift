@@ -228,7 +228,6 @@ class EventRepository: ObservableObject {
     func leaveEvent(_ event: Event) async {
         forgetEvent(event.id)
         await NotificationService.shared.cancelReveals(for: event.id)
-        RelayNotificationService.shared.cancelAll(for: event.id, participantIDs: event.participantIDs)
 
         if currentEvent?.id == event.id {
             saveCurrentEventID(nil)
