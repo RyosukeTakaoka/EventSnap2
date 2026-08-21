@@ -190,6 +190,16 @@ struct EventSettingsView: View {
                 }
 
                 Section {
+                    NavigationLink {
+                        RelayView()
+                    } label: {
+                        Label("Relay", systemImage: "figure.socialdance")
+                    }
+                } footer: {
+                    Text("参加者が順番に主役になって、Momentをつないでいく共同アルバムです。")
+                }
+
+                Section {
                     Button(role: .destructive) {
                         showEndConfirmation = true
                     } label: {
