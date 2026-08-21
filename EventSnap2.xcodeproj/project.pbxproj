@@ -97,9 +97,7 @@
 		DA000000000000000000000C /* RelayNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0000000000000000000003 /* RelayNotificationService.swift */; };
 		DA000000000000000000000D /* RelayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0000000000000000000004 /* RelayViewModel.swift */; };
 		DA000000000000000000000E /* RelayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0000000000000000000005 /* RelayView.swift */; };
-		DA000000000000000000000F /* RelayCaptureChoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0000000000000000000006 /* RelayCaptureChoiceView.swift */; };
 		DA0000000000000000000010 /* RelayTurnCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0000000000000000000007 /* RelayTurnCameraView.swift */; };
-		DA0000000000000000000011 /* RelayPhotoPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0000000000000000000008 /* RelayPhotoPickerView.swift */; };
 		DA0000000000000000000012 /* RelayCompletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0000000000000000000009 /* RelayCompletionView.swift */; };
 /* End PBXBuildFile section */
 
@@ -240,9 +238,7 @@
 		DA0000000000000000000003 /* RelayNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayNotificationService.swift; sourceTree = "<group>"; };
 		DA0000000000000000000004 /* RelayViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayViewModel.swift; sourceTree = "<group>"; };
 		DA0000000000000000000005 /* RelayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayView.swift; sourceTree = "<group>"; };
-		DA0000000000000000000006 /* RelayCaptureChoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayCaptureChoiceView.swift; sourceTree = "<group>"; };
 		DA0000000000000000000007 /* RelayTurnCameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayTurnCameraView.swift; sourceTree = "<group>"; };
-		DA0000000000000000000008 /* RelayPhotoPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPhotoPickerView.swift; sourceTree = "<group>"; };
 		DA0000000000000000000009 /* RelayCompletionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayCompletionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -262,9 +258,7 @@
 			isa = PBXGroup;
 			children = (
 				DA0000000000000000000005 /* RelayView.swift */,
-				DA0000000000000000000006 /* RelayCaptureChoiceView.swift */,
 				DA0000000000000000000007 /* RelayTurnCameraView.swift */,
-				DA0000000000000000000008 /* RelayPhotoPickerView.swift */,
 				DA0000000000000000000009 /* RelayCompletionView.swift */,
 			);
 			path = Relay;
@@ -640,9 +634,7 @@
 				DA000000000000000000000C /* RelayNotificationService.swift in Sources */,
 				DA000000000000000000000D /* RelayViewModel.swift in Sources */,
 				DA000000000000000000000E /* RelayView.swift in Sources */,
-				DA000000000000000000000F /* RelayCaptureChoiceView.swift in Sources */,
 				DA0000000000000000000010 /* RelayTurnCameraView.swift in Sources */,
-				DA0000000000000000000011 /* RelayPhotoPickerView.swift in Sources */,
 				DA0000000000000000000012 /* RelayCompletionView.swift in Sources */,
 				07CC90BB4A7DF00192BD0076 /* AlbumView.swift in Sources */,
 				3F512E3A41AA0F44F05BFF20 /* TimeCapsuleRevealOverlay.swift in Sources */,

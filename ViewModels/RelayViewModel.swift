@@ -143,35 +143,4 @@ final class RelayViewModel: ObservableObject {
             return false
         }
     }
-
-    /// 今日撮影済みのシェアOK写真から1枚選んでRelayに投稿する（自分が撮った分のみ）。
-    @discardableResult
-    func submitExistingPhoto(_ photo: Photo) async -> Bool {
-        guard let event = eventRepository.currentEvent, canAddNewMoment else { return false }
-
-        do {
-            try await relayRepository.completeSlot(eventID: event.id, participantID: DeviceIdentity.current, photoID: photo.id)
-            return true
-        } catch {
-            self.error = EventViewModel.message(for: error, fallback: "Relayへの投稿に失敗しました")
-            print("❌ Relay投稿エラー: \(error)")
-            return false
-        }
-    }
-
-    /// 「今日のシェアOK写真から選ぶ」の候補一覧。自分が撮影し、シェアOKにした、
-    /// 当日撮影分だけを対象にする（他の参加者が代理で撮ることは今回実装しない）。
-    var todaysOwnShareOKPhotos: [Photo] {
-        guard let event = eventRepository.currentEvent else { return [] }
-        let myID = DeviceIdentity.current
-
-        return photoRepository.allPhotos
-            .filter {
-                $0.eventID == event.id
-                    && $0.uploaderID == myID
-                    && $0.isShareOK
-                    && Calendar.current.isDateInToday($0.uploadedAt)
-            }
-            .sorted { $0.uploadedAt > $1.uploadedAt }
-    }
 }

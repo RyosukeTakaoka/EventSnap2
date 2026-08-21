@@ -10,9 +10,7 @@ import SwiftUI
 struct RelayView: View {
     @StateObject private var viewModel = RelayViewModel()
 
-    @State private var showCaptureChoice = false
     @State private var showCamera = false
-    @State private var showPicker = false
 
     var body: some View {
         ScrollView {
@@ -57,24 +55,8 @@ struct RelayView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.loadSession() }
         .refreshable { await viewModel.loadSession() }
-        .sheet(isPresented: $showCaptureChoice) {
-            RelayCaptureChoiceView(
-                onNewPhoto: {
-                    showCaptureChoice = false
-                    showCamera = true
-                },
-                onPickExisting: {
-                    showCaptureChoice = false
-                    showPicker = true
-                }
-            )
-            .presentationDetents([.medium])
-        }
         .fullScreenCover(isPresented: $showCamera) {
             RelayTurnCameraView(viewModel: viewModel)
-        }
-        .sheet(isPresented: $showPicker) {
-            RelayPhotoPickerView(viewModel: viewModel)
         }
     }
 
@@ -130,15 +112,15 @@ struct RelayView: View {
         VStack(spacing: 14) {
             Text("あなたの番が開放されました")
                 .font(.headline)
-            Text("新しく撮影するか、今日のシェアOK写真から選んでMomentを投稿しましょう")
+            Text("Momentを撮影しましょう")
                 .font(.footnote)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
             Button {
-                showCaptureChoice = true
+                showCamera = true
             } label: {
-                Text("Momentを投稿する")
+                Text("撮影する")
             }
             .buttonStyle(PrimaryButtonStyle())
         }
