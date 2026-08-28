@@ -54,5 +54,6 @@ struct GetAppScreen: View {
                 }
             )
         }
+        .navigationViewStyle(.stack)
     }
 }

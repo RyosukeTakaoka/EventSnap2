@@ -59,6 +59,7 @@ struct QRScannerView: View {
             // 新しく入れた端末でだけ「読み取れない」と言われる形で出ていた。
             .task { await requestCameraAccess() }
         }
+        .navigationViewStyle(.stack)
     }
 
     private var scanner: some View {

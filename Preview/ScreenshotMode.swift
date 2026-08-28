@@ -69,28 +69,23 @@ enum ScreenshotMode {
     private static let sceneKey = "EventSnapScreenshotScene"
 
     /// 撮影モードで起動しているか。
-//    static let isActive: Bool = {
-//        if ProcessInfo.processInfo.environment["EVENTSNAP_SCREENSHOT"] == "1" { return true }
-//        return UserDefaults.standard.bool(forKey: flagKey)
-//    }()
-    
-    //強制撮影
+    ///
+    /// ⚠️ ここを `true` などの固定値に書き換えないこと。撮影モードで起動すると
+    /// Fixtureのイベントが注入されて `currentEvent` が最初から入るため、
+    /// ホーム画面（＝イベントを作る唯一の入口）に一度も到達できなくなる。
+    /// 撮りたいシーンは、下のコメントにある起動引数で切り替える。
     static let isActive: Bool = {
-        return true  // ← 撮影が終わったら必ずこの行を消して元に戻すこと
+        if ProcessInfo.processInfo.environment["EVENTSNAP_SCREENSHOT"] == "1" { return true }
+        return UserDefaults.standard.bool(forKey: flagKey)
     }()
 
-//    /// 撮影対象のシーン（指定が無ければアルバム）。
-//    static let scene: ScreenshotScene = {
-//        guard let raw = UserDefaults.standard.string(forKey: sceneKey)
-//                ?? ProcessInfo.processInfo.environment["EVENTSNAP_SCREENSHOT_SCENE"],
-//              let scene = ScreenshotScene(rawValue: raw)
-//        else { return .albumGrid }
-//        return scene
-//    }()
-    
-    //撮影シーン固定
+    /// 撮影対象のシーン（指定が無ければアルバム）。
     static let scene: ScreenshotScene = {
-        return .albumGrid  // ← .camera / .timeCapsule / .eventReel / .invite に変えれば別シーンが撮れる
+        guard let raw = UserDefaults.standard.string(forKey: sceneKey)
+                ?? ProcessInfo.processInfo.environment["EVENTSNAP_SCREENSHOT_SCENE"],
+              let scene = ScreenshotScene(rawValue: raw)
+        else { return .albumGrid }
+        return scene
     }()
 
     /// カメラ画面の背景に敷く画像。

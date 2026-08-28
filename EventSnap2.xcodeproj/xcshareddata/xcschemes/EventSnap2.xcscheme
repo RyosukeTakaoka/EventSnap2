@@ -51,22 +51,28 @@
             ReferencedContainer = "container:EventSnap2.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <!-- App Store提出用スクリーンショットの撮影モード。
+           普段の実行では必ずオフにしておくこと。オンのままだとFixtureの
+           イベントが注入されてホーム画面に到達できず、イベント作成の導線を
+           一度も通れなくなる。撮影するときだけXcodeでチェックを入れる。
+           （以前は "-EventSnapScreenshot" の末尾に全角スペースが混入していて
+             キーが一致せず、引数を渡しても撮影モードにならなかった） -->
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-EventSnapScreenshot&#x3000;"
-            isEnabled = "YES">
+            argument = "-EventSnapScreenshot"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "1"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-EventSnapScreenshotScene"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "albumGrid"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
