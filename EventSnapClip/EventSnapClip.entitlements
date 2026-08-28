@@ -23,25 +23,17 @@
 	</array>
 
 	<!--
-	  閲覧専用リニューアルに伴い追加。CloudKitのPublic Databaseを読み取り専用で
-	  使うために必要（EventPreviewLoader.swift参照。書き込みは一切行わない）。
-	  コンテナ識別子はメインアプリ（EventSnap2ターゲット）のEventSnap.entitlements
-	  と同一にすること。
+	  ⚠️ iCloud / CloudKit のentitlementは **App Clipには付けられない**。
+	  App ClipのApp IDにはiCloud capabilityが存在しないため、書くと
+	  「Provisioning profile ... doesn't match the entitlements file's value for
+	  the com.apple.developer.icloud-services entitlement」で署名に失敗する。
 
-	  ⚠️ 注意: このファイルを編集しただけではXcodeに反映されないことがある。
-	  実際にビルドする前に、Xcode上で
-	  EventSnapClipターゲット → Signing & Capabilities → 「+ Capability」から
-	  「iCloud」を追加し、「CloudKit」にチェック、コンテナに
-	  `iCloud.app.takaoka.com.EventSnap2`（メインアプリと同じもの）を
-	  選択/追加できているか、必ず手動で確認すること。
+	  一時期ここに `com.apple.developer.icloud-services` /
+	  `com.apple.developer.icloud-container-identifiers` を足して、App Clipから
+	  CloudKitのPublic Databaseを読み取り専用で使う実装(EventPreviewLoader)を
+	  置いていたが、そもそも成立しないため撤去した。App Clipは
+	  ネットワークアクセスを一切行わない案内画面だけを持つ
+	  （EventSnapClipRootView参照）。
 	-->
-	<key>com.apple.developer.icloud-services</key>
-	<array>
-		<string>CloudKit</string>
-	</array>
-	<key>com.apple.developer.icloud-container-identifiers</key>
-	<array>
-		<string>iCloud.app.takaoka.com.EventSnap2</string>
-	</array>
 </dict>
 </plist>

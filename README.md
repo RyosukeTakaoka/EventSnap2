@@ -78,10 +78,13 @@ open EventSnap2.xcodeproj
 - **App Groups**: メインアプリと同じグループ
 
 **EventSnapClip**
-- **iCloud**: メインアプリと同じCloudKitコンテナへの読み取りアクセス（`EventSnapClip.entitlements` にキー自体は用意済みですが、Xcode上でのCapability追加が別途必要です）
 - **Associated Domains**: `appclips:` / `applinks:`（メインアプリと同じドメイン）
+- ⚠️ **iCloud（CloudKit）は追加しません。App ClipのApp IDにはiCloud capabilityが存在しない**ため、
+  entitlementsに書くと「Provisioning profile ... doesn't match the entitlements file's value for
+  the com.apple.developer.icloud-services entitlement」で署名に失敗します。
+  App Clipはネットワークアクセスを持たない案内画面だけの構成です。
 
-すべてのターゲットで同じiCloudコンテナ・App Groupを指すように揃えてください。ズレるとCloudKit同期やWidgetへのデータ受け渡しが動きません。
+メインアプリとWidgetは同じiCloudコンテナ・App Groupを指すように揃えてください。ズレるとCloudKit同期やWidgetへのデータ受け渡しが動きません。
 
 ### 4. QRコード / App Clipのドメインを設定する
 
@@ -129,12 +132,12 @@ open EventSnap2.xcodeproj
 4. Widget/Live Activityを確認する場合は `EventSnapWidget` スキームも一度実行し、ホーム画面にウィジェットを追加
 5. App Clipの動作は `EventSnapClip` スキーム、または実機でQRコードを読み取って確認します（本番でのApp Clip起動には、App Store ConnectでのApp Clip Experienceの登録が別途必要です）
 
-> ⚠️ **DEBUGビルド利用時の注意**: `Preview/ScreenshotMode.swift` の `ScreenshotMode.isActive` が、
-> App Store提出用スクリーンショット撮影のためのデバッグ用ハードコード（`return true`）のまま
-> になっています。この状態だとDEBUGビルドは常に「撮影モード」として起動し、CloudKitへの
-> 読み書き・カメラ・通知がすべて無効化されて、固定のFixtureデータしか表示されません。
-> 実データで動作確認したい場合は、同ファイルのコメントアウトされている本来の実装
-> （起動引数 `-EventSnapScreenshot 1` を見る形）に戻してください。
+> ⚠️ **撮影モードについて**: `Preview/ScreenshotMode.swift` の `ScreenshotMode.isActive` は、
+> 起動引数 `-EventSnapScreenshot 1` が渡されたときだけ true になります。撮影モードで起動すると
+> CloudKitへの読み書き・カメラ・通知がすべて無効化され、固定のFixtureデータしか表示されません
+> （＝ホーム画面に到達できず、イベントを作成する導線を通れません）。
+> **この値を `return true` のような固定値に書き換えないでください。** 撮影したいときは
+> `EventSnap2` スキームの Run > Arguments にあるチェックボックスをオンにしてください。
 
 ## App Store提出用スクリーンショット
 
