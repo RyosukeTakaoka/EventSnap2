@@ -70,6 +70,7 @@ private struct EventReelSceneView: View {
                     .foregroundColor(.secondary)
             }
         }
+        .navigationViewStyle(.stack)
     }
 }
 

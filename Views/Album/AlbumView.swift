@@ -121,6 +121,7 @@ struct AlbumView: View {
                 await viewModel.fetchPhotos()
             }
         }
+        .navigationViewStyle(.stack)
         // 初回チュートリアル: 実際のグリッド・公開待ちの枠をハイライトするだけで、
         // 偽物のUIは作らない（`TutorialManager`のコメント参照）。
         .overlayPreferenceValue(TutorialAnchorKey.self) { anchors in

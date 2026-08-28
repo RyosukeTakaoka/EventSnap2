@@ -21,9 +21,37 @@ struct HomeView: View {
     // EventRepository.shared（真の情報源）から直接判定する。
     // 別インスタンスのEventViewModel同士が同期しきれない可能性を排除するため。
     @ObservedObject private var eventRepository = EventRepository.shared
-    @State private var showQRScanner = false
-    @State private var showEventCreation = false
+
+    /// いま出しているシート。
+    ///
+    /// 以前は `showEventCreation` / `showQRScanner` の2つの `.sheet` を
+    /// 同じビューに重ねていた。SwiftUIは1つのビューから同時に1枚しか
+    /// シートを出せないため、この形は「片方が閉じきる前にもう片方を出そうとすると
+    /// 黙って無視される」という壊れ方をする。1つの状態に束ねて、
+    /// 同時に2枚出そうとする状態自体を作れないようにする。
+    @State private var activeSheet: HomeSheet?
     @State private var eventName = ""
+
+    /// シートが閉じきったあとに作成するイベント名。`nil` なら作成待ちは無い。
+    @State private var pendingEventName: String?
+
+    /// 参加中のイベントがあるか（＝MainTabViewを出すべきか）。
+    /// `EventRepository.currentEvent` を写したもの。
+    @State private var hasEvent = false
+
+    /// 実際にMainTabViewを提示しているか。
+    ///
+    /// `hasEvent` と分けているのは、**シートが出ている（閉じている途中も含む）間は
+    /// 提示してはいけない**ため。詳しくは `presentEventIfPossible()` を参照。
+    @State private var isEventOpen = false
+
+    /// ホーム画面から出すシート。
+    private enum HomeSheet: String, Identifiable {
+        case eventCreation
+        case qrScanner
+
+        var id: String { rawValue }
+    }
 
     var body: some View {
         // ⑥ 招待+読み取りの合成カットは、通常のHomeView→MainTabViewの導線とは
@@ -68,23 +96,19 @@ struct HomeView: View {
                 }
             }
             .navigationBarHidden(true)
-            .sheet(isPresented: $showEventCreation) {
-                EventCreationSheet(
-                    eventName: $eventName,
-                    onCreate: {
-                        Task {
-                            await eventViewModel.createEvent(name: eventName.isEmpty ? "新しいイベント" : eventName)
-                        }
+            .sheet(item: $activeSheet, onDismiss: handleSheetDismiss) { sheet in
+                switch sheet {
+                case .eventCreation:
+                    // ここでは作成しない。入力されたイベント名を控えるだけにして、
+                    // 実際の作成はシートが閉じきってから `handleSheetDismiss` が行う。
+                    EventCreationSheet(eventName: $eventName) { name in
+                        pendingEventName = name
                     }
-                )
+                case .qrScanner:
+                    QRScannerView(eventViewModel: eventViewModel)
+                }
             }
-            .sheet(isPresented: $showQRScanner) {
-                QRScannerView(eventViewModel: eventViewModel)
-            }
-            .fullScreenCover(isPresented: Binding(
-                get: { eventRepository.currentEvent != nil },
-                set: { _ in } // 閉じる導線はイベント終了／離脱のみで、いずれもリポジトリ側から起きる
-            )) {
+            .fullScreenCover(isPresented: $isEventOpen) {
                 // 作成直後は招待画面、参加直後はアルバム。
                 // どちらに飛ばすかは EventViewModel.pendingTab が決める。
                 // 撮影モードのときだけ、撮りたいシーンのタブを優先する
@@ -119,9 +143,61 @@ struct HomeView: View {
                 }
             }
         }
+        // iPadでは NavigationView が既定で2カラムの分割表示になり、中身が
+        // サイドバー側へ押し込まれて見えなくなる（横向きでは細い左カラム、
+        // 縦向きでは何も出ない）。iPhoneと同じ1画面のスタック表示に固定する。
+        // アプリ内の他の NavigationView にも同じ理由で付けている。
+        .navigationViewStyle(.stack)
+        .onChange(of: eventRepository.currentEvent) { _, event in
+            hasEvent = event != nil
+            presentEventIfPossible()
+        }
         .task {
+            hasEvent = eventRepository.currentEvent != nil
+            presentEventIfPossible()
             await eventViewModel.loadRecentEvents()
         }
+        }
+    }
+
+    // MARK: - イベント作成／参加の後始末
+
+    /// シートが完全に閉じたあとに呼ばれる。
+    ///
+    /// ## なぜ作成をここまで遅らせるのか
+    ///
+    /// 以前は「作成する」を押した瞬間に作成処理を走らせ、同時にシートを
+    /// 閉じていた。作成が終わると `EventRepository.currentEvent` が入り、
+    /// この画面の `fullScreenCover` が開く…はずだが、**シートが閉じる
+    /// アニメーションの最中に提示しようとすると、その提示はUIKitに
+    /// 丸ごと捨てられる**（"while a presentation is in progress"）。
+    ///
+    /// さらに `fullScreenCover` のbindingは `currentEvent != nil` から
+    /// 計算していて、setterが空だった。一度「提示済み」と見なされると
+    /// 状態が変化しないため、SwiftUIは二度と提示をやり直さない。
+    /// 結果として **イベントはCloudKitに作られているのに画面はホームのまま**
+    /// ＝「イベントが作成できない」という見え方になる。
+    ///
+    /// CloudKitへの保存がシートの開閉アニメーション（約0.35秒）より速く
+    /// 終わったときにだけ起きるので、回線の速い環境でのみ再現する
+    /// （手元の端末では再現せず、審査でだけ起きる）という形になっていた。
+    private func handleSheetDismiss() {
+        // 閉じている間に確定したイベント（QRコードで参加した場合）があれば、
+        // ここで初めて提示する。
+        presentEventIfPossible()
+
+        guard let name = pendingEventName else { return }
+        pendingEventName = nil
+        Task { await eventViewModel.createEvent(name: name) }
+    }
+
+    /// シートが出ていないときに限り、MainTabViewを提示する。
+    ///
+    /// シートが出ている間は提示せず、`handleSheetDismiss` まで持ち越す。
+    private func presentEventIfPossible() {
+        guard activeSheet == nil else { return }
+        if isEventOpen != hasEvent {
+            isEventOpen = hasEvent
         }
     }
 
@@ -147,7 +223,7 @@ struct HomeView: View {
 
     /// カメラファインダー風の大きな四角。QRコードで参加する導線を視覚的に
     /// 目立たせるための装飾で、タップ時の処理は`actionsSection`のQRスキャン
-    /// ボタンと同じ`showQRScanner = true`を呼ぶだけ（QRScannerView自体は
+    /// ボタンと同じ`activeSheet = .qrScanner`を設定するだけ（QRScannerView自体は
     /// 一切変更しない）。既存のボタン・遷移ロジックはそのまま残す。
     ///
     /// 背景が白に戻ったため、枠自体をDesignTokens.primaryの濃い単色で塗り、
@@ -155,7 +231,7 @@ struct HomeView: View {
     /// （以前は白背景ベタ塗りに対して白い枠線を重ねる配色だったため、逆転させている）。
     private var qrFinderSection: some View {
         Button {
-            showQRScanner = true
+            activeSheet = .qrScanner
         } label: {
             RoundedRectangle(cornerRadius: DesignTokens.cornerRadiusLarge, style: .continuous)
                 .fill(DesignTokens.primary)
@@ -178,7 +254,7 @@ struct HomeView: View {
             // 共通のPrimaryButtonStyle（白背景+青文字。薄い背景の画面向け）ではなく、
             // DesignTokens.primaryの濃い単色塗りにする。
             Button {
-                showEventCreation = true
+                activeSheet = .eventCreation
             } label: {
                 HStack {
                     Image(systemName: "plus.circle.fill")
@@ -194,7 +270,7 @@ struct HomeView: View {
 
             // QRスキャンボタン（アウトライン、primaryカラー）
             Button {
-                showQRScanner = true
+                activeSheet = .qrScanner
             } label: {
                 HStack {
                     Image(systemName: "qrcode.viewfinder")
@@ -301,7 +377,14 @@ struct HomeView: View {
 struct EventCreationSheet: View {
     @Binding var eventName: String
     @Environment(\.dismiss) var dismiss
-    let onCreate: () -> Void
+
+    /// 入力されたイベント名を呼び出し側へ渡すだけのコールバック。
+    ///
+    /// **このシートの中でイベントを作ってはいけない**。作成が終わると
+    /// 呼び出し側が全画面のMainTabViewを出すが、シートが閉じる途中に
+    /// 提示しようとするとその提示は捨てられてしまう（HomeViewの
+    /// `handleSheetDismiss` のコメントを参照）。
+    let onCreate: (String) -> Void
 
     var body: some View {
         NavigationView {
@@ -329,7 +412,9 @@ struct EventCreationSheet: View {
                         .padding(.horizontal)
 
                     Button("作成する") {
-                        onCreate()
+                        // 空白だけの入力も「未入力」として扱う
+                        let trimmed = eventName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        onCreate(trimmed.isEmpty ? "新しいイベント" : trimmed)
                         dismiss()
                     }
                     .buttonStyle(.primary)
@@ -343,6 +428,10 @@ struct EventCreationSheet: View {
                 dismiss()
             })
         }
+        // iPadでシートが分割表示になると、イベント名の入力欄と「作成する」が
+        // 隠れたサイドバー側に押し込まれ、「キャンセル」しか押せなくなる。
+        // ＝iPadでだけイベントを作れない状態になるため、スタック表示に固定する。
+        .navigationViewStyle(.stack)
     }
 }
 

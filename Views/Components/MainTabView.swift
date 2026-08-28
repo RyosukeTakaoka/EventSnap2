@@ -78,6 +78,7 @@ struct MainTabView: View {
                             }
                         }
                 }
+                .navigationViewStyle(.stack)
             }
         }
         .onAppear {
@@ -214,6 +215,7 @@ struct EventSettingsView: View {
                 Text("新しい写真の追加ができなくなります。")
             }
         }
+        .navigationViewStyle(.stack)
     }
 }
 

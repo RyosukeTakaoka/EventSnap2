@@ -20,10 +20,21 @@ struct EventSwitcherView: View {
     @ObservedObject var eventViewModel: EventViewModel
     @Environment(\.dismiss) private var dismiss
 
-    @State private var showJoinSheet = false
-    @State private var showCreateSheet = false
+    /// いま出しているシート。HomeViewと同じ理由で、`.sheet`を2つ重ねずに
+    /// 1つの状態へ束ねている（同時に2枚出そうとすると片方が無視される）。
+    @State private var activeSheet: SwitcherSheet?
     @State private var newEventName = ""
     @State private var leaveTarget: Event?
+
+    /// シートが閉じきったあとに作成するイベント名。`nil` なら作成待ちは無い。
+    @State private var pendingEventName: String?
+
+    private enum SwitcherSheet: String, Identifiable {
+        case join
+        case create
+
+        var id: String { rawValue }
+    }
 
     private var currentEvents: [Event] {
         eventViewModel.recentEvents.filter(\.isActive)
@@ -61,13 +72,13 @@ struct EventSwitcherView: View {
                 // 以前はここに参加（QRコード）しか無かった。
                 Section {
                     Button {
-                        showCreateSheet = true
+                        activeSheet = .create
                     } label: {
                         Label("イベントを作成", systemImage: "plus.circle")
                     }
 
                     Button {
-                        showJoinSheet = true
+                        activeSheet = .join
                     } label: {
                         Label("QRコードで参加", systemImage: "qrcode.viewfinder")
                     }
@@ -84,24 +95,23 @@ struct EventSwitcherView: View {
                 }
             }
             .refreshable { await eventViewModel.loadRecentEvents() }
-            .sheet(isPresented: $showJoinSheet) {
-                QRScannerView(eventViewModel: eventViewModel)
-            }
-            .sheet(isPresented: $showCreateSheet) {
-                // 既存のEventCreationSheet（HomeView.swift）をそのまま再利用する。
-                // 作成すると EventRepository が currentEvent を新しいイベントに
-                // 切り替えるので、このスイッチャー自体を閉じれば、下にある
-                // MainTabViewが自動的に新しいイベントの中身を表示する。
-                EventCreationSheet(
-                    eventName: $newEventName,
-                    onCreate: {
-                        Task {
-                            await eventViewModel.createEvent(name: newEventName.isEmpty ? "新しいイベント" : newEventName)
-                            newEventName = ""
-                            dismiss()
-                        }
+            .sheet(item: $activeSheet, onDismiss: handleSheetDismiss) { sheet in
+                switch sheet {
+                case .join:
+                    QRScannerView(eventViewModel: eventViewModel)
+                case .create:
+                    // 既存のEventCreationSheet（HomeView.swift）をそのまま再利用する。
+                    // 作成すると EventRepository が currentEvent を新しいイベントに
+                    // 切り替えるので、このスイッチャー自体を閉じれば、下にある
+                    // MainTabViewが自動的に新しいイベントの中身を表示する。
+                    //
+                    // ここでも作成はシートが閉じきってから行う。シートの開閉と
+                    // 画面の入れ替えが重なると、提示が取りこぼされることがある
+                    // （HomeView.handleSheetDismiss のコメントを参照）。
+                    EventCreationSheet(eventName: $newEventName) { name in
+                        pendingEventName = name
                     }
-                )
+                }
             }
             .confirmationDialog(
                 "「\(leaveTarget?.name ?? "")」を一覧から外しますか？",
@@ -120,7 +130,22 @@ struct EventSwitcherView: View {
                 Text("イベント自体は削除されません。QRコードをもう一度読み取れば、また参加できます。")
             }
         }
+        // iPadでは NavigationView が既定で2カラムの分割表示になり、
+        // 中身がサイドバー側に押し込まれて見えなくなるため、スタック表示に固定する。
+        .navigationViewStyle(.stack)
         .task { await eventViewModel.loadRecentEvents() }
+    }
+
+    /// シートが完全に閉じてからイベントを作成する。
+    /// 理由は `HomeView.handleSheetDismiss` のコメントを参照。
+    private func handleSheetDismiss() {
+        guard let name = pendingEventName else { return }
+        pendingEventName = nil
+        Task {
+            await eventViewModel.createEvent(name: name)
+            newEventName = ""
+            dismiss()
+        }
     }
 
     private func row(for event: Event) -> some View {
