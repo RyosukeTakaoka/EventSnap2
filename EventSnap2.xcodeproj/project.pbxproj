@@ -60,7 +60,6 @@
 		E90000000000000000000006 /* EventSnapClipRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000005 /* EventSnapClipRootView.swift */; };
 		E90000000000000000000008 /* GetAppScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000007 /* GetAppScreen.swift */; };
 		E9000000000000000000000B /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 775673713025AAC40003484E /* AppIcon.icon */; };
-		21EA6B9F632651140D9E2890 /* EventPreviewLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42C48431383094F8B5BA6F6F /* EventPreviewLoader.swift */; };
 		BDE49380E5897CC163DB7801 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B6F77360BB3B5ED718507C /* Event.swift */; };
 		A598EC34D1C567946A8DC44A /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */; };
 		81C5D792F1F9479D96A6435C /* PhotoImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51007000000000000000000 /* PhotoImageLoader.swift */; };
@@ -206,7 +205,6 @@
 		E90000000000000000000001 /* EventSnapClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipApp.swift; sourceTree = "<group>"; };
 		E90000000000000000000005 /* EventSnapClipRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipRootView.swift; sourceTree = "<group>"; };
 		E90000000000000000000007 /* GetAppScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetAppScreen.swift; sourceTree = "<group>"; };
-		42C48431383094F8B5BA6F6F /* EventPreviewLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPreviewLoader.swift; sourceTree = "<group>"; };
 		E9000000000000000000000E /* EventSnapClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnapClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA0001000000000000000000 /* UnreadBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnreadBadge.swift"; sourceTree = "<group>"; };
 		EA0004000000000000000000 /* PrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PrimaryButtonStyle.swift"; sourceTree = "<group>"; };
@@ -382,7 +380,6 @@
 				E90000000000000000000001 /* EventSnapClipApp.swift */,
 				E90000000000000000000005 /* EventSnapClipRootView.swift */,
 				E90000000000000000000007 /* GetAppScreen.swift */,
-				42C48431383094F8B5BA6F6F /* EventPreviewLoader.swift */,
 			);
 			path = EventSnapClip;
 			sourceTree = "<group>";
@@ -635,7 +632,6 @@
 				E90000000000000000000002 /* EventSnapClipApp.swift in Sources */,
 				E90000000000000000000006 /* EventSnapClipRootView.swift in Sources */,
 				E90000000000000000000008 /* GetAppScreen.swift in Sources */,
-				21EA6B9F632651140D9E2890 /* EventPreviewLoader.swift in Sources */,
 				BDE49380E5897CC163DB7801 /* Event.swift in Sources */,
 				A598EC34D1C567946A8DC44A /* Photo.swift in Sources */,
 				81C5D792F1F9479D96A6435C /* PhotoImageLoader.swift in Sources */,

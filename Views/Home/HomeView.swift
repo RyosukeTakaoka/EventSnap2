@@ -54,12 +54,28 @@ struct HomeView: View {
     }
 
     var body: some View {
+#if DEBUG
         // ⑥ 招待+読み取りの合成カットは、通常のHomeView→MainTabViewの導線とは
         // 別物（QRコードとスキャン画面を重ねた専用View）なので、このシーンの
         // ときだけ丸ごと差し替える。それ以外のシーン・通常起動では影響しない。
+        //
+        // `QROverlayScreenshotView`はファイルごと`#if DEBUG`で囲われている
+        // （Preview/QROverlayScreenshotView.swift）ため、この分岐も`#if DEBUG`の
+        // 中に置く必要がある。以前は分岐だけが無条件に書かれていたため、
+        // **ReleaseビルドではHomeViewがコンパイルできなかった**
+        // （"Cannot find 'QROverlayScreenshotView' in scope"）。
         if ScreenshotMode.isActive && ScreenshotMode.scene == .inviteOverlay {
             QROverlayScreenshotView()
         } else {
+            mainContent
+        }
+#else
+        mainContent
+#endif
+    }
+
+    /// 通常のホーム画面。
+    private var mainContent: some View {
         NavigationView {
             ZStack {
                 // 背景は白（ごく薄いDesignTokens.primaryのティント）。
@@ -156,7 +172,6 @@ struct HomeView: View {
             hasEvent = eventRepository.currentEvent != nil
             presentEventIfPossible()
             await eventViewModel.loadRecentEvents()
-        }
         }
     }
 

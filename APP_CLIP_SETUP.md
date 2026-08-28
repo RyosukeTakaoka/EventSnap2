@@ -73,8 +73,11 @@ App Clipでもメインアプリのコードを使用するため、以下のフ
 3. 以下を確認・追加:
 
 **iCloud**
-- Services: `CloudKit` にチェック
-- Containers: `iCloud.app.takaoka.com.EventSnap2`
+- ⚠️ **追加しません。** App ClipのApp IDにはiCloud capabilityが存在しないため、
+  entitlementsに `com.apple.developer.icloud-services` を書くと署名に失敗します
+  （"Provisioning profile ... doesn't match the entitlements file's value for
+  the com.apple.developer.icloud-services entitlement"）。
+  そのためApp ClipからCloudKitのイベント・写真を読むことはできません。
 
 **App Groups**
 - `group.app.takaoka.com.EventSnap2`
@@ -187,7 +190,8 @@ App Clipをリリースする際は：
 
 **よくあるエラー:**
 - `No such module 'CloudKit'`
-  → Capabilitiesで iCloud (CloudKit) を有効化
+  → App ClipではCloudKitは使えません。CloudKitに依存するコードをApp Clipターゲットに
+     入れていないか確認してください
 
 - `Cannot find 'Event' in scope`
   → `Models/Event.swift` をApp Clipターゲットに追加
