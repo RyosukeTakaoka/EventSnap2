@@ -314,12 +314,24 @@ struct NewlyRevealedBadge: View {
 
 struct PhotoDetailView: View {
     let photo: Photo
-    let viewModel: AlbumViewModel
-    
+    // 削除失敗時のエラー（`@Published var error`）をアラートで即座に反映できるよう
+    // 監視する。`PhotoCell`側の同名プロパティ（画像ダウンロードにしか使わない）は
+    // 監視の必要が無いため、そちらは`let`のままにしている。
+    @ObservedObject var viewModel: AlbumViewModel
+
     @State private var image: UIImage?
     @State private var isLoading = true
     @State private var showingSaveConfirmation = false
+    @State private var showingDeleteConfirmation = false
+    @State private var isDeleting = false
     @Environment(\.dismiss) var dismiss
+
+    /// 削除できるのは自分がアップロードした写真だけ。
+    /// 共有アルバムで他人の思い出を消せてしまわないようにする
+    /// （`PhotoRepository.deletePhoto`側でも同じ条件をもう一度確認している）。
+    private var canDelete: Bool {
+        photo.uploaderID == DeviceIdentity.current
+    }
 
     var body: some View {
         ZStack {
@@ -376,6 +388,24 @@ struct PhotoDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            // 自分がアップロードした写真にだけ削除ボタンを出す。
+            // 他人の写真には出さない（共有アルバムなので、消せてしまうと事故になる）。
+            if canDelete {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(.ultraThinMaterial, in: Circle())
+                            .environment(\.colorScheme, .dark)
+                    }
+                    .disabled(isDeleting)
+                }
+            }
+
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     saveImageToPhotos()
@@ -397,6 +427,25 @@ struct PhotoDetailView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text("写真をカメラロールに保存しました")
+        }
+        .confirmationDialog(
+            "この写真を削除しますか？",
+            isPresented: $showingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("削除", role: .destructive) {
+                Task { await deletePhoto() }
+            }
+            Button("キャンセル", role: .cancel) { }
+        } message: {
+            Text("参加者全員から見えなくなります。この操作は取り消せません。")
+        }
+        .alert("削除できませんでした",
+               isPresented: Binding(get: { viewModel.error != nil },
+                                    set: { if !$0 { viewModel.error = nil } })) {
+            Button("OK", role: .cancel) { viewModel.error = nil }
+        } message: {
+            Text(viewModel.error ?? "")
         }
     }
     
@@ -454,8 +503,20 @@ struct PhotoDetailView: View {
         
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
         showingSaveConfirmation = true
-        
+
         print("✅ カメラロールに保存完了")
+    }
+
+    private func deletePhoto() async {
+        isDeleting = true
+        let succeeded = await viewModel.deletePhoto(photo)
+        isDeleting = false
+
+        // 削除できたら詳細画面に留まる意味が無いので、アルバムへ戻る。
+        // 失敗した場合はこの画面に残り、下のアラートで理由を出す。
+        if succeeded {
+            dismiss()
+        }
     }
 }
 

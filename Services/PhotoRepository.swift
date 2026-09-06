@@ -304,6 +304,64 @@ class PhotoRepository: ObservableObject {
         return updated
     }
 
+    // MARK: - 写真削除
+
+    /// 写真を削除する。
+    ///
+    /// **削除できるのは、自分がアップロードした写真だけ**。Public Databaseは
+    /// 参加者全員が同じ写真を見る共有アルバムなので、他人の写真まで消せてしまうと
+    /// 「気づいたら誰かの思い出が消えていた」という事故になる。呼び出し側
+    /// （`PhotoDetailView`）でも削除ボタン自体を本人の写真にしか出さないが、
+    /// 直接このメソッドが呼ばれた場合に備えてここでも確認する。
+    ///
+    /// - Returns: 実際に削除できたら `true`
+    @discardableResult
+    func deletePhoto(_ photo: Photo, event: Event) async throws -> Bool {
+        guard photo.uploaderID == DeviceIdentity.current else {
+            throw PhotoError.notOwner
+        }
+
+        do {
+            _ = try await database.deleteRecord(withID: photo.recordID)
+        } catch let error as CKError where error.code == .unknownItem {
+            // レコードがrecordIDで見つからない。旧形式(recordNameがランダム)の
+            // 可能性があるのでフィールド検索してから削除する。
+            let predicate = NSPredicate(format: "id == %@", photo.id.uuidString)
+            let query = CKQuery(recordType: "Photo", predicate: predicate)
+            let results = try await database.records(matching: query)
+            guard let (recordID, _) = results.matchResults.first else {
+                // CloudKit上にはもう無い。ローカルのキャッシュだけ整合させて成功扱いにする。
+                removeFromCaches(photo.id)
+                return true
+            }
+            _ = try await database.deleteRecord(withID: recordID)
+        } catch {
+            print("❌ 写真の削除に失敗 (\(photo.id)): \(error)")
+            self.error = error
+            throw error
+        }
+
+        removeFromCaches(photo.id)
+
+        // シェアOKでEvent Reelに使われていた場合、そこからも取り除いて作り直す
+        if photo.isShareOK {
+            await ShareCollageBuilder.removeFromReels(photoID: photo.id, event: event)
+        }
+
+        // まだ公開されていないタイムカプセルだった場合、予約済みの公開通知も消す
+        if photo.isTimeCapsule && !photo.isRevealed() {
+            await NotificationService.shared.cancelReveals(for: [photo.id])
+        }
+
+        print("🗑️ 写真を削除しました: \(photo.id)")
+        return true
+    }
+
+    private func removeFromCaches(_ photoID: UUID) {
+        photos.removeAll { $0.id == photoID }
+        allPhotos.removeAll { $0.id == photoID }
+    }
+
     /// 写真を更新する（既存レコードを取得してから上書きする）。
     ///
     /// 新規に `CKRecord` を作り直すと recordID が変わって複製になるため、
@@ -386,6 +444,20 @@ class PhotoRepository: ObservableObject {
         // 出来上がりは常に .up の正しい向きになる。
         return UIGraphicsImageRenderer(size: newSize, format: format).image { _ in
             image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
+    }
+}
+
+// MARK: - エラー
+
+enum PhotoError: LocalizedError {
+    /// 自分がアップロードした写真ではない
+    case notOwner
+
+    var errorDescription: String? {
+        switch self {
+        case .notOwner:
+            return "自分がアップロードした写真だけ削除できます"
         }
     }
 }
