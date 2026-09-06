@@ -141,7 +141,8 @@ class EventRepository: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-        guard UUID(uuidString: eventID) != nil else {
+        guard let uuid = UUID(uuidString: eventID) else {
+            print("❌ QRから読み取った文字列がイベントIDの形式ではありません: \(eventID)")
             throw EventError.invalidID
         }
 
@@ -149,6 +150,20 @@ class EventRepository: ObservableObject {
         try await CloudKitAccount.ensureAvailable()
 
         guard let event = try await fetchEvent(id: eventID) else {
+            // 「見つからない」で終わらせず、切り分けに要る材料をログに残す。
+            // 実際の原因はほぼ次のどれかで、画面のメッセージだけでは区別できない。
+            //   1. 主催者と参加者で CloudKit の環境が違う
+            //      （Xcodeから直接入れたビルド＝Development、
+            //        TestFlight／App Store版＝Production。両者のデータは別物）
+            //   2. 主催者側でイベントの作成そのものが失敗していた
+            //   3. 読み取ったQRが別コンテナ／別アプリのもの
+            print("""
+            ❌ イベントが見つかりません
+               eventID   : \(eventID)
+               recordName: \(Event.recordID(for: uuid).recordName)
+               container : \(container.containerIdentifier ?? "不明")
+               主催者の端末と同じCloudKit環境(Development / Production)かを確認してください。
+            """)
             throw EventError.notFound
         }
 
@@ -197,7 +212,10 @@ class EventRepository: ObservableObject {
                     missing.append(id)
                 }
             } catch {
-                print("⚠️ 履歴イベントの取得に失敗: \(id)")
+                // ここで `missing` に入れてはいけない。取得に失敗しただけで
+                // 履歴から消すと、通信不良やスキーマ不備のたびに
+                // 「グループが消えた」状態になる。次回の読み込みでやり直す。
+                print("⚠️ 履歴イベントの取得に失敗（履歴は保持）: \(id) / \(error)")
             }
         }
 
@@ -244,11 +262,32 @@ class EventRepository: ObservableObject {
 
     // MARK: - イベント取得
 
-    private func fetchEvent(id: String) async throws -> Event? {
-        try await fetchRecord(id: id).flatMap(Event.from(record:))
+    /// イベントの取得結果。
+    ///
+    /// **「本当に存在しない」と「読めなかった」を必ず区別する**ためのもの。
+    /// 以前はどちらも `nil` で返していたため、CloudKitのスキーマ不備や通信の
+    /// 問題まで「イベントが見つかりません」として扱われ、さらに
+    /// `loadRecentEvents` が参加履歴からそのグループを消してしまっていた。
+    private enum EventLookup {
+        /// 読み込めた
+        case found(Event)
+        /// このIDのレコードは、この環境に確かに存在しない
+        case absent
+        /// レコードは在るのに Event として読めなかった（IDが壊れている等）
+        case unreadable
     }
 
-    /// イベントのレコードを取得する。
+    /// 「本当に無い」ときだけ `nil` を返す。
+    /// 読めなかった場合は `EventError.unreadable` を投げる（`nil` にはしない）。
+    private func fetchEvent(id: String) async throws -> Event? {
+        switch try await lookupEvent(id: id) {
+        case .found(let event): return event
+        case .absent:          return nil
+        case .unreadable:      throw EventError.unreadable
+        }
+    }
+
+    /// イベントのレコードを取得する。`nil` は「この環境に確かに無い」。
     ///
     /// ## なぜ2段構えなのか
     ///
@@ -266,7 +305,7 @@ class EventRepository: ObservableObject {
         // ① recordID で直接取得（強い一貫性）
         do {
             return try await database.record(for: Event.recordID(for: uuid))
-        } catch let error as CKError where error.code == .unknownItem {
+        } catch let error as CKError where error.isUnknownItem {
             // このIDのレコードは無い。旧形式の可能性があるので②へ。
         } catch {
             throw error
@@ -276,10 +315,35 @@ class EventRepository: ObservableObject {
         //    フィールド検索でしか見つけられない
         let predicate = NSPredicate(format: "id == %@", id)
         let query = CKQuery(recordType: "Event", predicate: predicate)
-        let results = try await database.records(matching: query)
 
-        guard let (_, result) = results.matchResults.first else { return nil }
+        let matchResults: [(CKRecord.ID, Result<CKRecord, Error>)]
+        do {
+            matchResults = try await database.records(matching: query).matchResults
+        } catch let error as CKError where error.isSchemaProblem {
+            // ここに来るのは「レコードが無い」ではなく **スキーマの問題**。
+            //
+            // - `unknownItem`: この環境に `Event` レコードタイプ自体が無い
+            //   （Production へ Deploy Schema Changes をしていない、など）
+            // - `invalidArguments`: `id` フィールドが Queryable になっていない
+            //
+            // 「イベントが見つかりません」と伝えてしまうと原因を永久に追えないので、
+            // スキーマの問題として区別して投げる。
+            print("❌ Eventのクエリがスキーマ都合で失敗しました: \(error)")
+            throw EventError.schemaUnavailable(error.localizedDescription)
+        }
+
+        guard let (_, result) = matchResults.first else { return nil }
         return try? result.get()
+    }
+
+    /// レコードを取りに行き、「無い」「読めない」「読めた」を区別して返す。
+    private func lookupEvent(id: String) async throws -> EventLookup {
+        guard let record = try await fetchRecord(id: id) else { return .absent }
+
+        if let event = Event.from(record: record) { return .found(event) }
+
+        print("⚠️ Eventレコードは存在しますが読み取れませんでした: \(record.recordID.recordName)")
+        return .unreadable
     }
 
     /// イベントを保存する（既存があれば上書き、無ければ新規作成）
@@ -359,11 +423,55 @@ class EventRepository: ObservableObject {
 enum EventError: LocalizedError {
     case invalidID
     case notFound
+    /// レコードは在るのに Event として読み込めなかった
+    case unreadable
+    /// CloudKit のスキーマ側の問題（レコードタイプが無い／インデックス未設定）
+    case schemaUnavailable(String)
 
     var errorDescription: String? {
         switch self {
-        case .invalidID: return "無効なイベントIDです"
-        case .notFound:  return "イベントが見つかりません"
+        case .invalidID:
+            return "無効なイベントIDです"
+        case .notFound:
+            // 「無い」と断定できたときだけ出す。原因の切り分けができるよう、
+            // よくある理由（作成側と別のiCloud環境で動かしている等）も添える。
+            return """
+            このイベントは見つかりませんでした。
+
+            ・主催者がイベントを終了・削除していないか
+            ・主催者と同じバージョンのアプリか
+              （Xcodeから入れたアプリとTestFlight／App Store版では
+              　保存先のiCloud環境が別になり、お互いのイベントが見えません）
+            をご確認ください。
+            """
+        case .unreadable:
+            return "イベントの情報を読み取れませんでした。\nアプリを最新版に更新してからお試しください。"
+        case .schemaUnavailable(let detail):
+            return "サーバー（iCloud）の設定が未反映のようです。\n(\(detail))"
         }
+    }
+}
+
+// MARK: - CKError の判定ヘルパー
+
+extension CKError {
+
+    /// 「そのレコードは無い」を表すか。
+    ///
+    /// `CKDatabase.record(for:)` は、内部の一括取得の都合で
+    /// **`.partialFailure` の中に `.unknownItem` を包んで**投げてくることがある。
+    /// トップレベルのコードだけを見ていると取りこぼし、「無いだけ」なのに
+    /// 予期しないエラーとして扱ってしまう。
+    var isUnknownItem: Bool {
+        if code == .unknownItem { return true }
+        guard code == .partialFailure,
+              let partial = partialErrorsByItemID?.values else { return false }
+        return partial.contains { ($0 as? CKError)?.code == .unknownItem }
+    }
+
+    /// スキーマ側の不備（レコードタイプが無い／フィールドが Queryable でない）か。
+    /// クエリでこれらが返るのは「該当なし」ではなく設定の問題。
+    var isSchemaProblem: Bool {
+        isUnknownItem || code == .invalidArguments
     }
 }
