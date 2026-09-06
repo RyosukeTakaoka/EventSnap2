@@ -14,6 +14,12 @@ struct CameraView: View {
     @ObservedObject private var eventRepository = EventRepository.shared
     @ObservedObject private var tutorial = TutorialManager.shared
 
+    /// ズーム倍率のラベルを出しているか。ピンチ中はずっと出し、
+    /// 指を離してもしばらく余韻で表示し続けてからフェードアウトする。
+    @State private var showZoomLabel = false
+    /// フェードアウトを予約しているタスク。ピンチが続く間はキャンセルして延長する。
+    @State private var zoomLabelHideTask: Task<Void, Never>?
+
     /// カメラ画面で扱う初回チュートリアルのステップだけを対象にする
     /// （アルバム側のステップは`AlbumView`が別途面倒を見る）。
     private static let cameraSteps: Set<TutorialStep> = [.shutter, .shareOK, .laterReveal, .shutterForLaterReveal]
@@ -38,6 +44,35 @@ struct CameraView: View {
             } else {
                 CameraPreview(session: viewModel.captureSession, mirrored: viewModel.cameraPosition == .front)
                     .ignoresSafeArea()
+                    // ピンチでズーム。指を置いた位置に関わらず、映像全体にジェスチャーを
+                    // 効かせたいのでプレビュー全面に付ける。
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { scale in
+                                if !showZoomLabel {
+                                    viewModel.zoomGestureBegan()
+                                }
+                                withAnimation(.easeOut(duration: 0.15)) { showZoomLabel = true }
+                                zoomLabelHideTask?.cancel()
+                                viewModel.zoomGestureChanged(scale: scale)
+                            }
+                            .onEnded { _ in
+                                scheduleZoomLabelHide()
+                            }
+                    )
+            }
+
+            // 現在のズーム倍率。ピンチ中と、指を離してからしばらくの間だけ見せる
+            // （常時表示すると、撮りたい瞬間の画面が文字で煩雑になるため）。
+            if showZoomLabel {
+                Text(String(format: "%.1fx", viewModel.zoomFactor))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(Color.black.opacity(0.55))
+                    .clipShape(Capsule())
+                    .transition(.opacity)
             }
 
             // UI オーバーレイ
@@ -195,6 +230,18 @@ struct CameraView: View {
         // シャッターボタンの`.disabled`と同じ条件でしか反応させない。
         .cameraControlCapture(isEnabled: !viewModel.isProcessing && isEventActive) {
             viewModel.capturePhoto()
+        }
+    }
+
+    /// ピンチが終わってから少し待ってズーム倍率のラベルを消す。
+    /// 離した瞬間に消すと今の倍率を確認する間もなく消えてしまうため、
+    /// 少し余韻を持たせる。連続でピンチし直された場合は、呼び出し側で
+    /// このタスクをキャンセルして延長する。
+    private func scheduleZoomLabelHide() {
+        zoomLabelHideTask = Task {
+            try? await Task.sleep(nanoseconds: 1_200_000_000)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeOut(duration: 0.25)) { showZoomLabel = false }
         }
     }
 }

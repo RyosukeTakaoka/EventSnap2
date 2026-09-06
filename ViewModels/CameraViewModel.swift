@@ -55,6 +55,31 @@ class CameraViewModel: ObservableObject {
     /// 現在使用中のカメラ（インカメラ/アウトカメラ）
     @Published var cameraPosition: AVCaptureDevice.Position = .front
 
+    // MARK: - ズーム
+
+    /// 現在のズーム倍率（UIのズーム表示にもそのまま使う）
+    @Published var zoomFactor: CGFloat = 1.0
+
+    /// ピンチ開始時点のズーム倍率。
+    /// `MagnificationGesture`は「開始時点を1.0とした相対倍率」を送ってくるため、
+    /// 実際の倍率を求めるにはこの値に掛け合わせる必要がある。
+    private var pinchStartZoomFactor: CGFloat = 1.0
+
+    /// ズームの上限。機種によっては`maxAvailableVideoZoomFactor`が非常に大きい値
+    /// （デジタルズームでどこまで拡大できるかの理論値）を返すが、そこまで拡大すると
+    /// 画質が粗くなりすぎて実用に耐えない。写真共有アプリとしての画質を優先し、
+    /// 常識的な上限で切る。
+    private let maxAllowedZoomFactor: CGFloat = 8.0
+
+    var minZoomFactor: CGFloat {
+        videoDeviceInput?.device.minAvailableVideoZoomFactor ?? 1.0
+    }
+
+    var maxZoomFactor: CGFloat {
+        guard let device = videoDeviceInput?.device else { return 1.0 }
+        return min(device.maxAvailableVideoZoomFactor, maxAllowedZoomFactor)
+    }
+
     /// 端末の物理的な向き。横で撮った写真を横のまま保存するために使う。
     let orientation = CameraOrientation()
 
@@ -178,6 +203,11 @@ class CameraViewModel: ObservableObject {
             Task { @MainActor in
                 self.cameraPosition = newPosition
                 self.applyMirroringForCurrentPosition()
+                // イン/アウトでズーム対応範囲が異なるため、切り替えたら1倍に戻す。
+                // 戻さないと、切り替え先のカメラで対応していない倍率のまま
+                // ズームされた状態になってしまうことがある。
+                self.pinchStartZoomFactor = 1.0
+                self.zoomFactor = 1.0
                 print("🔄 カメラを切り替えました: \(newPosition == .front ? "イン" : "アウト")")
             }
         }
@@ -187,6 +217,35 @@ class CameraViewModel: ObservableObject {
     private func applyMirroringForCurrentPosition() {
         let mirrored = cameraPosition == .front
         photoOutput.connection(with: .video)?.applyMirroring(mirrored)
+    }
+
+    // MARK: - ズーム制御
+
+    /// ピンチジェスチャーが始まった瞬間に呼ぶ。
+    /// 現在の倍率を基準として覚えておく。
+    func zoomGestureBegan() {
+        pinchStartZoomFactor = zoomFactor
+    }
+
+    /// ピンチの指を動かすたびに呼ぶ。`scale`はジェスチャー開始時点を1.0とした相対値。
+    func zoomGestureChanged(scale: CGFloat) {
+        applyZoom(pinchStartZoomFactor * scale)
+    }
+
+    private func applyZoom(_ factor: CGFloat) {
+        guard let device = videoDeviceInput?.device else { return }
+
+        let clamped = min(max(factor, minZoomFactor), maxZoomFactor)
+        guard clamped != device.videoZoomFactor else { return }
+
+        do {
+            try device.lockForConfiguration()
+            device.videoZoomFactor = clamped
+            device.unlockForConfiguration()
+            zoomFactor = clamped
+        } catch {
+            print("❌ ズームの適用に失敗: \(error)")
+        }
     }
 
     // MARK: - 向きの追従

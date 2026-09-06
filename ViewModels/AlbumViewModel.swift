@@ -132,4 +132,28 @@ class AlbumViewModel: ObservableObject {
     func thumbnail(for photo: Photo) async -> UIImage? {
         await PhotoImageLoader.shared.thumbnail(for: photo)
     }
+
+    // MARK: - 写真削除
+
+    /// 自分がアップロードした写真を削除する。
+    /// - Returns: 削除できたら `true`
+    @discardableResult
+    func deletePhoto(_ photo: Photo) async -> Bool {
+        guard let event = eventRepository.currentEvent else { return false }
+
+        do {
+            return try await photoRepository.deletePhoto(photo, event: event)
+        } catch {
+            self.error = AlbumViewModel.message(for: error)
+            print("❌ 写真削除エラー: \(error)")
+            return false
+        }
+    }
+
+    private static func message(for error: Error) -> String {
+        if let localized = error as? LocalizedError, let description = localized.errorDescription {
+            return description
+        }
+        return "写真の削除に失敗しました"
+    }
 }
