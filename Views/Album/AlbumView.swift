@@ -416,6 +416,7 @@ struct PhotoDetailView: View {
                 // 読みにくかった。すりガラス調のカプセルに乗せて、どんな写真の上でも
                 // 視認性を確保する。
                 infoCard
+                    .padding(.horizontal, 20)
                     .padding(.bottom, 20)
             }
 
@@ -563,8 +564,35 @@ struct PhotoDetailView: View {
 
     // MARK: - 写真情報カード
 
+    /// 投稿者の表示名。
+    ///
+    /// 自分の写真は名前を出さず「あなた」にする（自分の名前を自分に見せても
+    /// 意味が無く、一覧の中で自分の写真がすぐ分かる方が役に立つため）。
+    ///
+    /// この判定を`Photo`側の計算プロパティにしないのは、`Photo.swift`が
+    /// **App Clipターゲットでもコンパイルされる**ため。App Clip側には
+    /// `DeviceIdentity.swift`が含まれておらず、参照するとビルドが通らなくなる。
+    private var uploaderDisplayName: String {
+        if photo.uploaderID == DeviceIdentity.current { return "あなた" }
+
+        let name = photo.uploaderName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        // 表示名を決める前のバージョンで撮られた写真には名前が入っていない
+        return name.isEmpty ? "参加者" : name
+    }
+
     private var infoCard: some View {
         HStack(spacing: 14) {
+            Label {
+                Text(uploaderDisplayName)
+                    .lineLimit(1)
+            } icon: {
+                Image(systemName: "person.crop.circle")
+            }
+
+            Divider()
+                .frame(height: 12)
+                .overlay(Color.white.opacity(0.35))
+
             Label {
                 Text(photo.uploadedAt.formatted(date: .abbreviated, time: .shortened))
             } icon: {
@@ -585,6 +613,10 @@ struct PhotoDetailView: View {
         }
         .font(.caption)
         .foregroundColor(.white)
+        // 投稿者名が増えた分、細い端末や長い名前でカードが画面幅を超えうる。
+        // 折り返さず、少しだけ縮めて1行に収める。
+        .lineLimit(1)
+        .minimumScaleFactor(0.85)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(.ultraThinMaterial, in: Capsule())
