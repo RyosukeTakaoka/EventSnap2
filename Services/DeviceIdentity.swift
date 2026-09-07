@@ -38,16 +38,27 @@ enum DeviceIdentity {
         return generated
     }()
 
+    private static let displayNameKey = "displayName"
+
     /// 表示用の端末名（「〇〇さんの新しい思い出」の〇〇に使う）
     static var displayName: String {
         let defaults = UserDefaults.standard
-        if let custom = defaults.string(forKey: "displayName"), !custom.isEmpty {
+        if let custom = defaults.string(forKey: displayNameKey), !custom.isEmpty {
             return custom
         }
         return UIDevice.current.name
     }
 
+    /// 本人が表示名を決めたことがあるか。
+    ///
+    /// これが `false` の間は `displayName` が端末名（「〇〇のiPhone」）を
+    /// そのまま返しているだけの状態で、本人が選んだ名前ではない。
+    /// イベントの作成・参加画面はこれを見て、初回だけ表示名の入力を求める。
+    static var hasCustomDisplayName: Bool {
+        !(UserDefaults.standard.string(forKey: displayNameKey) ?? "").isEmpty
+    }
+
     static func setDisplayName(_ name: String) {
-        UserDefaults.standard.set(name, forKey: "displayName")
+        UserDefaults.standard.set(name, forKey: displayNameKey)
     }
 }

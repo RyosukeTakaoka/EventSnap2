@@ -18,20 +18,29 @@ struct QRScannerView: View {
     /// 同じコードで何度も参加処理を走らせない
     @State private var isHandling = false
 
+    /// まだ本人が表示名を決めたことが無い間は、カメラより先にこちらを出す。
+    /// 一度決めれば、以後の参加ではもう出さない（変更は設定タブから）。
+    @State private var needsDisplayName = !DeviceIdentity.hasCustomDisplayName
+    @State private var displayName = DeviceIdentity.displayName
+
     var body: some View {
         NavigationView {
             ZStack {
                 Color.black.ignoresSafeArea()
 
-                switch cameraGranted {
-                case true:
-                    scanner
-                case false:
-                    permissionDenied
-                case nil:
-                    ProgressView().tint(.white)
-                default:
-                    EmptyView()
+                if needsDisplayName {
+                    displayNameEntry
+                } else {
+                    switch cameraGranted {
+                    case true:
+                        scanner
+                    case false:
+                        permissionDenied
+                    case nil:
+                        ProgressView().tint(.white)
+                    default:
+                        EmptyView()
+                    }
                 }
             }
             .navigationBarItems(leading: Button("キャンセル") {
@@ -57,9 +66,61 @@ struct QRScannerView: View {
             // **黒い画面のまま何も読み取れない**状態になっていた。
             // 一度カメラタブを開いた端末では許可済みなので再現せず、
             // 新しく入れた端末でだけ「読み取れない」と言われる形で出ていた。
-            .task { await requestCameraAccess() }
+            //
+            // 表示名の入力画面が出ている間は呼ばない。ここでいきなりカメラ許可の
+            // システムダイアログが被さると、名前を入力している最中の画面が
+            // 邪魔されてしまうため（`submitDisplayName`で名前確定後に呼ぶ）。
+            .task {
+                guard !needsDisplayName else { return }
+                await requestCameraAccess()
+            }
         }
         .navigationViewStyle(.stack)
+    }
+
+    // MARK: - 表示名の入力
+
+    /// 初参加の人に、カメラを開く前に表示名を決めてもらう画面。
+    /// タイムカプセルの通知（「〇〇さんの新しい思い出」）や参加者一覧に使われる。
+    private var displayNameEntry: some View {
+        VStack(spacing: 20) {
+            Spacer()
+
+            Image(systemName: "person.crop.circle")
+                .font(.system(size: 44))
+                .foregroundColor(.white.opacity(0.85))
+
+            VStack(spacing: 8) {
+                Text("あなたの表示名を入力してください")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Text("タイムカプセルの通知などで使われます")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+            }
+
+            TextField("例: たかし", text: $displayName)
+                .textFieldStyle(.roundedBorder)
+                .autocorrectionDisabled()
+                .padding(.horizontal, 32)
+
+            Button("次へ") {
+                submitDisplayName()
+            }
+            .buttonStyle(.primary)
+            .padding(.horizontal, 32)
+
+            Spacer()
+        }
+    }
+
+    private func submitDisplayName() {
+        let trimmed = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            DeviceIdentity.setDisplayName(trimmed)
+        }
+        needsDisplayName = false
+        Task { await requestCameraAccess() }
     }
 
     private var scanner: some View {
