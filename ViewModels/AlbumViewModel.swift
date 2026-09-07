@@ -145,9 +145,10 @@ class AlbumViewModel: ObservableObject {
 
     // MARK: - リアクション
 
-    /// 自分のリアクションを設定・付け替え・取り消しする。
+    /// 自分のリアクションを付ける／外す（同じ絵文字をもう一度で取り消し）。
+    /// 1枚の写真に何種類でも押せる。
     ///
-    /// 読み取り（`emojiSummary`/`myReaction`）はここには置かず、
+    /// 読み取り（`emojiSummary`/`myReactions`など）はここには置かず、
     /// 呼び出し側のViewが`ReactionRepository.shared`を直接`@ObservedObject`で
     /// 観測する。`AlbumViewModel`経由の素通しにすると、他の参加者のリアクションが
     /// 届いて`ReactionRepository.reactions`が更新されても、それは

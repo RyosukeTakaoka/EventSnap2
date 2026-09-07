@@ -4,6 +4,11 @@
 //
 //  写真への絵文字リアクション管理（CloudKit連携）
 //
+//  **件数は一切集計しない。** 出すのは「どの絵文字を、誰が押したか」だけ。
+//  InstagramやYouTubeの「いいね◯件」のような数字は、EventSnapの
+//  「その場に居合わせた人だけの、飾らない集まり」というコンセプトに
+//  合わないという判断で意図的に作っていない。
+//
 
 import Foundation
 import CloudKit
@@ -42,52 +47,65 @@ class ReactionRepository: ObservableObject {
                 }
             }
             self.reactions = fetched
-        } catch let error as CKError where error.code == .unknownItem {
-            // Reactionレコードタイプ自体がまだこの環境に無い（スキーマ未反映）。
-            // リアクション機能が無いだけとして扱い、他の写真表示は妨げない。
-            print("⚠️ Reactionレコードタイプが見つかりません。CloudKitのスキーマ設定を確認してください")
+        } catch let error as CKError where error.code == .unknownItem || error.code == .invalidArguments {
+            // ここに来るのはスキーマ側の準備がまだ終わっていないとき。
+            //
+            // - `unknownItem`      : この環境に`Reaction`レコードタイプがまだ無い
+            //                        （誰も一度もリアクションしていない＝自動生成前）
+            // - `invalidArguments` : `eventID`がQueryableになっていない
+            //
+            // どちらもリアクションが1件も無いのと同じ扱いにして、
+            // アルバムの写真表示までは巻き添えで止めない。
+            print("⚠️ リアクションを取得できませんでした（スキーマ未整備の可能性）: \(error.localizedDescription)")
             self.reactions = []
         }
     }
 
     // MARK: - リアクションの変更
 
-    /// 自分のリアクションを設定する。
-    /// - 既に同じ絵文字を選んでいた場合は取り消す（トグル）
-    /// - 別の絵文字を選んでいた場合は付け替える
-    /// - まだ選んでいない場合は新しく付ける
+    /// 自分のリアクションを付ける／外す（同じ絵文字をもう一度で取り消し）。
     ///
-    /// 1人が1枚の写真に持てるリアクションは常に1個まで
-    /// （複数の絵文字を同時に付けることはできない）。
+    /// **1人が同じ写真に何種類でも押せる。** 絵文字ごとに別レコードなので、
+    /// ある絵文字を押す・外す操作が他の絵文字に影響しない。
     func toggleReaction(_ emoji: String, photoID: UUID, event: Event) async {
         let reactorID = DeviceIdentity.current
 
-        if let existing = reactions.first(where: { $0.photoID == photoID && $0.reactorID == reactorID }) {
-            if existing.emoji == emoji {
-                await remove(existing)
-            } else {
-                var updated = existing
-                updated.emoji = emoji
-                await upsert(updated)
-            }
+        if let existing = reactions.first(where: {
+            $0.photoID == photoID && $0.reactorID == reactorID && $0.emoji == emoji
+        }) {
+            await remove(existing)
         } else {
-            let new = Reaction(eventID: event.id, photoID: photoID, reactorID: reactorID, emoji: emoji, createdAt: Date())
-            await upsert(new)
+            let new = Reaction(
+                eventID: event.id,
+                photoID: photoID,
+                reactorID: reactorID,
+                reactorName: DeviceIdentity.displayName,
+                emoji: emoji,
+                createdAt: Date()
+            )
+            await add(new)
         }
     }
 
-    /// 自分がその写真に付けているリアクション（無ければnil）
-    func myReaction(for photoID: UUID) -> String? {
-        reactions.first { $0.photoID == photoID && $0.reactorID == DeviceIdentity.current }?.emoji
+    /// 自分がその写真に付けている絵文字（複数可）
+    func myReactions(for photoID: UUID) -> Set<String> {
+        let me = DeviceIdentity.current
+        return Set(reactions.filter { $0.photoID == photoID && $0.reactorID == me }.map(\.emoji))
+    }
+
+    /// その写真へのリアクションを押された順に返す（「誰が押したか」の一覧用）。
+    /// プロパティの`reactions`と紛らわしくならないよう、別の名前にしている。
+    func sortedReactions(for photoID: UUID) -> [Reaction] {
+        reactions.filter { $0.photoID == photoID }.sorted { $0.createdAt < $1.createdAt }
     }
 
     /// その写真に付いているリアクションの種類を、古い順に重複無しで返す。
-    /// **誰が何個押したかは一切集計しない**。写真の隅に絵文字を並べて見せる
-    /// だけの、数字の出ないリアクション表示に使う。
+    /// **何件付いているかは数えない**。アルバムのグリッドで、写真の隅に
+    /// 絵文字を並べて見せるだけの表示に使う。
     func emojiSummary(for photoID: UUID) -> [String] {
         var seen = Set<String>()
         var order: [String] = []
-        for reaction in reactions.filter({ $0.photoID == photoID }).sorted(by: { $0.createdAt < $1.createdAt }) {
+        for reaction in sortedReactions(for: photoID) {
             if seen.insert(reaction.emoji).inserted {
                 order.append(reaction.emoji)
             }
@@ -95,51 +113,39 @@ class ReactionRepository: ObservableObject {
         return order
     }
 
-    private func upsert(_ reaction: Reaction) async {
+    private func add(_ reaction: Reaction) async {
+        // 先にローカルへ反映して、タップに即座に反応させる。
+        // 失敗したら元に戻す（`PhotoRepository.uploadPhoto`のrollbackと同じ考え方）。
+        reactions.append(reaction)
+
         do {
-            try await save(reaction)
+            _ = try await database.save(reaction.toRecord())
+        } catch let error as CKError where error.code == .serverRecordChanged {
+            // 既に同じレコードがサーバーにある（別端末から同期される前に押した等）。
+            // 押したという結果自体は同じなので、ローカルはそのままでよい。
         } catch {
             print("❌ リアクションの保存に失敗 (\(reaction.photoID)): \(error)")
-            return
-        }
-
-        if let index = reactions.firstIndex(where: { $0.id == reaction.id }) {
-            reactions[index] = reaction
-        } else {
-            reactions.append(reaction)
+            reactions.removeAll { $0.id == reaction.id }
         }
     }
 
     private func remove(_ reaction: Reaction) async {
+        reactions.removeAll { $0.id == reaction.id }
+
         do {
             _ = try await database.deleteRecord(withID: reaction.recordID)
         } catch let error as CKError where error.code == .unknownItem {
-            // CloudKit上にはもう無い。ローカルだけ整合させる。
+            // CloudKit上にはもう無い。ローカルだけ整合させればよい。
         } catch {
             print("❌ リアクションの削除に失敗 (\(reaction.photoID)): \(error)")
-            return
-        }
-
-        reactions.removeAll { $0.id == reaction.id }
-    }
-
-    /// レコードを保存する（既存があれば上書き、無ければ新規作成）。
-    /// recordIDが(photoID, reactorID)から決まるため、Event/Photoと違って
-    /// クエリへのフォールバックは要らない（旧形式のランダムなrecordNameが
-    /// 存在しない、新規追加のレコードタイプのため）。
-    private func save(_ reaction: Reaction) async throws {
-        do {
-            let existing = try await database.record(for: reaction.recordID)
-            _ = try await database.save(reaction.apply(to: existing))
-        } catch let error as CKError where error.code == .unknownItem {
-            _ = try await database.save(reaction.toRecord())
+            reactions.append(reaction)
         }
     }
 
     // MARK: - リアルタイム更新
 
-    /// リアクションはEmoji変更（付け替え）も他の参加者に届く必要があるため、
-    /// 作成だけでなく更新・削除でも発火するサブスクリプションにする
+    /// リアクションは付け外しの両方が他の参加者に届く必要があるため、
+    /// 作成だけでなく削除でも発火するサブスクリプションにする
     /// （`PhotoRepository.setupSubscription`は作成のみで足りるが、こちらは違う）。
     func setupSubscription(for eventID: UUID) async {
         guard !ScreenshotMode.suppressesLiveServices else { return }
@@ -159,7 +165,9 @@ class ReactionRepository: ObservableObject {
         do {
             _ = try await database.save(subscription)
         } catch {
-            print("❌ リアクションのSubscription設定失敗: \(error)")
+            // スキーマ未整備のうちは失敗する。リアクション自体が使えないだけなので、
+            // 他の同期は止めずに次回の起動でやり直す。
+            print("❌ リアクションのSubscription設定失敗: \(error.localizedDescription)")
         }
     }
 }

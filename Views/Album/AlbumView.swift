@@ -325,11 +325,11 @@ struct NewlyRevealedBadge: View {
 
 // MARK: - リアクションの絵文字バッジ
 
-/// 写真の隅に添える、リアクションの種類だけを並べた小さなバッジ。
+/// アルバムのグリッドで、写真の隅に添える小さなバッジ。
 ///
-/// Instagram/YouTubeの「いいね」のような数字は出さない。あくまで
-/// 「どんな反応が付いているか」だけが分かればよく、誰が何個押したかは
-/// 一切集計しない（`ReactionRepository.emojiSummary`参照）。
+/// ここでは絵文字の**種類**だけを見せる。数字（いいね◯件）は出さないし、
+/// サムネイルの上に名前を載せると写真が見えなくなるので、
+/// **誰が押したかは写真を開いたときに一覧で見せる**（`PhotoDetailView.reactionRoster`）。
 /// 種類が増えすぎて煩雑にならないよう、最大3種類までに切る。
 struct ReactionSummaryBadge: View {
     let emojis: [String]
@@ -404,10 +404,11 @@ struct PhotoDetailView: View {
 
                 Spacer()
 
-                // リアクション。InstagramやYouTubeの「いいね」のような数字は出さず、
-                // 自分がどの絵文字を選んでいるかだけが分かるようにする
-                // （他の人が何を押したかの内訳は`ReactionSummaryBadge`が
-                // アルバム側で絵文字の種類だけ見せる）。
+                // リアクション。InstagramやYouTubeの「いいね◯件」のような数字は
+                // 出さず、「誰がどの絵文字を押したか」だけを見せる。
+                reactionRoster
+                    .padding(.bottom, 10)
+
                 reactionPicker
                     .padding(.bottom, 12)
 
@@ -497,15 +498,50 @@ struct PhotoDetailView: View {
     
     // MARK: - リアクション
 
+    /// 誰がどの絵文字を押したかの一覧。
+    ///
+    /// **件数は出さない。** 「❤️ たかし」のように、絵文字と名前を並べるだけに留める
+    /// （いいね◯件のような数字を出さない方針。`ReactionRepository`のコメント参照）。
+    /// 人数が増えても縦に伸びないよう、横スクロールで逃がしている。
+    private var reactionRoster: some View {
+        let all = reactionRepository.sortedReactions(for: photo.id)
+
+        return Group {
+            if !all.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(all) { reaction in
+                            HStack(spacing: 5) {
+                                Text(reaction.emoji)
+                                    .font(.system(size: 13))
+                                Text(reaction.displayName)
+                                    .font(.caption)
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color.white.opacity(0.16), in: Capsule())
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("\(reaction.displayName)さんが\(reaction.emoji)")
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+            }
+        }
+    }
+
     /// 絵文字を選ぶ小さなピッカー。同じ絵文字をもう一度タップすると取り消す。
-    /// 選べるのは自分の1個だけで、他の参加者が何を押したかの数は出さない
-    /// （`ReactionRepository`のコメント参照）。
+    ///
+    /// **何種類でも同時に押せる**（1個に絞らない）。絞ってしまうと、結局
+    /// どれか1つを選ばせる＝いいねの延長になってしまうため。
     private var reactionPicker: some View {
-        let mine = reactionRepository.myReaction(for: photo.id)
+        let mine = reactionRepository.myReactions(for: photo.id)
 
         return HStack(spacing: 10) {
             ForEach(Reaction.availableEmojis, id: \.self) { emoji in
-                let isMine = mine == emoji
+                let isMine = mine.contains(emoji)
                 Button {
                     Task { await viewModel.toggleReaction(emoji, for: photo) }
                 } label: {
@@ -653,11 +689,16 @@ struct RevealedPhotoFullScreenView: View {
 
                 Spacer()
 
-                HStack {
-                    Spacer()
-                    NewlyRevealedBadge()
-                        .padding(.trailing, 10)
-                        .padding(.bottom, 24)
+                // この画面は公開通知だけでなく、リアクション通知・撮影再開通知から
+                // 開かれることもある。タイムカプセルが公開されたわけではない写真に
+                // 「✨ NEW」を出すと嘘になるので、公開直後のときだけ添える。
+                if TimeCapsuleService.isRecentlyRevealed(photo) {
+                    HStack {
+                        Spacer()
+                        NewlyRevealedBadge()
+                            .padding(.trailing, 10)
+                            .padding(.bottom, 24)
+                    }
                 }
             }
         }
