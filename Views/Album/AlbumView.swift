@@ -188,6 +188,11 @@ struct PhotoCell: View {
     let photo: Photo
     let viewModel: AlbumViewModel
 
+    // リアクションはAlbumViewModelを経由せず直接観測する。他の参加者のリアクションが
+    // 届いたときに、このセルがちゃんと再描画されるようにするため
+    // （`AlbumViewModel.toggleReaction`のコメント参照）。
+    @ObservedObject private var reactionRepository = ReactionRepository.shared
+
     @State private var image: UIImage?
     @State private var isLoading = true
 
@@ -224,6 +229,14 @@ struct PhotoCell: View {
                 // アルバムは最終的に普通の思い出アルバムに戻る。
                 if TimeCapsuleService.isRecentlyRevealed(photo) {
                     NewlyRevealedBadge()
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                // 誰が何個押したかは出さず、種類だけを小さく並べる
+                // （`ReactionRepository.emojiSummary`参照）。
+                let emojis = reactionRepository.emojiSummary(for: photo.id)
+                if !emojis.isEmpty {
+                    ReactionSummaryBadge(emojis: emojis)
                 }
             }
             .task {
@@ -310,6 +323,30 @@ struct NewlyRevealedBadge: View {
     }
 }
 
+// MARK: - リアクションの絵文字バッジ
+
+/// 写真の隅に添える、リアクションの種類だけを並べた小さなバッジ。
+///
+/// Instagram/YouTubeの「いいね」のような数字は出さない。あくまで
+/// 「どんな反応が付いているか」だけが分かればよく、誰が何個押したかは
+/// 一切集計しない（`ReactionRepository.emojiSummary`参照）。
+/// 種類が増えすぎて煩雑にならないよう、最大3種類までに切る。
+struct ReactionSummaryBadge: View {
+    let emojis: [String]
+
+    private var displayed: [String] { Array(emojis.suffix(3)) }
+
+    var body: some View {
+        Text(displayed.joined())
+            .font(.system(size: 12))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(Color.black.opacity(0.45), in: Capsule())
+            .padding(5)
+            .accessibilityLabel("リアクション: \(displayed.joined(separator: "、"))")
+    }
+}
+
 // MARK: - 写真詳細ビュー
 
 struct PhotoDetailView: View {
@@ -318,6 +355,8 @@ struct PhotoDetailView: View {
     // 監視する。`PhotoCell`側の同名プロパティ（画像ダウンロードにしか使わない）は
     // 監視の必要が無いため、そちらは`let`のままにしている。
     @ObservedObject var viewModel: AlbumViewModel
+    // リアクションの状態（自分の選択・他の参加者の分）を直接観測する。
+    @ObservedObject private var reactionRepository = ReactionRepository.shared
 
     @State private var image: UIImage?
     @State private var isLoading = true
@@ -364,6 +403,13 @@ struct PhotoDetailView: View {
                 }
 
                 Spacer()
+
+                // リアクション。InstagramやYouTubeの「いいね」のような数字は出さず、
+                // 自分がどの絵文字を選んでいるかだけが分かるようにする
+                // （他の人が何を押したかの内訳は`ReactionSummaryBadge`が
+                // アルバム側で絵文字の種類だけ見せる）。
+                reactionPicker
+                    .padding(.bottom, 12)
 
                 // 写真情報。以前は背景に何も無い白文字だけだったため、明るい写真の上では
                 // 読みにくかった。すりガラス調のカプセルに乗せて、どんな写真の上でも
@@ -449,6 +495,36 @@ struct PhotoDetailView: View {
         }
     }
     
+    // MARK: - リアクション
+
+    /// 絵文字を選ぶ小さなピッカー。同じ絵文字をもう一度タップすると取り消す。
+    /// 選べるのは自分の1個だけで、他の参加者が何を押したかの数は出さない
+    /// （`ReactionRepository`のコメント参照）。
+    private var reactionPicker: some View {
+        let mine = reactionRepository.myReaction(for: photo.id)
+
+        return HStack(spacing: 10) {
+            ForEach(Reaction.availableEmojis, id: \.self) { emoji in
+                let isMine = mine == emoji
+                Button {
+                    Task { await viewModel.toggleReaction(emoji, for: photo) }
+                } label: {
+                    Text(emoji)
+                        .font(.system(size: 20))
+                        .frame(width: 38, height: 38)
+                        .background(isMine ? Color.white.opacity(0.95) : Color.white.opacity(0.12))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("\(emoji)でリアクション")
+                .accessibilityAddTraits(isMine ? .isSelected : [])
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial, in: Capsule())
+        .environment(\.colorScheme, .dark)
+    }
+
     // MARK: - 写真情報カード
 
     private var infoCard: some View {

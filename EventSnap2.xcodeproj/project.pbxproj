@@ -53,6 +53,8 @@
 		E5200E000000000000000000 /* EventSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100E000000000000000000 /* EventSwitcherView.swift */; };
 		EA1A7497F70CC406621DEF9A /* EventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C600D3D5C6BB4F411ED1607B /* EventRepository.swift */; };
 		F2434A896825B0EDCDFBB10C /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3CB1C550D157424087F6B4 /* Participant.swift */; };
+		AA1000000000000000000002 /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000000000000000000001 /* Reaction.swift */; };
+		AA1000000000000000000004 /* ReactionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000000000000000000003 /* ReactionRepository.swift */; };
 		F2CAC544E91C5A9FEC4EC5B5 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */; };
 		E76000000000000000000000 /* CloudKitAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75000000000000000000000 /* CloudKitAccount.swift */; };
 		E76001000000000000000000 /* AppLinkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75001000000000000000000 /* AppLinkConfig.swift */; };
@@ -183,6 +185,8 @@
 		BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C600D3D5C6BB4F411ED1607B /* EventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepository.swift; sourceTree = "<group>"; };
 		CB3CB1C550D157424087F6B4 /* Participant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Participant.swift; sourceTree = "<group>"; };
+		AA1000000000000000000001 /* Reaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reaction.swift; sourceTree = "<group>"; };
+		AA1000000000000000000003 /* ReactionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionRepository.swift; sourceTree = "<group>"; };
 		D0CA4F056D31CD263119C9D8 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		E51000000000000000000000 /* AppTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTab.swift; sourceTree = "<group>"; };
 		E51001000000000000000000 /* DeviceIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIdentity.swift; sourceTree = "<group>"; };
@@ -275,6 +279,7 @@
 				38C4572E49ADF53996217172 /* QRCodeService.swift */,
 				EAF100090000000000000000 /* EventActivityManager.swift */,
 				EC0000000000000000000001 /* OnboardingTutorialManager.swift */,
+				AA1000000000000000000003 /* ReactionRepository.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -332,6 +337,7 @@
 				F5210C5AE9EB4A64A7585DAC /* EventReel.swift */,
 				CB3CB1C550D157424087F6B4 /* Participant.swift */,
 				ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */,
+				AA1000000000000000000001 /* Reaction.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -612,6 +618,8 @@
 				F2434A896825B0EDCDFBB10C /* Participant.swift in Sources */,
 				1AF10605D40D9A743104DEE5 /* Photo.swift in Sources */,
 				B53DCC3367AE67945491E976 /* PhotoRepository.swift in Sources */,
+				AA1000000000000000000002 /* Reaction.swift in Sources */,
+				AA1000000000000000000004 /* ReactionRepository.swift in Sources */,
 				0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */,
 				94A53529D607048BD1840E6E /* QRCodeView.swift in Sources */,
 				34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */,

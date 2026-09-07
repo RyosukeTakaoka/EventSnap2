@@ -252,6 +252,14 @@ enum SyncCoordinator {
             return
         }
 
+        // リアクションの変更もサイレントプッシュで届く（`ReactionRepository.setupSubscription`）。
+        // アルバムを開いたままの参加者にもその場で反映されるよう、写真と一緒に取り直す。
+        do {
+            try await ReactionRepository.shared.fetchReactions(for: event.id)
+        } catch {
+            print("⚠️ リアクションの同期に失敗: \(error)")
+        }
+
         await NotificationService.shared.scheduleReveals(
             for: PhotoRepository.shared.allPhotos,
             event: event,
