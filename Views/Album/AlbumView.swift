@@ -188,6 +188,11 @@ struct PhotoCell: View {
     let photo: Photo
     let viewModel: AlbumViewModel
 
+    // リアクションはAlbumViewModelを経由せず直接観測する。他の参加者のリアクションが
+    // 届いたときに、このセルがちゃんと再描画されるようにするため
+    // （`AlbumViewModel.toggleReaction`のコメント参照）。
+    @ObservedObject private var reactionRepository = ReactionRepository.shared
+
     @State private var image: UIImage?
     @State private var isLoading = true
 
@@ -224,6 +229,14 @@ struct PhotoCell: View {
                 // アルバムは最終的に普通の思い出アルバムに戻る。
                 if TimeCapsuleService.isRecentlyRevealed(photo) {
                     NewlyRevealedBadge()
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                // 誰が何個押したかは出さず、種類だけを小さく並べる
+                // （`ReactionRepository.emojiSummary`参照）。
+                let emojis = reactionRepository.emojiSummary(for: photo.id)
+                if !emojis.isEmpty {
+                    ReactionSummaryBadge(emojis: emojis)
                 }
             }
             .task {
@@ -310,6 +323,30 @@ struct NewlyRevealedBadge: View {
     }
 }
 
+// MARK: - リアクションの絵文字バッジ
+
+/// アルバムのグリッドで、写真の隅に添える小さなバッジ。
+///
+/// ここでは絵文字の**種類**だけを見せる。数字（いいね◯件）は出さないし、
+/// サムネイルの上に名前を載せると写真が見えなくなるので、
+/// **誰が押したかは写真を開いたときに一覧で見せる**（`PhotoDetailView.reactionRoster`）。
+/// 種類が増えすぎて煩雑にならないよう、最大3種類までに切る。
+struct ReactionSummaryBadge: View {
+    let emojis: [String]
+
+    private var displayed: [String] { Array(emojis.suffix(3)) }
+
+    var body: some View {
+        Text(displayed.joined())
+            .font(.system(size: 12))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(Color.black.opacity(0.45), in: Capsule())
+            .padding(5)
+            .accessibilityLabel("リアクション: \(displayed.joined(separator: "、"))")
+    }
+}
+
 // MARK: - 写真詳細ビュー
 
 struct PhotoDetailView: View {
@@ -318,6 +355,8 @@ struct PhotoDetailView: View {
     // 監視する。`PhotoCell`側の同名プロパティ（画像ダウンロードにしか使わない）は
     // 監視の必要が無いため、そちらは`let`のままにしている。
     @ObservedObject var viewModel: AlbumViewModel
+    // リアクションの状態（自分の選択・他の参加者の分）を直接観測する。
+    @ObservedObject private var reactionRepository = ReactionRepository.shared
 
     @State private var image: UIImage?
     @State private var isLoading = true
@@ -364,6 +403,14 @@ struct PhotoDetailView: View {
                 }
 
                 Spacer()
+
+                // リアクション。InstagramやYouTubeの「いいね◯件」のような数字は
+                // 出さず、「誰がどの絵文字を押したか」だけを見せる。
+                reactionRoster
+                    .padding(.bottom, 10)
+
+                reactionPicker
+                    .padding(.bottom, 12)
 
                 // 写真情報。以前は背景に何も無い白文字だけだったため、明るい写真の上では
                 // 読みにくかった。すりガラス調のカプセルに乗せて、どんな写真の上でも
@@ -449,6 +496,71 @@ struct PhotoDetailView: View {
         }
     }
     
+    // MARK: - リアクション
+
+    /// 誰がどの絵文字を押したかの一覧。
+    ///
+    /// **件数は出さない。** 「❤️ たかし」のように、絵文字と名前を並べるだけに留める
+    /// （いいね◯件のような数字を出さない方針。`ReactionRepository`のコメント参照）。
+    /// 人数が増えても縦に伸びないよう、横スクロールで逃がしている。
+    private var reactionRoster: some View {
+        let all = reactionRepository.sortedReactions(for: photo.id)
+
+        return Group {
+            if !all.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(all) { reaction in
+                            HStack(spacing: 5) {
+                                Text(reaction.emoji)
+                                    .font(.system(size: 13))
+                                Text(reaction.displayName)
+                                    .font(.caption)
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color.white.opacity(0.16), in: Capsule())
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("\(reaction.displayName)さんが\(reaction.emoji)")
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+            }
+        }
+    }
+
+    /// 絵文字を選ぶ小さなピッカー。同じ絵文字をもう一度タップすると取り消す。
+    ///
+    /// **何種類でも同時に押せる**（1個に絞らない）。絞ってしまうと、結局
+    /// どれか1つを選ばせる＝いいねの延長になってしまうため。
+    private var reactionPicker: some View {
+        let mine = reactionRepository.myReactions(for: photo.id)
+
+        return HStack(spacing: 10) {
+            ForEach(Reaction.availableEmojis, id: \.self) { emoji in
+                let isMine = mine.contains(emoji)
+                Button {
+                    Task { await viewModel.toggleReaction(emoji, for: photo) }
+                } label: {
+                    Text(emoji)
+                        .font(.system(size: 20))
+                        .frame(width: 38, height: 38)
+                        .background(isMine ? Color.white.opacity(0.95) : Color.white.opacity(0.12))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("\(emoji)でリアクション")
+                .accessibilityAddTraits(isMine ? .isSelected : [])
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial, in: Capsule())
+        .environment(\.colorScheme, .dark)
+    }
+
     // MARK: - 写真情報カード
 
     private var infoCard: some View {
@@ -577,11 +689,16 @@ struct RevealedPhotoFullScreenView: View {
 
                 Spacer()
 
-                HStack {
-                    Spacer()
-                    NewlyRevealedBadge()
-                        .padding(.trailing, 10)
-                        .padding(.bottom, 24)
+                // この画面は公開通知だけでなく、リアクション通知・撮影再開通知から
+                // 開かれることもある。タイムカプセルが公開されたわけではない写真に
+                // 「✨ NEW」を出すと嘘になるので、公開直後のときだけ添える。
+                if TimeCapsuleService.isRecentlyRevealed(photo) {
+                    HStack {
+                        Spacer()
+                        NewlyRevealedBadge()
+                            .padding(.trailing, 10)
+                            .padding(.bottom, 24)
+                    }
                 }
             }
         }

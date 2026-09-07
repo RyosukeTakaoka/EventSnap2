@@ -252,10 +252,42 @@ enum SyncCoordinator {
             return
         }
 
+        // リアクションの変更もサイレントプッシュで届く（`ReactionRepository.setupSubscription`）。
+        // アルバムを開いたままの参加者にもその場で反映されるよう、写真と一緒に取り直す。
+        do {
+            try await ReactionRepository.shared.fetchReactions(for: event.id)
+        } catch {
+            print("⚠️ リアクションの同期に失敗: \(error)")
+        }
+
+        let viewerID = DeviceIdentity.current
+
         await NotificationService.shared.scheduleReveals(
             for: PhotoRepository.shared.allPhotos,
             event: event,
-            viewerID: DeviceIdentity.current
+            viewerID: viewerID
+        )
+
+        // ここから下の2つは「予約」ではなく、その場で鳴らす通知。
+        // どちらもサイレントプッシュでこのメソッドが呼ばれた流れで判定する。
+        //
+        // イベント用アプリなので、通知が無いと「後で思い出したとき」以外に
+        // アプリを開く理由が無くなってしまう。かといって撮るたびに鳴らすと
+        // ただの連打になるため、鳴らすのは次の2つの場面だけに絞っている。
+
+        // ① 自分の写真に他の人がリアクションした
+        await NotificationService.shared.notifyNewReactions(
+            ReactionRepository.shared.reactions,
+            photos: PhotoRepository.shared.allPhotos,
+            event: event,
+            viewerID: viewerID
+        )
+
+        // ② しばらく途切れていたあとに、また誰かが撮り始めた（二次会・打ち上げなど）
+        await NotificationService.shared.notifyRestartedShooting(
+            photos: PhotoRepository.shared.allPhotos,
+            event: event,
+            viewerID: viewerID
         )
 
         // イベント中でも、シェアOKの新着写真があれば

@@ -8,6 +8,7 @@
 import Foundation
 import UserNotifications
 import Combine
+import UIKit
 
 /// タイムカプセルが公開されたことを知らせる通知。
 ///
@@ -181,12 +182,139 @@ final class NotificationService: ObservableObject {
         print("🔕 \(ids.count) 件の公開通知を取り消しました（シェア優先による解除）")
     }
 
+    // MARK: - リアクションの通知
+
+    /// 自分の写真に付いた新しいリアクションを知らせる。
+    ///
+    /// タイムカプセルの公開通知と違って**予約ではなく即時**に出す。
+    /// リアクションが作られた瞬間に`CKQuerySubscription`のサイレントプッシュが
+    /// 届き、`SyncCoordinator`がリアクションを取り直したところで呼ばれる。
+    ///
+    /// 通知するのは **自分がアップロードした写真に、他の人が付けたリアクション** だけ。
+    /// 一度知らせたものは`UserDefaults`に記録して二度と鳴らさない
+    /// （フォアグラウンド復帰のたびに`SyncCoordinator`が走るため、
+    /// 記録が無いと同じリアクションで何度も鳴ってしまう）。
+    func notifyNewReactions(_ reactions: [Reaction], photos: [Photo], event: Event, viewerID: String) async {
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+        guard await isAuthorized else { return }
+
+        // 自分がアプリを見ている最中に、自分宛ての通知をバナーで被せない。
+        // (`AppDelegate.willPresent`が前面でも表示する設定のため、ここで止める)
+        guard UIApplication.shared.applicationState != .active else { return }
+
+        let myPhotoIDs = Set(photos.filter { $0.uploaderID == viewerID }.map(\.id))
+        let candidates = reactions.filter { myPhotoIDs.contains($0.photoID) && $0.reactorID != viewerID }
+
+        var alreadyNotified = Set(UserDefaults.standard.stringArray(forKey: Self.notifiedReactionsKey) ?? [])
+        let fresh = candidates.filter { !alreadyNotified.contains($0.id) }
+
+        // 記録は「今も存在するリアクション」だけに絞って持ち続ける。
+        // そうしないとイベントを重ねるほど際限なく増えていく。
+        // (取り消されたリアクションが押し直された場合は、もう一度鳴ってよい)
+        alreadyNotified = Set(candidates.map(\.id))
+        UserDefaults.standard.set(Array(alreadyNotified), forKey: Self.notifiedReactionsKey)
+
+        guard !fresh.isEmpty else { return }
+
+        // 1リアクション1通知にすると、まとめて押されたときに通知が連打される。
+        // 写真ごとに1件へまとめる。
+        for (photoID, group) in Dictionary(grouping: fresh, by: \.photoID) {
+            let emojis = Self.uniqueJoined(group.map(\.emoji), separator: "", limit: 3)
+            let names = Self.uniqueJoined(group.map(\.displayName), separator: "、", limit: 2)
+
+            let content = UNMutableNotificationContent()
+            content.title = event.name
+            content.body = "\(names)があなたの写真に \(emojis) でリアクションしました"
+            content.sound = .default
+            content.userInfo = [
+                "eventID": event.id.uuidString,
+                "photoID": photoID.uuidString,
+                "type": Self.reactionType,
+            ]
+
+            await deliverImmediately(content, identifier: "reaction-\(photoID.uuidString)-\(Date().timeIntervalSince1970)")
+        }
+    }
+
+    // MARK: - 久しぶりの投稿の通知
+
+    /// 「しばらく途切れていたイベントで、また誰かが撮った」ことを知らせる。
+    ///
+    /// ## なぜこの通知が要るか
+    ///
+    /// EventSnapはイベント用なので、何も知らせないと「後で思い出したときに
+    /// 開く」以外にアプリを開く動機が無い。特に、打ち上げや二次会など
+    /// **本編が終わったあとに誰かが撮り始めた**タイミングは、
+    /// 参加者にとって一番知りたい瞬間なのに一番気づかれにくい。
+    ///
+    /// 逆に、撮影が続いている最中に1枚ごとへ通知を出すと、ただの連打になる。
+    /// そこで「**直前の写真から`quietPeriod`以上あいてからの投稿**」に絞って、
+    /// 場が再開したことだけを知らせる。
+    func notifyRestartedShooting(photos: [Photo], event: Event, viewerID: String) async {
+        guard !ScreenshotMode.suppressesLiveServices else { return }
+        guard await isAuthorized else { return }
+        guard UIApplication.shared.applicationState != .active else { return }
+
+        // 伏せられているタイムカプセルは見に行っても何も見えないので数えない。
+        // 「見られる写真が増えた」ときだけ知らせる。
+        let visible = TimeCapsuleService.albumPhotos(photos).sorted { $0.uploadedAt < $1.uploadedAt }
+        guard let latest = visible.last, visible.count >= 2 else { return }
+
+        // 自分が撮った写真では鳴らさない
+        guard latest.uploaderID != viewerID else { return }
+
+        // 直前の写真との間隔が空いていなければ、まだ撮影が続いている最中。
+        let previous = visible[visible.count - 2]
+        guard latest.uploadedAt.timeIntervalSince(previous.uploadedAt) >= Self.quietPeriod else { return }
+
+        // 参加した直後に過去の写真を取り込んだだけ、というときに鳴らさないための保険。
+        // 「今まさに撮られた」ものだけを対象にする。
+        guard Date().timeIntervalSince(latest.uploadedAt) <= Self.freshnessWindow else { return }
+
+        var notified = Set(UserDefaults.standard.stringArray(forKey: Self.notifiedRestartKey) ?? [])
+        guard !notified.contains(latest.id.uuidString) else { return }
+
+        // 記録は現存する写真の分だけ残す（際限なく増えないように）
+        notified.insert(latest.id.uuidString)
+        let alivePhotoIDs = Set(photos.map { $0.id.uuidString })
+        UserDefaults.standard.set(Array(notified.intersection(alivePhotoIDs)), forKey: Self.notifiedRestartKey)
+
+        let trimmedName = latest.uploaderName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let who = trimmedName.isEmpty ? "誰か" : "\(trimmedName)さん"
+
+        let content = UNMutableNotificationContent()
+        content.title = event.name
+        content.body = "\(who)がまた写真を撮り始めました"
+        content.sound = .default
+        content.userInfo = [
+            "eventID": event.id.uuidString,
+            "photoID": latest.id.uuidString,
+            "type": Self.restartType,
+        ]
+
+        await deliverImmediately(content, identifier: "restart-\(latest.id.uuidString)")
+    }
+
+    /// 予約ではなく、その場で通知を出す（`trigger: nil`）。
+    private func deliverImmediately(_ content: UNMutableNotificationContent, identifier: String) async {
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
+        do {
+            try await center.add(request)
+        } catch {
+            print("❌ 通知の送信に失敗 (\(identifier)): \(error)")
+        }
+    }
+
     // MARK: - 通知タップ
 
     /// 通知の`userInfo`から対象イベント・対象写真を取り出し、`pendingReveal`にセットする。
-    /// 公開通知(`timeCapsuleReveal`)以外は無視する。
+    ///
+    /// 公開通知・リアクション・撮影再開のどれも「対象の写真を開く」で行き先は同じなので、
+    /// 3種類とも同じ仕組みに乗せている（`EventSnapApp.handleNotificationReveal`）。
     func handleNotificationTap(userInfo: [AnyHashable: Any]) {
-        guard (userInfo["type"] as? String) == "timeCapsuleReveal",
+        let handledTypes = ["timeCapsuleReveal", Self.reactionType, Self.restartType]
+
+        guard let type = userInfo["type"] as? String, handledTypes.contains(type),
               let eventIDString = userInfo["eventID"] as? String,
               let eventID = UUID(uuidString: eventIDString),
               let photoIDString = userInfo["photoID"] as? String,
@@ -196,12 +324,39 @@ final class NotificationService: ObservableObject {
         pendingReveal = RevealTarget(eventID: eventID, photoID: photoID)
     }
 
+    // MARK: - 設定値
+
+    /// 「撮影が再開した」とみなす、直前の写真からの間隔。
+    ///
+    /// 短くしすぎると撮影中の連打になり、長くしすぎると二次会の開始に
+    /// 気づけない。**ここを変えるだけで調整できる**ようにまとめてある。
+    static let quietPeriod: TimeInterval = 3 * 60 * 60   // 3時間
+
+    /// 「今まさに撮られた」とみなす猶予。イベントに参加した直後に過去の写真を
+    /// まとめて取り込んだだけ、というときに通知が鳴らないようにするための保険。
+    private static let freshnessWindow: TimeInterval = 30 * 60   // 30分
+
+    private static let reactionType = "photoReaction"
+    private static let restartType = "shootingRestarted"
+
+    private static let notifiedReactionsKey = "notifiedReactionIDs"
+    private static let notifiedRestartKey = "notifiedRestartPhotoIDs"
+
     // MARK: - 文言
 
     private static let prefix = "timecapsule-"
 
     private func notificationID(for photo: Photo) -> String {
         Self.prefix + photo.id.uuidString
+    }
+
+    /// 重複を取り除いて先頭`limit`件までを連ねる。それ以上あれば「ほか」を付ける。
+    /// 通知本文が長くなりすぎないようにするためのもの。
+    private static func uniqueJoined(_ values: [String], separator: String, limit: Int) -> String {
+        var seen = Set<String>()
+        let unique = values.filter { seen.insert($0).inserted }
+        let head = unique.prefix(limit).joined(separator: separator)
+        return unique.count > limit ? head + "ほか" : head
     }
 
     private func message(for photo: Photo, viewerID: String) -> String {

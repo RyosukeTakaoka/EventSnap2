@@ -42,6 +42,7 @@ class AlbumViewModel: ObservableObject {
 
     private let photoRepository = PhotoRepository.shared
     private let eventRepository = EventRepository.shared
+    private let reactionRepository = ReactionRepository.shared
     private var cancellables = Set<AnyCancellable>()
 
     /// 公開時刻をまたいだ瞬間に画面へ反映するためのタイマー
@@ -82,6 +83,14 @@ class AlbumViewModel: ObservableObject {
             print("❌ 写真取得エラー: \(error)")
         }
 
+        // リアクションが取れなくても写真表示自体は止めたくないので、
+        // 上の写真取得とは別のdo-catchにしてエラーを分離する。
+        do {
+            try await reactionRepository.fetchReactions(for: event.id)
+        } catch {
+            print("❌ リアクション取得エラー: \(error)")
+        }
+
         isLoading = false
     }
 
@@ -90,6 +99,7 @@ class AlbumViewModel: ObservableObject {
     func setupRealtimeSync() async {
         guard let eventID = eventRepository.currentEvent?.id else { return }
         await photoRepository.setupSubscription(for: eventID)
+        await reactionRepository.setupSubscription(for: eventID)
     }
 
     // MARK: - Repository監視
@@ -131,6 +141,21 @@ class AlbumViewModel: ObservableObject {
 
     func thumbnail(for photo: Photo) async -> UIImage? {
         await PhotoImageLoader.shared.thumbnail(for: photo)
+    }
+
+    // MARK: - リアクション
+
+    /// 自分のリアクションを付ける／外す（同じ絵文字をもう一度で取り消し）。
+    /// 1枚の写真に何種類でも押せる。
+    ///
+    /// 読み取り（`emojiSummary`/`myReactions`など）はここには置かず、
+    /// 呼び出し側のViewが`ReactionRepository.shared`を直接`@ObservedObject`で
+    /// 観測する。`AlbumViewModel`経由の素通しにすると、他の参加者のリアクションが
+    /// 届いて`ReactionRepository.reactions`が更新されても、それは
+    /// `AlbumViewModel`自身の`@Published`ではないため画面が再描画されない。
+    func toggleReaction(_ emoji: String, for photo: Photo) async {
+        guard let event = eventRepository.currentEvent else { return }
+        await reactionRepository.toggleReaction(emoji, photoID: photo.id, event: event)
     }
 
     // MARK: - 写真削除
