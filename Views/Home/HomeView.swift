@@ -401,6 +401,12 @@ struct EventCreationSheet: View {
     /// `handleSheetDismiss` のコメントを参照）。
     let onCreate: (String) -> Void
 
+    /// 表示名の入力欄。まだ本人が決めたことが無いときだけ出す
+    /// （`DeviceIdentity.hasCustomDisplayName`）。一度決めれば、以後の
+    /// 作成・参加では出さない。変更したくなったら設定タブから直せる。
+    @State private var displayName = DeviceIdentity.displayName
+    private let needsDisplayName = !DeviceIdentity.hasCustomDisplayName
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -426,7 +432,27 @@ struct EventCreationSheet: View {
                         .textFieldStyle(.roundedBorder)
                         .padding(.horizontal)
 
+                    // 初めてイベントを作る人には、ここで表示名も一緒に決めてもらう。
+                    // タイムカプセルの通知（「〇〇さんの新しい思い出」）や参加者一覧に使われる。
+                    if needsDisplayName {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("あなたの表示名")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            TextField("例: たかし", text: $displayName)
+                                .textFieldStyle(.roundedBorder)
+                        }
+                        .padding(.horizontal)
+                    }
+
                     Button("作成する") {
+                        if needsDisplayName {
+                            let trimmedName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+                            if !trimmedName.isEmpty {
+                                DeviceIdentity.setDisplayName(trimmedName)
+                            }
+                        }
+
                         // 空白だけの入力も「未入力」として扱う
                         let trimmed = eventName.trimmingCharacters(in: .whitespacesAndNewlines)
                         onCreate(trimmed.isEmpty ? "新しいイベント" : trimmed)
