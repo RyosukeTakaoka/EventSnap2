@@ -26,6 +26,7 @@ class EventRepository: ObservableObject {
 
     private let currentEventIDKey = "currentEventID"
     private let joinedEventIDsKey = "joinedEventIDs"
+    private let cachedEventsKey = "cachedEvents"
 
     /// 履歴に残す上限
     private let historyLimit = 20
@@ -63,8 +64,57 @@ class EventRepository: ObservableObject {
         joinedEventIDs = ids
     }
 
+    /// 履歴から外す。
+    ///
+    /// ⚠️ **呼んでよいのは、ユーザーが自分で「一覧から外す」を選んだときだけ。**
+    /// CloudKitから読めなかったことを理由にここを呼んではいけない
+    /// （`loadRecentEvents`のコメント参照）。
     private func forgetEvent(_ id: UUID) {
         joinedEventIDs = joinedEventIDs.filter { $0 != id.uuidString }
+        cachedEvents = cachedEvents.filter { $0.id != id }
+    }
+
+    // MARK: - イベント内容のキャッシュ
+
+    /// 最後に読み込めたイベントの中身。
+    ///
+    /// ## なぜ必要か
+    ///
+    /// 参加履歴はIDしか持っていないため、CloudKitから読めないイベントは
+    /// 一覧に出しようがなく、**参加していたグループが画面から消えたように見える**。
+    ///
+    /// CloudKitから読めなくなる理由は「本当に消えた」だけではない。
+    ///
+    /// - Xcodeから入れたビルド（Development）とTestFlight/App Store版（Production）
+    ///   では**保存先の環境が別**なので、ビルドを入れ替えると相手側のイベントは
+    ///   一切見えなくなる
+    /// - iCloudにサインインしていない／通信が不安定
+    /// - サーバー側のインデックスがまだ反映されていない
+    ///
+    /// どれも一時的なものなので、**前回読めた内容を手元に残しておき、
+    /// 読めない間もグループを一覧に出し続ける**。
+    private var cachedEvents: [Event] {
+        get {
+            guard let data = UserDefaults.standard.data(forKey: cachedEventsKey),
+                  let events = try? JSONDecoder().decode([Event].self, from: data)
+            else { return [] }
+            return events
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(Array(newValue.prefix(historyLimit))) else { return }
+            UserDefaults.standard.set(data, forKey: cachedEventsKey)
+        }
+    }
+
+    private func cachedEvent(id: String) -> Event? {
+        guard let uuid = UUID(uuidString: id) else { return nil }
+        return cachedEvents.first { $0.id == uuid }
+    }
+
+    private func updateCache(with event: Event) {
+        var events = cachedEvents.filter { $0.id != event.id }
+        events.insert(event, at: 0)
+        cachedEvents = events
     }
 
     // MARK: - 起動時の復元
@@ -80,17 +130,27 @@ class EventRepository: ObservableObject {
         guard currentEvent == nil, let savedID = savedCurrentEventID else { return }
 
         do {
-            guard let event = try await fetchEvent(id: savedID) else {
-                print("⚠️ 保存されていたイベントが見つかりません。履歴から削除します")
-                if let uuid = UUID(uuidString: savedID) { forgetEvent(uuid) }
-                saveCurrentEventID(nil)
-                return
+            if let event = try await fetchEvent(id: savedID) {
+                applyCurrent(event)
+                print("✅ イベントを復元しました: \(event.name)")
+            } else if let cached = cachedEvent(id: savedID) {
+                // CloudKitでは見つからないが、前回読めた内容が手元にある。
+                //
+                // ここで履歴を消してはいけない。「見つからない」の正体は
+                // だいたいビルドの入れ替え（Development / Production の違い）で、
+                // 元のビルドに戻せばまた見えるようになる。消してしまうと
+                // **二度と戻せない**（詳細は`cachedEvents`のコメント）。
+                applyCurrent(cached)
+                print("⚠️ CloudKitから読めないため、保存済みの内容で復元しました: \(cached.name)")
+            } else {
+                print("⚠️ 保存されていたイベントを復元できませんでした（履歴は保持）: \(savedID)")
             }
-            applyCurrent(event)
-            print("✅ イベントを復元しました: \(event.name)")
         } catch {
-            // 通信エラーの場合は保存を消さない。次回の起動でまた試す。
-            print("⚠️ イベントの復元に失敗（保存は維持）: \(error)")
+            // 通信エラー。キャッシュがあればそれで開き、無ければ次回の起動でやり直す。
+            if let cached = cachedEvent(id: savedID) {
+                applyCurrent(cached)
+            }
+            print("⚠️ イベントの復元に失敗（履歴は保持）: \(error)")
         }
 
         await loadRecentEvents()
@@ -201,29 +261,35 @@ class EventRepository: ObservableObject {
             return
         }
 
-        var loaded: [Event] = []
-        var missing: [String] = []
+        // まず手元のキャッシュで埋めておき、読めたものだけ最新版で上書きする。
+        //
+        // ⚠️ **読めなかったイベントを履歴から消してはいけない。**
+        // 以前はここで消していたため、ビルドを入れ替えた（Development ⇄ Production）
+        // だけで参加履歴が丸ごと吹き飛び、元のビルドに戻しても
+        // **二度と戻らない**という壊れ方をしていた。
+        // 「今回読めなかった」ことは「そのイベントが消えた」ことを意味しない。
+        //
+        // 履歴から外れるのは、ユーザーが自分で「一覧から外す」を選んだときだけ
+        // （`leaveEvent` → `forgetEvent`）。
+        var byID = Dictionary(cachedEvents.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
 
         for id in ids {
             do {
                 if let event = try await fetchEvent(id: id) {
-                    loaded.append(event)
+                    byID[event.id] = event
                 } else {
-                    missing.append(id)
+                    print("⚠️ 履歴イベントが見つかりません（履歴は保持）: \(id)")
                 }
             } catch {
-                // ここで `missing` に入れてはいけない。取得に失敗しただけで
-                // 履歴から消すと、通信不良やスキーマ不備のたびに
-                // 「グループが消えた」状態になる。次回の読み込みでやり直す。
                 print("⚠️ 履歴イベントの取得に失敗（履歴は保持）: \(id) / \(error)")
             }
         }
 
-        if !missing.isEmpty {
-            joinedEventIDs = joinedEventIDs.filter { !missing.contains($0) }
-        }
+        // 履歴の並び（最近使った順）を保ったまま、読めたもの・キャッシュにあるものを並べる
+        let ordered = ids.compactMap { UUID(uuidString: $0) }.compactMap { byID[$0] }
 
-        recentEvents = loaded
+        recentEvents = ordered
+        cachedEvents = ordered
     }
 
     /// 別のイベントに切り替える。
@@ -400,6 +466,8 @@ class EventRepository: ObservableObject {
         currentEvent = event
         saveCurrentEventID(event.id)
         participants = makeParticipants(from: event)
+        // 次に読めなくなったときのために、開いた内容を手元にも残しておく
+        updateCache(with: event)
     }
 
     /// participantIDs から表示用の参加者一覧を組み立てる。
