@@ -15,6 +15,10 @@ EventSnapは、文化祭・旅行・パーティーなどの少人数イベン�
 > 世界7,000万人の共有カレンダー「TimeTree」との比較は
 > [`docs/TIMETREE_GROWTH_CASE_STUDY.md`](docs/TIMETREE_GROWTH_CASE_STUDY.md)。
 > EventSnapの招待導線が既に優れている理由と、法人・団体展開の妥当性を補強する。
+>
+> B2B SaaS「Miro」のProduct-Led Growth戦略との比較は
+> [`docs/MIRO_GROWTH_CASE_STUDY.md`](docs/MIRO_GROWTH_CASE_STUDY.md)。
+> 招待導線は既に強いが計測が無いという弱点と、法人展開のボトムアップ経路を扱う。
 
 ### 主な機能
 
