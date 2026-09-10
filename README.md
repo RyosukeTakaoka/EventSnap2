@@ -19,6 +19,11 @@ EventSnapは、文化祭・旅行・パーティーなどの少人数イベン�
 > B2B SaaS「Miro」のProduct-Led Growth戦略との比較は
 > [`docs/MIRO_GROWTH_CASE_STUDY.md`](docs/MIRO_GROWTH_CASE_STUDY.md)。
 > 招待導線は既に強いが計測が無いという弱点と、法人展開のボトムアップ経路を扱う。
+>
+> 8,000万DLの「Locket Widget」との比較は
+> [`docs/LOCKET_GROWTH_CASE_STUDY.md`](docs/LOCKET_GROWTH_CASE_STUDY.md)。
+> ウィジェット/Live Activityが既にLocketの役割を上回って果たしていることの確認と、
+> TikTok種まき戦略がなぜ採用できないかを扱う。
 
 ### 主な機能
 
