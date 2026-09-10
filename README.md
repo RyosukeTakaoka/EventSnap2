@@ -11,6 +11,10 @@ EventSnapは、文化祭・旅行・パーティーなどの少人数イベン�
 > 累計1,400万人のヘルスケアアプリ「あすけん」の成長施策を調べ、EventSnapに何が使えるかを整理した資料は
 > [`docs/ASKEN_GROWTH_CASE_STUDY.md`](docs/ASKEN_GROWTH_CASE_STUDY.md)。
 > 招待・通知・法人向け展開を検討する前に読むこと。
+>
+> 世界7,000万人の共有カレンダー「TimeTree」との比較は
+> [`docs/TIMETREE_GROWTH_CASE_STUDY.md`](docs/TIMETREE_GROWTH_CASE_STUDY.md)。
+> EventSnapの招待導線が既に優れている理由と、法人・団体展開の妥当性を補強する。
 
 ### 主な機能
 
