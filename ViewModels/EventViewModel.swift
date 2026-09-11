@@ -54,11 +54,16 @@ class EventViewModel: ObservableObject {
         isLoading = true
         error = nil
 
+        // 作成に取り掛かる前の参加履歴で判定する
+        // （Repeat Organizer Rate = 過去にも自分がイベントを作ったことがあるか）。
+        let isRepeatOrganizer = recentEvents.contains { $0.creatorID == DeviceIdentity.current }
+
         do {
             let event = try await eventRepository.createEvent(name: name)
             // 作った直後は人を呼びたいので招待画面から始める
             self.pendingTab = .invite
             print("✅ イベント作成成功: \(event.name) / \(event.id.uuidString)")
+            AnalyticsService.eventCreated(isRepeatOrganizer: isRepeatOrganizer)
         } catch {
             // 「失敗しました」だけだと原因が分からず詰まってしまうので、
             // iCloud未サインインなどの理由をそのまま出す
@@ -85,6 +90,7 @@ class EventViewModel: ObservableObject {
             // 参加した側はまず何が撮られているか見たいはずなのでアルバムへ
             self.pendingTab = .album
             print("✅ イベント参加成功")
+            AnalyticsService.eventJoined()
         } catch {
             self.error = Self.message(for: error, fallback: "イベントへの参加に失敗しました")
             print("❌ イベント参加エラー: \(error)")

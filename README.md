@@ -28,6 +28,14 @@ EventSnapは、文化祭・旅行・パーティーなどの少人数イベン�
 > Uber・Slack・BeRealのような「フレームチェンジ（前提の再定義）」をEventSnap自身の
 > 獲得導線に当てはめた提案は [`docs/FRAME_CHANGE_STRATEGY.md`](docs/FRAME_CHANGE_STRATEGY.md)。
 > 「新しい思い出アプリ」ではなく「SNS投稿の素材収集ハブ」への位置づけ転換を扱う。
+>
+> 「競合に機能を完全コピーされても、それでも選ばれ続ける構造」を三井越後屋の
+> 「現金掛け値なし」から逆算した資料は [`docs/DEFENSIBILITY.md`](docs/DEFENSIBILITY.md)。
+> 「ユーザー」ではなく「イベント主催者が次も選ぶか」を中心指標に据える提案と、
+> タイムカプセルの公開タイミングに関する実装上の弱点を扱う。
+>
+> Firebase Analyticsを導入した（無料）。イベント名の一覧とFirebaseコンソール側の
+> セットアップ手順は [`docs/ANALYTICS_SETUP.md`](docs/ANALYTICS_SETUP.md)。
 
 ### 主な機能
 

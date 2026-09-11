@@ -381,6 +381,12 @@ class CameraViewModel: ObservableObject {
         let eventID = event.id
         print("  📋 イベントID: \(eventID.uuidString)")
 
+        // アップロード前の時点で判定する
+        // （First Photo Rate = このイベントで自分がまだ1枚も撮っていなかったか）。
+        let isFirstPhotoForParticipant = !photoRepository.allPhotos.contains {
+            $0.eventID == eventID && $0.uploaderID == DeviceIdentity.current
+        }
+
         do {
             print("  🔄 PhotoRepositoryにアップロード中...")
             let uploaded = try await photoRepository.uploadPhoto(
@@ -392,6 +398,10 @@ class CameraViewModel: ObservableObject {
 
             lastCaptureWasTimeCapsule = uploaded.isTimeCapsule
             TutorialManager.shared.handleCaptureCompleted(wasTimeCapsule: uploaded.isTimeCapsule)
+            AnalyticsService.photoCaptured(
+                isFirstPhotoForParticipant: isFirstPhotoForParticipant,
+                isTimeCapsule: uploaded.isTimeCapsule
+            )
 
             // シェアOKは一度ONにしたら、本人がOFFにするまで継続する仕様。
             // 撮影のたびに自動でリセットしない（「あとで公開」は毎回リセットする）。

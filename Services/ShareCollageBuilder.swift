@@ -137,6 +137,10 @@ enum ShareCollageBuilder {
             remaining.removeAll { usedIDs.contains($0.id) }
         }
 
+        if !created.isEmpty {
+            AnalyticsService.eventReelGenerated(reelCount: created.count)
+        }
+
         return created
     }
 

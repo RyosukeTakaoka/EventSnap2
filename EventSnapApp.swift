@@ -2,6 +2,7 @@ import SwiftUI
 import UserNotifications
 import CloudKit
 import WidgetKit
+import FirebaseCore
 
 @main
 struct EventSnapApp: App {
@@ -13,6 +14,7 @@ struct EventSnapApp: App {
     /// 通常起動では何も起きず、Releaseビルドでは呼び出しごと消える
     /// （`Preview/ScreenshotMode.swift`を参照）。
     init() {
+        FirebaseApp.configure()
         ScreenshotMode.installFixturesIfNeeded()
     }
 
