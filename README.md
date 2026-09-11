@@ -24,6 +24,10 @@ EventSnapは、文化祭・旅行・パーティーなどの少人数イベン�
 > [`docs/LOCKET_GROWTH_CASE_STUDY.md`](docs/LOCKET_GROWTH_CASE_STUDY.md)。
 > ウィジェット/Live Activityが既にLocketの役割を上回って果たしていることの確認と、
 > TikTok種まき戦略がなぜ採用できないかを扱う。
+>
+> Uber・Slack・BeRealのような「フレームチェンジ（前提の再定義）」をEventSnap自身の
+> 獲得導線に当てはめた提案は [`docs/FRAME_CHANGE_STRATEGY.md`](docs/FRAME_CHANGE_STRATEGY.md)。
+> 「新しい思い出アプリ」ではなく「SNS投稿の素材収集ハブ」への位置づけ転換を扱う。
 
 ### 主な機能
 
