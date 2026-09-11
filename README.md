@@ -15,6 +15,19 @@ EventSnapは、文化祭・旅行・パーティーなどの少人数イベン�
 > 世界7,000万人の共有カレンダー「TimeTree」との比較は
 > [`docs/TIMETREE_GROWTH_CASE_STUDY.md`](docs/TIMETREE_GROWTH_CASE_STUDY.md)。
 > EventSnapの招待導線が既に優れている理由と、法人・団体展開の妥当性を補強する。
+>
+> B2B SaaS「Miro」のProduct-Led Growth戦略との比較は
+> [`docs/MIRO_GROWTH_CASE_STUDY.md`](docs/MIRO_GROWTH_CASE_STUDY.md)。
+> 招待導線は既に強いが計測が無いという弱点と、法人展開のボトムアップ経路を扱う。
+>
+> 8,000万DLの「Locket Widget」との比較は
+> [`docs/LOCKET_GROWTH_CASE_STUDY.md`](docs/LOCKET_GROWTH_CASE_STUDY.md)。
+> ウィジェット/Live Activityが既にLocketの役割を上回って果たしていることの確認と、
+> TikTok種まき戦略がなぜ採用できないかを扱う。
+>
+> Uber・Slack・BeRealのような「フレームチェンジ（前提の再定義）」をEventSnap自身の
+> 獲得導線に当てはめた提案は [`docs/FRAME_CHANGE_STRATEGY.md`](docs/FRAME_CHANGE_STRATEGY.md)。
+> 「新しい思い出アプリ」ではなく「SNS投稿の素材収集ハブ」への位置づけ転換を扱う。
 
 ### 主な機能
 
