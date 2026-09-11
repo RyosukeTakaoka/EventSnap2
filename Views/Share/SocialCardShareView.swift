@@ -96,6 +96,10 @@ struct SocialCardShareView: View {
                     .fontWeight(.semibold)
             }
             .buttonStyle(.primary)
+            // ShareLink自体に完了コールバックが無いため、タップの事実だけを計測する。
+            .simultaneousGesture(TapGesture().onEnded {
+                AnalyticsService.eventReelShareTapped(photoCount: reel.photoIDs.count)
+            })
         } else {
             Button {} label: {
                 Label("シェアする", systemImage: "square.and.arrow.up")
