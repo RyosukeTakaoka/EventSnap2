@@ -1,0 +1,258 @@
+/* EventSnap App Store screenshots — shared styles */
+
+:root {
+  --cream: #FFFDF8;
+  --accent-purple: #7C5CFF;
+  --accent-pink: #FF6B9D;
+  --ink: #2A2438;
+  --ink-soft: rgba(42, 36, 56, 0.62);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Hiragino Sans", "Noto Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #eee9ff;
+}
+
+/* ---------- Slide canvas ---------- */
+/* Real export target: 1320 x 2868 (iPhone 6.9" App Store, 1x). */
+/* On-screen preview scale: 1/3.39 -> 390 x 845. */
+
+.slide {
+  position: relative;
+  width: 390px;
+  height: 845px;
+  overflow: hidden;
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  isolation: isolate;
+}
+
+.slide::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 15% 8%, rgba(124, 92, 255, 0.16), transparent 40%),
+    radial-gradient(circle at 85% 92%, rgba(255, 107, 157, 0.16), transparent 42%);
+  pointer-events: none;
+}
+
+/* ---------- Copy ---------- */
+
+.slide-copy {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 46px 28px 18px;
+  text-align: center;
+}
+
+.slide-copy h1 {
+  font-size: 30px;
+  line-height: 1.32;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  background: linear-gradient(100deg, var(--accent-purple) 10%, var(--accent-pink) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- Phone frame ---------- */
+
+.phone-frame-wrap {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 6px 0;
+}
+
+.phone-frame {
+  position: relative;
+  width: 262px;
+  height: 566px;
+  border-radius: 42px;
+  padding: 10px;
+  background: linear-gradient(160deg, #1c1730, #060510 70%);
+  box-shadow:
+    0 30px 60px -18px rgba(90, 60, 160, 0.45),
+    0 8px 20px -6px rgba(90, 60, 160, 0.3);
+}
+
+.phone-frame .screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 32px;
+  overflow: hidden;
+  background: #000;
+}
+
+.phone-frame .screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.phone-frame .notch {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 84px;
+  height: 22px;
+  border-radius: 14px;
+  background: #060510;
+  z-index: 5;
+}
+
+/* ---------- Stats footer ---------- */
+
+.slide-stats {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 14px 24px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.slide-stats .stat {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  background: #ffffffcc;
+  border: 1px solid rgba(124, 92, 255, 0.18);
+  padding: 7px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.slide-stats .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--accent-purple), var(--accent-pink));
+}
+
+/* ---------- Hand-drawn decorations ---------- */
+
+.deco {
+  position: absolute;
+  z-index: 1;
+  font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+  user-select: none;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.deco.star {
+  color: var(--accent-purple);
+  opacity: 0.8;
+}
+
+.deco.heart {
+  color: var(--accent-pink);
+  opacity: 0.75;
+}
+
+/* ---------- Preview index page ---------- */
+
+.preview-body {
+  min-height: 100vh;
+  padding: 56px 24px 80px;
+  background: var(--cream);
+}
+
+.preview-header {
+  max-width: 1100px;
+  margin: 0 auto 40px;
+  text-align: center;
+}
+
+.preview-header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(100deg, var(--accent-purple) 10%, var(--accent-pink) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 10px;
+}
+
+.preview-header p {
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
+.preview-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+
+@media (max-width: 900px) {
+  .preview-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.preview-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 12px 28px -14px rgba(90, 60, 160, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.preview-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 34px -14px rgba(90, 60, 160, 0.45);
+}
+
+.preview-card iframe {
+  width: 100%;
+  height: 300px;
+  border: 1px solid rgba(124, 92, 255, 0.12);
+  border-radius: 14px;
+  pointer-events: none;
+}
+
+.preview-card .label {
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  text-align: center;
+}
+
+.preview-card .index {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent-purple);
+  text-align: center;
+  margin-bottom: 2px;
+}

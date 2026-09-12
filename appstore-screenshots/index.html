@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>EventSnap - App Store Screenshots</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a2e;
+    font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  h1 {
+    color: white;
+    text-align: center;
+    margin-bottom: 8px;
+    font-size: 28px;
+    background: linear-gradient(135deg, #7C5CFF, #FF6B9D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle { color: #888; text-align: center; margin-bottom: 40px; font-size: 14px; }
+  .slides-grid {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .slide-card {
+    width: 330px;
+    height: 716px;
+    border-radius: 28px;
+    background: #FFFDF8;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 20px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .slide-number {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    font-size: 11px;
+    color: #ccc;
+    font-weight: 600;
+  }
+  .deco {
+    position: absolute;
+    font-size: 20px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .catchcopy {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.4;
+    text-align: center;
+    margin-top: 12px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #7C5CFF, #FF6B9D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    z-index: 1;
+  }
+  .phone-frame {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    z-index: 1;
+  }
+  .phone-frame img {
+    max-width: 260px;
+    max-height: 480px;
+    object-fit: contain;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(124,92,255,0.2);
+  }
+  .stat-text {
+    font-size: 13px;
+    color: #888;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-top: 12px;
+    z-index: 1;
+  }
+  .app-name {
+    font-size: 13px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #7C5CFF, #FF6B9D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+<h1>EventSnap</h1>
+<p class="subtitle">App Store Screenshots — iPhone 6.9" (1320×2868px)</p>
+<div class="slides-grid">
+
+  <!-- Slide 1: Event Reel -->
+  <div class="slide-card">
+    <span class="slide-number">① Event Reel</span>
+    <span class="deco" style="top:40px;right:20px">★</span>
+    <span class="deco" style="top:80px;left:18px">✦</span>
+    <span class="deco" style="bottom:60px;right:18px">♥</span>
+    <div class="catchcopy">みんなの写真が、<br>ひとつになる。</div>
+    <div class="phone-frame">
+      <img src="public/screenshots/uploaded/event-reel-trimmed.png" alt="Event Reel">
+    </div>
+    <div class="stat-text">📷 12 PEOPLE・128 PHOTOS</div>
+    <div class="app-name">EventSnap</div>
+  </div>
+
+  <!-- Slide 2: Camera -->
+  <div class="slide-card">
+    <span class="slide-number">② Camera</span>
+    <span class="deco" style="top:50px;right:22px">✦</span>
+    <span class="deco" style="bottom:70px;left:16px">★</span>
+    <div class="catchcopy">撮った瞬間、<br>もう全員に届いてる。</div>
+    <div class="phone-frame">
+      <img src="public/screenshots/uploaded/camera-trimmed.png" alt="Camera">
+    </div>
+    <div class="app-name">EventSnap</div>
+  </div>
+
+  <!-- Slide 3: QR Overlay -->
+  <div class="slide-card">
+    <span class="slide-number">③ QR Invite</span>
+    <span class="deco" style="top:42px;left:20px">♥</span>
+    <span class="deco" style="bottom:80px;right:20px">✦</span>
+    <div class="catchcopy">QRをかざすだけ。<br>招待もアプリの<br>検索もいらない。</div>
+    <div class="phone-frame">
+      <img src="public/screenshots/uploaded/qr-overlay-trimmed.png" alt="QR Overlay">
+    </div>
+    <div class="app-name">EventSnap</div>
+  </div>
+
+  <!-- Slide 4: Widget -->
+  <div class="slide-card">
+    <span class="slide-number">④ Widget</span>
+    <span class="deco" style="top:44px;right:18px">★</span>
+    <span class="deco" style="top:90px;left:16px">♥</span>
+    <span class="deco" style="bottom:65px;left:20px">✦</span>
+    <div class="catchcopy">開かなくても、<br>思い出はそこにある。</div>
+    <div class="phone-frame">
+      <img src="public/screenshots/uploaded/widget-trimmed.png" alt="Widget">
+    </div>
+    <div class="app-name">EventSnap</div>
+  </div>
+
+</div>
+</body>
+</html>

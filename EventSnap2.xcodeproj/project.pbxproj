@@ -7,6 +7,78 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01D9DA15894454558A31F2E0 /* EventSnapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D16059709C44664F34BE80 /* EventSnapApp.swift */; };
+		07CC90BB4A7DF00192BD0076 /* AlbumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C236C172F86BEBC915519F /* AlbumView.swift */; };
+		083CB47D53F61CF0C9DE7A56 /* AppLinkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75001000000000000000000 /* AppLinkConfig.swift */; };
+		0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38C4572E49ADF53996217172 /* QRCodeService.swift */; };
+		120F1A928552A6F94B2863A5 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603E3322F12D494691F2AB55 /* CameraViewModel.swift */; };
+		1406BD85B5F92142777FAFB0 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B6F77360BB3B5ED718507C /* Event.swift */; };
+		1AF10605D40D9A743104DEE5 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */; };
+		34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */; };
+		3F512E3A41AA0F44F05BFF20 /* TimeCapsuleRevealOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AAA260EFF4A8528AE1697E6 /* TimeCapsuleRevealOverlay.swift */; };
+		4BA45F6E7F014F81B165E400 /* EventReel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5210C5AE9EB4A64A7585DAC /* EventReel.swift */; };
+		6672E15CA9D7AD5E2FC592FC /* AlbumViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */; };
+		770D99B23055575A007D5194 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 770D99B13055575A007D5194 /* GoogleService-Info.plist */; };
+		775673723025AAC40003484E /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 775673713025AAC40003484E /* AppIcon.icon */; };
+		7760F8EA2F5D2CBC00F18A2E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7760F8AA2F5D236F00F18A2E /* Assets.xcassets */; };
+		7C142E68F84DD7505B638AC5 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0CA4F056D31CD263119C9D8 /* CameraView.swift */; };
+		81C5D792F1F9479D96A6435C /* PhotoImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51007000000000000000000 /* PhotoImageLoader.swift */; };
+		8B64EDCB35DD653F109FB6BD /* SocialCardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000A000000000000000000 /* SocialCardService.swift */; };
+		94A53529D607048BD1840E6E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05ED44B24BF30673E712740A /* QRCodeView.swift */; };
+		9B2319CCFD1753657F39F1FE /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1FC9B16BEEE0613D3DEA5D /* MainTabView.swift */; };
+		A598EC34D1C567946A8DC44A /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */; };
+		AA1000000000000000000002 /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000000000000000000001 /* Reaction.swift */; };
+		AA1000000000000000000004 /* ReactionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000000000000000000003 /* ReactionRepository.swift */; };
+		AFDD38475E88AE2F42DF276D /* PhotoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0010000000000000000000 /* PhotoAnalyzer.swift */; };
+		B53DCC3367AE67945491E976 /* PhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */; };
+		BDE49380E5897CC163DB7801 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B6F77360BB3B5ED718507C /* Event.swift */; };
+		C8F67F33DDF36464638794BE /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8257853D0F117AD23C2561B6 /* HomeView.swift */; };
+		E52000000000000000000000 /* AppTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51000000000000000000000 /* AppTab.swift */; };
+		E52001000000000000000000 /* DeviceIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51001000000000000000000 /* DeviceIdentity.swift */; };
+		E52003000000000000000000 /* CameraOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51003000000000000000000 /* CameraOrientation.swift */; };
+		E52004000000000000000000 /* UIImage+Orientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51004000000000000000000 /* UIImage+Orientation.swift */; };
+		E52005000000000000000000 /* TimeCapsuleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51005000000000000000000 /* TimeCapsuleService.swift */; };
+		E52006000000000000000000 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51006000000000000000000 /* NotificationService.swift */; };
+		E52007000000000000000000 /* PhotoImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51007000000000000000000 /* PhotoImageLoader.swift */; };
+		E52009000000000000000000 /* ShareCollageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51009000000000000000000 /* ShareCollageStore.swift */; };
+		E5200A000000000000000000 /* ShareCollageBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100A000000000000000000 /* ShareCollageBuilder.swift */; };
+		E5200D000000000000000000 /* ShareCollageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100D000000000000000000 /* ShareCollageView.swift */; };
+		E5200E000000000000000000 /* EventSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100E000000000000000000 /* EventSwitcherView.swift */; };
+		E76000000000000000000000 /* CloudKitAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75000000000000000000000 /* CloudKitAccount.swift */; };
+		E76001000000000000000000 /* AppLinkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75001000000000000000000 /* AppLinkConfig.swift */; };
+		E90000000000000000000002 /* EventSnapClipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000001 /* EventSnapClipApp.swift */; };
+		E90000000000000000000006 /* EventSnapClipRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000005 /* EventSnapClipRootView.swift */; };
+		E90000000000000000000008 /* GetAppScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000007 /* GetAppScreen.swift */; };
+		E9000000000000000000000B /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 775673713025AAC40003484E /* AppIcon.icon */; };
+		E9000000000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7760F8AA2F5D236F00F18A2E /* Assets.xcassets */; };
+		E90000000000000000000016 /* EventSnapClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = E9000000000000000000000E /* EventSnapClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EA0002000000000000000000 /* UnreadBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0001000000000000000000 /* UnreadBadge.swift */; };
+		EA0003000000000000000000 /* PrimaryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0004000000000000000000 /* PrimaryButtonStyle.swift */; };
+		EA0005000000000000000000 /* NotoSansJP-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0006000000000000000000 /* NotoSansJP-Bold.ttf */; };
+		EA0007000000000000000000 /* NotoSansJP-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0008000000000000000000 /* NotoSansJP-Black.ttf */; };
+		EA000B000000000000000000 /* SocialCardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000A000000000000000000 /* SocialCardService.swift */; };
+		EA000D000000000000000000 /* SocialCardShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000C000000000000000000 /* SocialCardShareView.swift */; };
+		EA000E000000000000000000 /* BebasNeue-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA000F000000000000000000 /* BebasNeue-Regular.ttf */; };
+		EA0011000000000000000000 /* PhotoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0010000000000000000000 /* PhotoAnalyzer.swift */; };
+		EA0021000000000000000000 /* EventReelPhotoSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0020000000000000000000 /* EventReelPhotoSelector.swift */; };
+		EA0022000000000000000000 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0023000000000000000000 /* DesignTokens.swift */; };
+		EA1A7497F70CC406621DEF9A /* EventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C600D3D5C6BB4F411ED1607B /* EventRepository.swift */; };
+		EAF100010000000000000000 /* EventSnapSharedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100000000000000000000 /* EventSnapSharedState.swift */; };
+		EAF100020000000000000000 /* EventSnapSharedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100000000000000000000 /* EventSnapSharedState.swift */; };
+		EAF100040000000000000000 /* EventActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100030000000000000000 /* EventActivityAttributes.swift */; };
+		EAF100050000000000000000 /* EventActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100030000000000000000 /* EventActivityAttributes.swift */; };
+		EAF100070000000000000000 /* EventSnapDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100060000000000000000 /* EventSnapDeepLink.swift */; };
+		EAF100080000000000000000 /* EventSnapDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100060000000000000000 /* EventSnapDeepLink.swift */; };
+		EAF100100000000000000000 /* EventActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100090000000000000000 /* EventActivityManager.swift */; };
+		EAF100120000000000000000 /* WidgetBrand.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100110000000000000000 /* WidgetBrand.swift */; };
+		EAF100140000000000000000 /* EventSnapWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100130000000000000000 /* EventSnapWidget.swift */; };
+		EAF100160000000000000000 /* EventActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100150000000000000000 /* EventActivityWidget.swift */; };
+		EAF100180000000000000000 /* EventSnapWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100170000000000000000 /* EventSnapWidgetBundle.swift */; };
+		EAF100300000000000000000 /* EventSnapWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EAF100190000000000000000 /* EventSnapWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EC0000000000000000000002 /* OnboardingTutorialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0000000000000000000001 /* OnboardingTutorialManager.swift */; };
+		EC0000000000000000000004 /* TutorialOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0000000000000000000003 /* TutorialOverlay.swift */; };
+		F2434A896825B0EDCDFBB10C /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3CB1C550D157424087F6B4 /* Participant.swift */; };
+		F2CAC544E91C5A9FEC4EC5B5 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */; };
 		FC0000000000000000000065 /* ScreenshotMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000001 /* ScreenshotMode.swift */; };
 		FC0000000000000000000066 /* PreviewFixtureData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000002 /* PreviewFixtureData.swift */; };
 		FC0000000000000000000067 /* PreviewImageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0000000000000000000003 /* PreviewImageFactory.swift */; };
@@ -22,78 +94,24 @@
 		FC00000000000000000000CC /* preview-camera-bg.jpg in Resources */ = {isa = PBXBuildFile; fileRef = FC00000000000000000000CB /* preview-camera-bg.jpg */; };
 		FC00000000000000000000CE /* preview-qrscan-bg.jpg in Resources */ = {isa = PBXBuildFile; fileRef = FC00000000000000000000CD /* preview-qrscan-bg.jpg */; };
 		FC00000000000000000000D0 /* QROverlayScreenshotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC00000000000000000000CF /* QROverlayScreenshotView.swift */; };
-		01D9DA15894454558A31F2E0 /* EventSnapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D16059709C44664F34BE80 /* EventSnapApp.swift */; };
-		07CC90BB4A7DF00192BD0076 /* AlbumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C236C172F86BEBC915519F /* AlbumView.swift */; };
-		0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38C4572E49ADF53996217172 /* QRCodeService.swift */; };
-		120F1A928552A6F94B2863A5 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603E3322F12D494691F2AB55 /* CameraViewModel.swift */; };
-		1406BD85B5F92142777FAFB0 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B6F77360BB3B5ED718507C /* Event.swift */; };
-		EA0022000000000000000000 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0023000000000000000000 /* DesignTokens.swift */; };
-		3F512E3A41AA0F44F05BFF20 /* TimeCapsuleRevealOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AAA260EFF4A8528AE1697E6 /* TimeCapsuleRevealOverlay.swift */; };
-		1AF10605D40D9A743104DEE5 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */; };
-		34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */; };
-		4BA45F6E7F014F81B165E400 /* EventReel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5210C5AE9EB4A64A7585DAC /* EventReel.swift */; };
-		6672E15CA9D7AD5E2FC592FC /* AlbumViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */; };
-		775673723025AAC40003484E /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 775673713025AAC40003484E /* AppIcon.icon */; };
-		7760F8EA2F5D2CBC00F18A2E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7760F8AA2F5D236F00F18A2E /* Assets.xcassets */; };
-		7C142E68F84DD7505B638AC5 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0CA4F056D31CD263119C9D8 /* CameraView.swift */; };
-		94A53529D607048BD1840E6E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05ED44B24BF30673E712740A /* QRCodeView.swift */; };
-		9B2319CCFD1753657F39F1FE /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1FC9B16BEEE0613D3DEA5D /* MainTabView.swift */; };
-		B53DCC3367AE67945491E976 /* PhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */; };
-		C8F67F33DDF36464638794BE /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8257853D0F117AD23C2561B6 /* HomeView.swift */; };
-		E52000000000000000000000 /* AppTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51000000000000000000000 /* AppTab.swift */; };
-		E52001000000000000000000 /* DeviceIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51001000000000000000000 /* DeviceIdentity.swift */; };
-		E52003000000000000000000 /* CameraOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51003000000000000000000 /* CameraOrientation.swift */; };
-		E52004000000000000000000 /* UIImage+Orientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51004000000000000000000 /* UIImage+Orientation.swift */; };
-		E52005000000000000000000 /* TimeCapsuleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51005000000000000000000 /* TimeCapsuleService.swift */; };
-		E52006000000000000000000 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51006000000000000000000 /* NotificationService.swift */; };
-		E52007000000000000000000 /* PhotoImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51007000000000000000000 /* PhotoImageLoader.swift */; };
-		E52009000000000000000000 /* ShareCollageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51009000000000000000000 /* ShareCollageStore.swift */; };
-		E5200A000000000000000000 /* ShareCollageBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100A000000000000000000 /* ShareCollageBuilder.swift */; };
-		E5200D000000000000000000 /* ShareCollageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100D000000000000000000 /* ShareCollageView.swift */; };
-		E5200E000000000000000000 /* EventSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5100E000000000000000000 /* EventSwitcherView.swift */; };
-		EA1A7497F70CC406621DEF9A /* EventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C600D3D5C6BB4F411ED1607B /* EventRepository.swift */; };
-		F2434A896825B0EDCDFBB10C /* Participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3CB1C550D157424087F6B4 /* Participant.swift */; };
-		AA1000000000000000000002 /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000000000000000000001 /* Reaction.swift */; };
-		AA1000000000000000000004 /* ReactionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000000000000000000003 /* ReactionRepository.swift */; };
-		F2CAC544E91C5A9FEC4EC5B5 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */; };
-		E76000000000000000000000 /* CloudKitAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75000000000000000000000 /* CloudKitAccount.swift */; };
-		E76001000000000000000000 /* AppLinkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75001000000000000000000 /* AppLinkConfig.swift */; };
-		E90000000000000000000002 /* EventSnapClipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000001 /* EventSnapClipApp.swift */; };
-		E90000000000000000000006 /* EventSnapClipRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000005 /* EventSnapClipRootView.swift */; };
-		E90000000000000000000008 /* GetAppScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90000000000000000000007 /* GetAppScreen.swift */; };
-		E9000000000000000000000B /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 775673713025AAC40003484E /* AppIcon.icon */; };
-		BDE49380E5897CC163DB7801 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B6F77360BB3B5ED718507C /* Event.swift */; };
-		A598EC34D1C567946A8DC44A /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */; };
-		81C5D792F1F9479D96A6435C /* PhotoImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E51007000000000000000000 /* PhotoImageLoader.swift */; };
-		8B64EDCB35DD653F109FB6BD /* SocialCardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000A000000000000000000 /* SocialCardService.swift */; };
-		AFDD38475E88AE2F42DF276D /* PhotoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0010000000000000000000 /* PhotoAnalyzer.swift */; };
-		083CB47D53F61CF0C9DE7A56 /* AppLinkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75001000000000000000000 /* AppLinkConfig.swift */; };
-		E9000000000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7760F8AA2F5D236F00F18A2E /* Assets.xcassets */; };
-		E90000000000000000000016 /* EventSnapClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = E9000000000000000000000E /* EventSnapClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		EA0002000000000000000000 /* UnreadBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0001000000000000000000 /* UnreadBadge.swift */; };
-		EA0003000000000000000000 /* PrimaryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0004000000000000000000 /* PrimaryButtonStyle.swift */; };
-		EA0005000000000000000000 /* NotoSansJP-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0006000000000000000000 /* NotoSansJP-Bold.ttf */; };
-		EA0007000000000000000000 /* NotoSansJP-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA0008000000000000000000 /* NotoSansJP-Black.ttf */; };
-		EA000E000000000000000000 /* BebasNeue-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA000F000000000000000000 /* BebasNeue-Regular.ttf */; };
-		EA000B000000000000000000 /* SocialCardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000A000000000000000000 /* SocialCardService.swift */; };
-		EA000D000000000000000000 /* SocialCardShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA000C000000000000000000 /* SocialCardShareView.swift */; };
-		EA0011000000000000000000 /* PhotoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0010000000000000000000 /* PhotoAnalyzer.swift */; };
-		EA0021000000000000000000 /* EventReelPhotoSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0020000000000000000000 /* EventReelPhotoSelector.swift */; };
-		EAF100010000000000000000 /* EventSnapSharedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100000000000000000000 /* EventSnapSharedState.swift */; };
-		EAF100020000000000000000 /* EventSnapSharedState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100000000000000000000 /* EventSnapSharedState.swift */; };
-		EAF100040000000000000000 /* EventActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100030000000000000000 /* EventActivityAttributes.swift */; };
-		EAF100050000000000000000 /* EventActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100030000000000000000 /* EventActivityAttributes.swift */; };
-		EAF100070000000000000000 /* EventSnapDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100060000000000000000 /* EventSnapDeepLink.swift */; };
-		EAF100080000000000000000 /* EventSnapDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100060000000000000000 /* EventSnapDeepLink.swift */; };
-		EAF100100000000000000000 /* EventActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100090000000000000000 /* EventActivityManager.swift */; };
-		EAF100120000000000000000 /* WidgetBrand.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100110000000000000000 /* WidgetBrand.swift */; };
-		EAF100140000000000000000 /* EventSnapWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100130000000000000000 /* EventSnapWidget.swift */; };
-		EAF100160000000000000000 /* EventActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100150000000000000000 /* EventActivityWidget.swift */; };
-		EAF100180000000000000000 /* EventSnapWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF100170000000000000000 /* EventSnapWidgetBundle.swift */; };
-		EC0000000000000000000002 /* OnboardingTutorialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0000000000000000000001 /* OnboardingTutorialManager.swift */; };
-		EC0000000000000000000004 /* TutorialOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0000000000000000000003 /* TutorialOverlay.swift */; };
-		EAF100300000000000000000 /* EventSnapWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EAF100190000000000000000 /* EventSnapWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E90000000000000000000017 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E9000000000000000000000F;
+			remoteInfo = EventSnapClip;
+		};
+		EAF100280000000000000000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EAF100220000000000000000;
+			remoteInfo = EventSnapWidget;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		E90000000000000000000015 /* Embed App Clips */ = {
@@ -120,37 +138,69 @@
 		};
 /* End PBXCopyFilesBuildPhase section */
 
-/* Begin PBXContainerItemProxy section */
-		E90000000000000000000017 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E9000000000000000000000F;
-			remoteInfo = EventSnapClip;
-		};
-		EAF100280000000000000000 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 81ABA3FBA786DED3296CB919 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = EAF100220000000000000000;
-			remoteInfo = EventSnapWidget;
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXTargetDependency section */
-		E90000000000000000000018 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E9000000000000000000000F /* EventSnapClip */;
-			targetProxy = E90000000000000000000017 /* PBXContainerItemProxy */;
-		};
-		EAF100290000000000000000 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = EAF100220000000000000000 /* EventSnapWidget */;
-			targetProxy = EAF100280000000000000000 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin PBXFileReference section */
+		05ED44B24BF30673E712740A /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
+		293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRepository.swift; sourceTree = "<group>"; };
+		32B6F77360BB3B5ED718507C /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		38C4572E49ADF53996217172 /* QRCodeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeService.swift; sourceTree = "<group>"; };
+		54C236C172F86BEBC915519F /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
+		5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewModel.swift; sourceTree = "<group>"; };
+		603E3322F12D494691F2AB55 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
+		6AAA260EFF4A8528AE1697E6 /* TimeCapsuleRevealOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeCapsuleRevealOverlay.swift; sourceTree = "<group>"; };
+		770D99B13055575A007D5194 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		775673713025AAC40003484E /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		7760F8AA2F5D236F00F18A2E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7A1FC9B16BEEE0613D3DEA5D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		8257853D0F117AD23C2561B6 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		A2D16059709C44664F34BE80 /* EventSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapApp.swift; sourceTree = "<group>"; };
+		AA1000000000000000000001 /* Reaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reaction.swift; sourceTree = "<group>"; };
+		AA1000000000000000000003 /* ReactionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionRepository.swift; sourceTree = "<group>"; };
+		ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
+		BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C600D3D5C6BB4F411ED1607B /* EventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepository.swift; sourceTree = "<group>"; };
+		CB3CB1C550D157424087F6B4 /* Participant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Participant.swift; sourceTree = "<group>"; };
+		D0CA4F056D31CD263119C9D8 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		E51000000000000000000000 /* AppTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTab.swift; sourceTree = "<group>"; };
+		E51001000000000000000000 /* DeviceIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIdentity.swift; sourceTree = "<group>"; };
+		E51003000000000000000000 /* CameraOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraOrientation.swift; sourceTree = "<group>"; };
+		E51004000000000000000000 /* UIImage+Orientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Orientation.swift"; sourceTree = "<group>"; };
+		E51005000000000000000000 /* TimeCapsuleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeCapsuleService.swift; sourceTree = "<group>"; };
+		E51006000000000000000000 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		E51007000000000000000000 /* PhotoImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoImageLoader.swift; sourceTree = "<group>"; };
+		E51009000000000000000000 /* ShareCollageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageStore.swift; sourceTree = "<group>"; };
+		E5100A000000000000000000 /* ShareCollageBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageBuilder.swift; sourceTree = "<group>"; };
+		E5100D000000000000000000 /* ShareCollageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageView.swift; sourceTree = "<group>"; };
+		E5100E000000000000000000 /* EventSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSwitcherView.swift; sourceTree = "<group>"; };
+		E75000000000000000000000 /* CloudKitAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitAccount.swift; sourceTree = "<group>"; };
+		E75001000000000000000000 /* AppLinkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLinkConfig.swift; sourceTree = "<group>"; };
+		E90000000000000000000001 /* EventSnapClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipApp.swift; sourceTree = "<group>"; };
+		E90000000000000000000005 /* EventSnapClipRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipRootView.swift; sourceTree = "<group>"; };
+		E90000000000000000000007 /* GetAppScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetAppScreen.swift; sourceTree = "<group>"; };
+		E9000000000000000000000E /* EventSnapClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnapClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA0001000000000000000000 /* UnreadBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnreadBadge.swift; sourceTree = "<group>"; };
+		EA0004000000000000000000 /* PrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButtonStyle.swift; sourceTree = "<group>"; };
+		EA0006000000000000000000 /* NotoSansJP-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansJP-Bold.ttf"; sourceTree = "<group>"; };
+		EA0008000000000000000000 /* NotoSansJP-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansJP-Black.ttf"; sourceTree = "<group>"; };
+		EA000A000000000000000000 /* SocialCardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialCardService.swift; sourceTree = "<group>"; };
+		EA000C000000000000000000 /* SocialCardShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialCardShareView.swift; sourceTree = "<group>"; };
+		EA000F000000000000000000 /* BebasNeue-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BebasNeue-Regular.ttf"; sourceTree = "<group>"; };
+		EA0010000000000000000000 /* PhotoAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAnalyzer.swift; sourceTree = "<group>"; };
+		EA0020000000000000000000 /* EventReelPhotoSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventReelPhotoSelector.swift; sourceTree = "<group>"; };
+		EA0023000000000000000000 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		EAF100000000000000000000 /* EventSnapSharedState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapSharedState.swift; sourceTree = "<group>"; };
+		EAF100030000000000000000 /* EventActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityAttributes.swift; sourceTree = "<group>"; };
+		EAF100060000000000000000 /* EventSnapDeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapDeepLink.swift; sourceTree = "<group>"; };
+		EAF100090000000000000000 /* EventActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityManager.swift; sourceTree = "<group>"; };
+		EAF100110000000000000000 /* WidgetBrand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBrand.swift; sourceTree = "<group>"; };
+		EAF100130000000000000000 /* EventSnapWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapWidget.swift; sourceTree = "<group>"; };
+		EAF100150000000000000000 /* EventActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityWidget.swift; sourceTree = "<group>"; };
+		EAF100170000000000000000 /* EventSnapWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapWidgetBundle.swift; sourceTree = "<group>"; };
+		EAF100190000000000000000 /* EventSnapWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EventSnapWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC0000000000000000000001 /* OnboardingTutorialManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTutorialManager.swift; sourceTree = "<group>"; };
+		EC0000000000000000000003 /* TutorialOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialOverlay.swift; sourceTree = "<group>"; };
+		F5210C5AE9EB4A64A7585DAC /* EventReel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventReel.swift; sourceTree = "<group>"; };
+		F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewModel.swift; sourceTree = "<group>"; };
+		FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		FC0000000000000000000001 /* ScreenshotMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotMode.swift; sourceTree = "<group>"; };
 		FC0000000000000000000002 /* PreviewFixtureData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewFixtureData.swift; sourceTree = "<group>"; };
 		FC0000000000000000000003 /* PreviewImageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewImageFactory.swift; sourceTree = "<group>"; };
@@ -163,71 +213,10 @@
 		FC000000000000000000000A /* preview-photo-05.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "preview-photo-05.jpg"; sourceTree = "<group>"; };
 		FC000000000000000000000B /* preview-photo-06.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "preview-photo-06.jpg"; sourceTree = "<group>"; };
 		FC000000000000000000000C /* preview-photo-07.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "preview-photo-07.jpg"; sourceTree = "<group>"; };
+		FC000000000000000000005A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		FC00000000000000000000CB /* preview-camera-bg.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "preview-camera-bg.jpg"; sourceTree = "<group>"; };
 		FC00000000000000000000CD /* preview-qrscan-bg.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "preview-qrscan-bg.jpg"; sourceTree = "<group>"; };
 		FC00000000000000000000CF /* QROverlayScreenshotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QROverlayScreenshotView.swift; sourceTree = "<group>"; };
-		FC000000000000000000005A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		05ED44B24BF30673E712740A /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
-		293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRepository.swift; sourceTree = "<group>"; };
-		32B6F77360BB3B5ED718507C /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
-		EA0023000000000000000000 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
-		6AAA260EFF4A8528AE1697E6 /* TimeCapsuleRevealOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeCapsuleRevealOverlay.swift; sourceTree = "<group>"; };
-		38C4572E49ADF53996217172 /* QRCodeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeService.swift; sourceTree = "<group>"; };
-		54C236C172F86BEBC915519F /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
-		5A7BBB4A25B7A29C39AC404A /* EventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewModel.swift; sourceTree = "<group>"; };
-		603E3322F12D494691F2AB55 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
-		775673713025AAC40003484E /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
-		7760F8AA2F5D236F00F18A2E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		7A1FC9B16BEEE0613D3DEA5D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
-		8257853D0F117AD23C2561B6 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		A2D16059709C44664F34BE80 /* EventSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapApp.swift; sourceTree = "<group>"; };
-		ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
-		BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C600D3D5C6BB4F411ED1607B /* EventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepository.swift; sourceTree = "<group>"; };
-		CB3CB1C550D157424087F6B4 /* Participant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Participant.swift; sourceTree = "<group>"; };
-		AA1000000000000000000001 /* Reaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reaction.swift; sourceTree = "<group>"; };
-		AA1000000000000000000003 /* ReactionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionRepository.swift; sourceTree = "<group>"; };
-		D0CA4F056D31CD263119C9D8 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
-		E51000000000000000000000 /* AppTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTab.swift; sourceTree = "<group>"; };
-		E51001000000000000000000 /* DeviceIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIdentity.swift; sourceTree = "<group>"; };
-		E51003000000000000000000 /* CameraOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraOrientation.swift; sourceTree = "<group>"; };
-		E51004000000000000000000 /* UIImage+Orientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Orientation.swift"; sourceTree = "<group>"; };
-		E51005000000000000000000 /* TimeCapsuleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeCapsuleService.swift; sourceTree = "<group>"; };
-		E51006000000000000000000 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-		EC0000000000000000000001 /* OnboardingTutorialManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTutorialManager.swift; sourceTree = "<group>"; };
-		EC0000000000000000000003 /* TutorialOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialOverlay.swift; sourceTree = "<group>"; };
-		E51007000000000000000000 /* PhotoImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoImageLoader.swift; sourceTree = "<group>"; };
-		E51009000000000000000000 /* ShareCollageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageStore.swift; sourceTree = "<group>"; };
-		E5100A000000000000000000 /* ShareCollageBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageBuilder.swift; sourceTree = "<group>"; };
-		E5100D000000000000000000 /* ShareCollageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollageView.swift; sourceTree = "<group>"; };
-		E5100E000000000000000000 /* EventSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSwitcherView.swift; sourceTree = "<group>"; };
-		F5210C5AE9EB4A64A7585DAC /* EventReel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventReel.swift; sourceTree = "<group>"; };
-		F9D00FD6412BC99639F44D7B /* AlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewModel.swift; sourceTree = "<group>"; };
-		FAB149AFA412D41F6D0E4E5D /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
-		E75000000000000000000000 /* CloudKitAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CloudKitAccount.swift"; sourceTree = "<group>"; };
-		E75001000000000000000000 /* AppLinkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppLinkConfig.swift"; sourceTree = "<group>"; };
-		E90000000000000000000001 /* EventSnapClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipApp.swift; sourceTree = "<group>"; };
-		E90000000000000000000005 /* EventSnapClipRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapClipRootView.swift; sourceTree = "<group>"; };
-		E90000000000000000000007 /* GetAppScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetAppScreen.swift; sourceTree = "<group>"; };
-		E9000000000000000000000E /* EventSnapClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnapClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		EA0001000000000000000000 /* UnreadBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnreadBadge.swift"; sourceTree = "<group>"; };
-		EA0004000000000000000000 /* PrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PrimaryButtonStyle.swift"; sourceTree = "<group>"; };
-		EA0006000000000000000000 /* NotoSansJP-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansJP-Bold.ttf"; sourceTree = "<group>"; };
-		EA0008000000000000000000 /* NotoSansJP-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansJP-Black.ttf"; sourceTree = "<group>"; };
-		EA000F000000000000000000 /* BebasNeue-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BebasNeue-Regular.ttf"; sourceTree = "<group>"; };
-		EA000A000000000000000000 /* SocialCardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardService.swift"; sourceTree = "<group>"; };
-		EA0010000000000000000000 /* PhotoAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoAnalyzer.swift"; sourceTree = "<group>"; };
-		EA0020000000000000000000 /* EventReelPhotoSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventReelPhotoSelector.swift"; sourceTree = "<group>"; };
-		EA000C000000000000000000 /* SocialCardShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialCardShareView.swift"; sourceTree = "<group>"; };
-		EAF100000000000000000000 /* EventSnapSharedState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapSharedState.swift; sourceTree = "<group>"; };
-		EAF100030000000000000000 /* EventActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityAttributes.swift; sourceTree = "<group>"; };
-		EAF100060000000000000000 /* EventSnapDeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapDeepLink.swift; sourceTree = "<group>"; };
-		EAF100090000000000000000 /* EventActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityManager.swift; sourceTree = "<group>"; };
-		EAF100110000000000000000 /* WidgetBrand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBrand.swift; sourceTree = "<group>"; };
-		EAF100130000000000000000 /* EventSnapWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapWidget.swift; sourceTree = "<group>"; };
-		EAF100150000000000000000 /* EventActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityWidget.swift; sourceTree = "<group>"; };
-		EAF100170000000000000000 /* EventSnapWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapWidgetBundle.swift; sourceTree = "<group>"; };
-		EAF100190000000000000000 /* EventSnapWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EventSnapWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -309,6 +298,7 @@
 		AF726F6A46D7E6C672320238 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				770D99B13055575A007D5194 /* GoogleService-Info.plist */,
 				E9000000000000000000000E /* EventSnapClip.app */,
 				BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */,
 				EAF100190000000000000000 /* EventSnapWidget.appex */,
@@ -351,35 +341,6 @@
 			path = Share;
 			sourceTree = "<group>";
 		};
-		EA0009000000000000000000 /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-				EA0006000000000000000000 /* NotoSansJP-Bold.ttf */,
-				EA0008000000000000000000 /* NotoSansJP-Black.ttf */,
-				EA000F000000000000000000 /* BebasNeue-Regular.ttf */,
-			);
-			path = Fonts;
-			sourceTree = "<group>";
-		};
-		EE37BEE979FB00FB2D8DFAF6 = {
-			isa = PBXGroup;
-			children = (
-				7760F8AA2F5D236F00F18A2E /* Assets.xcassets */,
-				775673713025AAC40003484E /* AppIcon.icon */,
-				EA0009000000000000000000 /* Fonts */,
-				A2D16059709C44664F34BE80 /* EventSnapApp.swift */,
-				BC50DA07C3F6CCC4452B93EF /* Models */,
-				7EADC30A06EEA49AA9CE8AD4 /* Services */,
-				1E58259F9C4ED7C03B68737C /* ViewModels */,
-				B46D40979E843E46E78EE80A /* Views */,
-				FC00000000000000000000C9 /* Preview */,
-				EAF100200000000000000000 /* Shared */,
-				E9000000000000000000000D /* EventSnapClip */,
-				EAF100210000000000000000 /* EventSnapWidget */,
-				AF726F6A46D7E6C672320238 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
 		E9000000000000000000000D /* EventSnapClip */ = {
 			isa = PBXGroup;
 			children = (
@@ -388,6 +349,16 @@
 				E90000000000000000000007 /* GetAppScreen.swift */,
 			);
 			path = EventSnapClip;
+			sourceTree = "<group>";
+		};
+		EA0009000000000000000000 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				EA0006000000000000000000 /* NotoSansJP-Bold.ttf */,
+				EA0008000000000000000000 /* NotoSansJP-Black.ttf */,
+				EA000F000000000000000000 /* BebasNeue-Regular.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 		EAF100200000000000000000 /* Shared */ = {
@@ -409,6 +380,25 @@
 				EAF100110000000000000000 /* WidgetBrand.swift */,
 			);
 			path = EventSnapWidget;
+			sourceTree = "<group>";
+		};
+		EE37BEE979FB00FB2D8DFAF6 = {
+			isa = PBXGroup;
+			children = (
+				7760F8AA2F5D236F00F18A2E /* Assets.xcassets */,
+				775673713025AAC40003484E /* AppIcon.icon */,
+				EA0009000000000000000000 /* Fonts */,
+				A2D16059709C44664F34BE80 /* EventSnapApp.swift */,
+				BC50DA07C3F6CCC4452B93EF /* Models */,
+				7EADC30A06EEA49AA9CE8AD4 /* Services */,
+				1E58259F9C4ED7C03B68737C /* ViewModels */,
+				B46D40979E843E46E78EE80A /* Views */,
+				FC00000000000000000000C9 /* Preview */,
+				EAF100200000000000000000 /* Shared */,
+				E9000000000000000000000D /* EventSnapClip */,
+				EAF100210000000000000000 /* EventSnapWidget */,
+				AF726F6A46D7E6C672320238 /* Products */,
+			);
 			sourceTree = "<group>";
 		};
 		FC00000000000000000000C9 /* Preview */ = {
@@ -462,6 +452,30 @@
 			);
 			name = EventSnap2;
 			packageProductDependencies = (
+				770D9999305517C0007D5194 /* FirebaseAI */,
+				770D999A305517C0007D5194 /* FirebaseAILogic */,
+				770D999B305517C0007D5194 /* FirebaseAnalytics */,
+				770D999C305517C0007D5194 /* FirebaseAnalyticsCore */,
+				770D999D305517C0007D5194 /* FirebaseAnalyticsIdentitySupport */,
+				770D999E305517C0007D5194 /* FirebaseAppCheck */,
+				770D999F305517C0007D5194 /* FirebaseAppDistribution-Beta */,
+				770D99A0305517C0007D5194 /* FirebaseAuth */,
+				770D99A1305517C0007D5194 /* FirebaseAuthCombine-Community */,
+				770D99A2305517C0007D5194 /* FirebaseCore */,
+				770D99A3305517C0007D5194 /* FirebaseCrashlytics */,
+				770D99A4305517C0007D5194 /* FirebaseDatabase */,
+				770D99A5305517C0007D5194 /* FirebaseFirestore */,
+				770D99A6305517C0007D5194 /* FirebaseFirestoreCombine-Community */,
+				770D99A7305517C0007D5194 /* FirebaseFunctions */,
+				770D99A8305517C0007D5194 /* FirebaseFunctionsCombine-Community */,
+				770D99A9305517C0007D5194 /* FirebaseInAppMessaging-Beta */,
+				770D99AA305517C0007D5194 /* FirebaseInstallations */,
+				770D99AB305517C0007D5194 /* FirebaseMLModelDownloader */,
+				770D99AC305517C0007D5194 /* FirebaseMessaging */,
+				770D99AD305517C0007D5194 /* FirebasePerformance */,
+				770D99AE305517C0007D5194 /* FirebaseRemoteConfig */,
+				770D99AF305517C0007D5194 /* FirebaseStorage */,
+				770D99B0305517C0007D5194 /* FirebaseStorageCombine-Community */,
 			);
 			productName = EventSnap2;
 			productReference = BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */;
@@ -523,6 +537,9 @@
 			);
 			mainGroup = EE37BEE979FB00FB2D8DFAF6;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -551,6 +568,7 @@
 				FC0000000000000000000070 /* preview-photo-07.jpg in Resources */,
 				FC00000000000000000000CC /* preview-camera-bg.jpg in Resources */,
 				FC00000000000000000000CE /* preview-qrscan-bg.jpg in Resources */,
+				770D99B23055575A007D5194 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -665,6 +683,19 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E90000000000000000000018 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E9000000000000000000000F /* EventSnapClip */;
+			targetProxy = E90000000000000000000017 /* PBXContainerItemProxy */;
+		};
+		EAF100290000000000000000 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EAF100220000000000000000 /* EventSnapWidget */;
+			targetProxy = EAF100280000000000000000 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		08FE3C3BF15158B2E0E575BF /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -729,7 +760,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = EventSnap.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 54;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 5B2NQ74986;
 				ENABLE_PREVIEWS = YES;
@@ -739,7 +770,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0;
+				MARKETING_VERSION = 5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2;
 				PRODUCT_NAME = EventSnap;
 				SDKROOT = iphoneos;
@@ -759,7 +790,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = EventSnap.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 54;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 5B2NQ74986;
 				ENABLE_PREVIEWS = YES;
@@ -769,10 +800,130 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0;
+				MARKETING_VERSION = 5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2;
 				PRODUCT_NAME = EventSnap;
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		E90000000000000000000012 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 53;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = EventSnapClip/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 5.1;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.AppClip;
+				PRODUCT_NAME = EventSnapClip;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E90000000000000000000013 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 53;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = EventSnapClip/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 5.1;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.AppClip;
+				PRODUCT_NAME = EventSnapClip;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		EAF100250000000000000000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = EventSnapWidget/EventSnapWidget.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 53;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				INFOPLIST_FILE = EventSnapWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 5.1;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		EAF100260000000000000000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = EventSnapWidget/EventSnapWidget.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 53;
+				DEVELOPMENT_TEAM = 5B2NQ74986;
+				INFOPLIST_FILE = EventSnapWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 5.1;
+				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -845,126 +996,6 @@
 			};
 			name = Debug;
 		};
-		E90000000000000000000012 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
-				DEVELOPMENT_TEAM = 5B2NQ74986;
-				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = EventSnapClip/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.AppClip;
-				PRODUCT_NAME = EventSnapClip;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Debug;
-		};
-		E90000000000000000000013 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = EventSnapClip/EventSnapClip.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
-				DEVELOPMENT_TEAM = 5B2NQ74986;
-				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = EventSnapClip/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.AppClip;
-				PRODUCT_NAME = EventSnapClip;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Release;
-		};
-		EAF100250000000000000000 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = EventSnapWidget/EventSnapWidget.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
-				DEVELOPMENT_TEAM = 5B2NQ74986;
-				INFOPLIST_FILE = EventSnapWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Widget;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Debug;
-		};
-		EAF100260000000000000000 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = EventSnapWidget/EventSnapWidget.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
-				DEVELOPMENT_TEAM = 5B2NQ74986;
-				INFOPLIST_FILE = EventSnapWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.takaoka.com.EventSnap2.Widget;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.9;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1005,6 +1036,140 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.19.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		770D9999305517C0007D5194 /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		770D999A305517C0007D5194 /* FirebaseAILogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAILogic;
+		};
+		770D999B305517C0007D5194 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		770D999C305517C0007D5194 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		770D999D305517C0007D5194 /* FirebaseAnalyticsIdentitySupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsIdentitySupport;
+		};
+		770D999E305517C0007D5194 /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
+		770D999F305517C0007D5194 /* FirebaseAppDistribution-Beta */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAppDistribution-Beta";
+		};
+		770D99A0305517C0007D5194 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		770D99A1305517C0007D5194 /* FirebaseAuthCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAuthCombine-Community";
+		};
+		770D99A2305517C0007D5194 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		770D99A3305517C0007D5194 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		770D99A4305517C0007D5194 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		770D99A5305517C0007D5194 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		770D99A6305517C0007D5194 /* FirebaseFirestoreCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseFirestoreCombine-Community";
+		};
+		770D99A7305517C0007D5194 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		770D99A8305517C0007D5194 /* FirebaseFunctionsCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseFunctionsCombine-Community";
+		};
+		770D99A9305517C0007D5194 /* FirebaseInAppMessaging-Beta */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseInAppMessaging-Beta";
+		};
+		770D99AA305517C0007D5194 /* FirebaseInstallations */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseInstallations;
+		};
+		770D99AB305517C0007D5194 /* FirebaseMLModelDownloader */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMLModelDownloader;
+		};
+		770D99AC305517C0007D5194 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		770D99AD305517C0007D5194 /* FirebasePerformance */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebasePerformance;
+		};
+		770D99AE305517C0007D5194 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+		770D99AF305517C0007D5194 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		770D99B0305517C0007D5194 /* FirebaseStorageCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 770D9998305517C0007D5194 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseStorageCombine-Community";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 81ABA3FBA786DED3296CB919 /* Project object */;
 }
