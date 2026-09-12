@@ -28,6 +28,7 @@
 		9B2319CCFD1753657F39F1FE /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1FC9B16BEEE0613D3DEA5D /* MainTabView.swift */; };
 		A598EC34D1C567946A8DC44A /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */; };
 		AA1000000000000000000002 /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000000000000000000001 /* Reaction.swift */; };
+		AA2000000000000000000006 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000005 /* AnalyticsService.swift */; };
 		AA1000000000000000000004 /* ReactionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000000000000000000003 /* ReactionRepository.swift */; };
 		AFDD38475E88AE2F42DF276D /* PhotoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0010000000000000000000 /* PhotoAnalyzer.swift */; };
 		B53DCC3367AE67945491E976 /* PhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293E93A30DC002395CAFBFC2 /* PhotoRepository.swift */; };
@@ -154,6 +155,7 @@
 		8257853D0F117AD23C2561B6 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		A2D16059709C44664F34BE80 /* EventSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSnapApp.swift; sourceTree = "<group>"; };
 		AA1000000000000000000001 /* Reaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reaction.swift; sourceTree = "<group>"; };
+		AA2000000000000000000005 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		AA1000000000000000000003 /* ReactionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionRepository.swift; sourceTree = "<group>"; };
 		ADA12A1DDC8DDFA1F7CBAE67 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		BF4ACF1C8407E1D9AC33C3ED /* EventSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -258,6 +260,7 @@
 				E51005000000000000000000 /* TimeCapsuleService.swift */,
 				E51006000000000000000000 /* NotificationService.swift */,
 				E51007000000000000000000 /* PhotoImageLoader.swift */,
+				AA2000000000000000000005 /* AnalyticsService.swift */,
 				EA000A000000000000000000 /* SocialCardService.swift */,
 				EA0010000000000000000000 /* PhotoAnalyzer.swift */,
 				E51009000000000000000000 /* ShareCollageStore.swift */,
@@ -638,6 +641,7 @@
 				B53DCC3367AE67945491E976 /* PhotoRepository.swift in Sources */,
 				AA1000000000000000000002 /* Reaction.swift in Sources */,
 				AA1000000000000000000004 /* ReactionRepository.swift in Sources */,
+				AA2000000000000000000006 /* AnalyticsService.swift in Sources */,
 				0E2A78FCCE558028BB4A44D5 /* QRCodeService.swift in Sources */,
 				94A53529D607048BD1840E6E /* QRCodeView.swift in Sources */,
 				34EB75664A886F7BF143C002 /* QRScannerView.swift in Sources */,
