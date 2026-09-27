@@ -239,7 +239,9 @@ struct PhotoCell: View {
                     ReactionSummaryBadge(emojis: emojis)
                 }
             }
-            .task {
+            // 画像のURLが後から手に入った場合（取り直しでサムネイルのURLが届いた等）にも
+            // 読み込み直せるよう、URLをidにしておく。キャッシュ済みなら通信はしない。
+            .task(id: photo.thumbnailURL) {
                 await loadImage()
             }
     }
@@ -247,9 +249,11 @@ struct PhotoCell: View {
     private func loadImage() async {
         print("📥 画像ダウンロード開始: \(photo.id)")
         
-        isLoading = true
+        if image == nil { isLoading = true }
         
-        let downloadedImage = await viewModel.downloadImage(for: photo)
+        // グリッドは小さいので、本体画像（最大1920px）ではなくサムネイルを使う。
+        // 以前は全セルが本体画像を落としていたため、表示が遅く通信量も多かった。
+        let downloadedImage = await viewModel.thumbnail(for: photo)
         
         if let downloadedImage = downloadedImage {
             self.image = downloadedImage
@@ -351,7 +355,7 @@ struct ReactionSummaryBadge: View {
 
 struct PhotoDetailView: View {
     let photo: Photo
-    // 削除失敗時のエラー（`@Published var error`）をアラートで即座に反映できるよう
+    // 削除失敗時のエラー（`@Published var deleteError`）をアラートで即座に反映できるよう
     // 監視する。`PhotoCell`側の同名プロパティ（画像ダウンロードにしか使わない）は
     // 監視の必要が無いため、そちらは`let`のままにしている。
     @ObservedObject var viewModel: AlbumViewModel
@@ -360,6 +364,9 @@ struct PhotoDetailView: View {
 
     @State private var image: UIImage?
     @State private var isLoading = true
+    /// 本体画像（高解像度）まで読み込めたか。サムネイルを仮表示している間は
+    /// カメラロールへの保存をさせない（低解像度の画像が保存されてしまうため）。
+    @State private var isFullImageLoaded = false
     @State private var showingSaveConfirmation = false
     @State private var showingDeleteConfirmation = false
     @State private var isDeleting = false
@@ -465,7 +472,7 @@ struct PhotoDetailView: View {
                         .background(.ultraThinMaterial, in: Circle())
                         .environment(\.colorScheme, .dark)
                 }
-                .disabled(image == nil)
+                .disabled(!isFullImageLoaded)
             }
         }
         .task {
@@ -489,11 +496,11 @@ struct PhotoDetailView: View {
             Text("参加者全員から見えなくなります。この操作は取り消せません。")
         }
         .alert("削除できませんでした",
-               isPresented: Binding(get: { viewModel.error != nil },
-                                    set: { if !$0 { viewModel.error = nil } })) {
-            Button("OK", role: .cancel) { viewModel.error = nil }
+               isPresented: Binding(get: { viewModel.deleteError != nil },
+                                    set: { if !$0 { viewModel.deleteError = nil } })) {
+            Button("OK", role: .cancel) { viewModel.deleteError = nil }
         } message: {
-            Text(viewModel.error ?? "")
+            Text(viewModel.deleteError ?? "")
         }
     }
     
@@ -627,11 +634,19 @@ struct PhotoDetailView: View {
         print("📥 詳細画像ダウンロード開始: \(photo.id)")
         
         isLoading = true
+
+        // アルバムで表示済みのサムネイルがあれば先に出しておき、
+        // 本体画像が届いたら差し替える（待ち時間に真っ黒な画面を見せない）。
+        if image == nil, let thumbnail = await viewModel.thumbnail(for: photo) {
+            self.image = thumbnail
+            isLoading = false
+        }
         
         let downloadedImage = await viewModel.downloadImage(for: photo)
         
         if let downloadedImage = downloadedImage {
             self.image = downloadedImage
+            isFullImageLoaded = true
             print("✅ 詳細画像ダウンロード成功")
         } else {
             print("❌ 詳細画像ダウンロード失敗")

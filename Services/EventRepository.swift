@@ -79,11 +79,22 @@ class EventRepository: ObservableObject {
 
         guard currentEvent == nil, let savedID = savedCurrentEventID else { return }
 
+        // イベント情報の取得と並行して、写真一覧の取得も先に始めておく。
+        // 以前は「イベントの取得 → 完了後に写真の取得」と順番に通信していたため、
+        // アプリを開いてから写真が出るまでに往復2回分の待ち時間がかかっていた。
+        // アルバム側の取得（`AlbumViewModel.fetchPhotos`）は、実行中のこの取得を
+        // 待って結果を共有するので、二重に通信することはない。
+        if let uuid = UUID(uuidString: savedID) {
+            Task { try? await PhotoRepository.shared.fetchPhotos(for: uuid) }
+        }
+
         do {
             guard let event = try await fetchEvent(id: savedID) else {
                 print("⚠️ 保存されていたイベントが見つかりません。履歴から削除します")
                 if let uuid = UUID(uuidString: savedID) { forgetEvent(uuid) }
                 saveCurrentEventID(nil)
+                // 先に取り始めていた写真も、存在しないイベントのものなので捨てる
+                PhotoRepository.shared.clearPhotos()
                 return
             }
             applyCurrent(event)
