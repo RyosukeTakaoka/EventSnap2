@@ -29,6 +29,12 @@ class PhotoRepository: ObservableObject {
 
     init() {
         self.database = container.publicCloudDatabase
+
+        // 一覧取得では本体画像を落とさないので、必要になった時に取れるようにしておく
+        // （`PhotoImageLoader`はApp Clipでも使われるため、直接はこのクラスを参照しない）
+        PhotoImageLoader.shared.fullImageURLResolver = { [weak self] photo in
+            await self?.fetchImageURL(for: photo)
+        }
     }
 
     // MARK: - 写真アップロード
@@ -73,6 +79,17 @@ class PhotoRepository: ObservableObject {
             isShareOK: isShareOK
         )
 
+        // 画像をリサイズ（パフォーマンス向上）
+        guard let resizedImage = resizeImage(image, maxSize: 1920) else {
+            throw NSError(domain: "PhotoRepository", code: 1, userInfo: [NSLocalizedDescriptionKey: "画像のリサイズに失敗"])
+        }
+        let thumbnail = resizeImage(resizedImage, maxSize: 300)
+
+        // アルバムに並べる前に、手元の画像を画像キャッシュへ入れておく。
+        // ローカルに追加した直後の写真にはまだ画像のURLが無いため、これをしないと
+        // CloudKitから取り直すまでアルバムのセルが「読み込み失敗」の表示になっていた。
+        PhotoImageLoader.shared.store(image: resizedImage, thumbnail: thumbnail, for: photo.id)
+
         // ローカルキャッシュに即座に追加（UX向上）。
         // ただしタイムカプセルはアルバムに出さない。伏せた本人にも見せない。
         if !photo.isTimeCapsule {
@@ -80,31 +97,30 @@ class PhotoRepository: ObservableObject {
         }
         self.allPhotos.insert(photo, at: 0)
 
-        // 画像をリサイズ（パフォーマンス向上）
-        guard let resizedImage = resizeImage(image, maxSize: 1920) else {
-            rollback(photo)
-            throw NSError(domain: "PhotoRepository", code: 1, userInfo: [NSLocalizedDescriptionKey: "画像のリサイズに失敗"])
-        }
-
         // CloudKitレコード作成
         let record = photo.toRecord()
 
         // 画像データを一時ファイルに保存
-        if let imageData = resizedImage.jpegData(compressionQuality: 0.8) {
-            let tempURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("\(photo.id.uuidString).jpg")
+        do {
+            if let imageData = resizedImage.jpegData(compressionQuality: 0.8) {
+                let tempURL = FileManager.default.temporaryDirectory
+                    .appendingPathComponent("\(photo.id.uuidString).jpg")
 
-            try imageData.write(to: tempURL)
-            record["imageAsset"] = CKAsset(fileURL: tempURL)
+                try imageData.write(to: tempURL)
+                record["imageAsset"] = CKAsset(fileURL: tempURL)
 
-            // サムネイル生成
-            if let thumbnail = resizeImage(resizedImage, maxSize: 300),
-               let thumbnailData = thumbnail.jpegData(compressionQuality: 0.7) {
-                let thumbnailURL = FileManager.default.temporaryDirectory
-                    .appendingPathComponent("\(photo.id.uuidString)_thumb.jpg")
-                try thumbnailData.write(to: thumbnailURL)
-                record["thumbnailAsset"] = CKAsset(fileURL: thumbnailURL)
+                // サムネイル
+                if let thumbnailData = thumbnail?.jpegData(compressionQuality: 0.7) {
+                    let thumbnailURL = FileManager.default.temporaryDirectory
+                        .appendingPathComponent("\(photo.id.uuidString)_thumb.jpg")
+                    try thumbnailData.write(to: thumbnailURL)
+                    record["thumbnailAsset"] = CKAsset(fileURL: thumbnailURL)
+                }
             }
+        } catch {
+            // 一時ファイルに書けなかった場合も、ローカルに追加した写真を残さない
+            rollback(photo)
+            throw error
         }
 
         do {
@@ -146,39 +162,143 @@ class PhotoRepository: ObservableObject {
 
     // MARK: - 写真取得
 
+    /// 写真一覧の取得で読み込むフィールド。
+    ///
+    /// **本体画像（`imageAsset`、最大1920px）は含めない。** CloudKitのクエリは
+    /// 指定したフィールドのCKAssetを全部ダウンロードし終えるまで結果を返さないため、
+    /// 以前は写真の枚数分だけ大きな画像を落とし切るまでアルバムに何も出ず、
+    /// アプリを開いてから写真が表示されるまでが遅かった。
+    /// 一覧にはサムネイルだけを使い、本体画像は詳細画面などで必要になった時に
+    /// `fetchImageURL` で1枚ずつ取る。
+    private static let listDesiredKeys: [CKRecord.FieldKey] = [
+        "id", "eventID", "uploaderID", "uploaderName", "uploadedAt",
+        "filterName", "aiProcessed", "isTimeCapsule", "revealDate", "isShareOK",
+        "thumbnailAsset"
+    ]
+
+    /// 実行中の一覧取得。起動直後は複数の経路（アルバム画面の表示・イベントの復元・
+    /// アプリがアクティブになった時の同期）から同時に呼ばれるため、同じイベントの
+    /// 取得が走っている間はそれを待って結果を共有し、何度も通信しないようにする。
+    private var inFlightFetch: (eventID: UUID, task: Task<[Photo], Error>)?
+
+    /// 最後に取得を依頼されたイベント。イベントを切り替えた直後に、前のイベントの
+    /// 取得結果が遅れて届いて写真一覧を上書きしてしまうのを防ぐ。
+    private var latestRequestedEventID: UUID?
+
+    /// いま `photos`/`allPhotos` に入っている写真がどのイベントのものか
+    private var displayedEventID: UUID?
+
+    /// 自分が削除した写真のID。CloudKitのクエリは結果整合（反映に少し時間がかかる）
+    /// なので、削除した直後に一覧を取り直すと、消したはずの写真が戻ってくることがある。
+    /// その写真をもう一度消そうとすると「見つからない」エラーになるため、ここで除外する。
+    private var deletedPhotoIDs: Set<UUID> = []
+
     /// イベントの写真一覧を取得
     func fetchPhotos(for eventID: UUID) async throws {
         // 撮影モードではCloudKitに問い合わせない（注入済みのFixtureを維持する）
         guard !ScreenshotMode.suppressesLiveServices else { return }
 
+        latestRequestedEventID = eventID
+
+        // 別のイベントに切り替わった場合は、取得が終わるまで前のイベントの写真を
+        // 出し続けないよう先に空にする（別グループの写真が一瞬並ぶのを防ぐ）
+        if let displayedEventID, displayedEventID != eventID {
+            photos = []
+            allPhotos = []
+        }
+
+        let task: Task<[Photo], Error>
+        if let running = inFlightFetch, running.eventID == eventID {
+            task = running.task
+        } else {
+            task = Task { try await self.queryPhotos(for: eventID) }
+            inFlightFetch = (eventID, task)
+        }
+
+        let fetchedPhotos: [Photo]
+        do {
+            fetchedPhotos = try await task.value
+        } catch {
+            if inFlightFetch?.task == task { inFlightFetch = nil }
+            print("❌ 写真取得失敗: \(error)")
+            self.error = error
+            throw error
+        }
+        if inFlightFetch?.task == task { inFlightFetch = nil }
+
+        // 取得中に別のイベントへ切り替わっていたら、古い結果は捨てる
+        guard latestRequestedEventID == eventID else { return }
+
+        let visible = fetchedPhotos.filter { !deletedPhotoIDs.contains($0.id) }
+        displayedEventID = eventID
+
+        self.allPhotos = visible
+        // アルバムには公開済みのものだけを流す。
+        // 公開判定は revealDate との比較なので、全端末で同じ結果になる。
+        self.photos = TimeCapsuleService.albumPhotos(visible)
+
+        let locked = visible.count - self.photos.count
+        print("✅ 写真取得成功: 公開済み \(self.photos.count)枚 / 未公開 \(locked)枚")
+    }
+
+    /// CloudKitから1イベント分の写真を取得する。
+    ///
+    /// 1回のクエリで返ってくる件数には上限があるため、カーソルをたどって
+    /// 最後まで読む（以前は最初の1ページ分しか取っておらず、写真が多いイベントでは
+    /// 古い写真がアルバムに出てこなかった）。
+    private func queryPhotos(for eventID: UUID) async throws -> [Photo] {
         let predicate = NSPredicate(format: "eventID == %@", eventID.uuidString)
         let query = CKQuery(recordType: "Photo", predicate: predicate)
         query.sortDescriptors = [NSSortDescriptor(key: "uploadedAt", ascending: false)]
 
-        do {
-            let results = try await database.records(matching: query)
+        var fetchedPhotos: [Photo] = []
 
-            var fetchedPhotos: [Photo] = []
-
-            for (_, result) in results.matchResults {
+        func append(_ matchResults: [(CKRecord.ID, Result<CKRecord, Error>)]) {
+            for (_, result) in matchResults {
                 if let record = try? result.get(),
                    let photo = Photo.from(record: record) {
                     fetchedPhotos.append(photo)
                 }
             }
-
-            self.allPhotos = fetchedPhotos
-            // アルバムには公開済みのものだけを流す。
-            // 公開判定は revealDate との比較なので、全端末で同じ結果になる。
-            self.photos = TimeCapsuleService.albumPhotos(fetchedPhotos)
-
-            let locked = fetchedPhotos.count - self.photos.count
-            print("✅ 写真取得成功: 公開済み \(self.photos.count)枚 / 未公開 \(locked)枚")
-        } catch {
-            print("❌ 写真取得失敗: \(error)")
-            self.error = error
-            throw error
         }
+
+        var page = try await database.records(matching: query, desiredKeys: Self.listDesiredKeys)
+        append(page.matchResults)
+
+        while let cursor = page.queryCursor {
+            page = try await database.records(continuingMatchFrom: cursor, desiredKeys: Self.listDesiredKeys)
+            append(page.matchResults)
+        }
+
+        return fetchedPhotos
+    }
+
+    /// 写真1枚分の本体画像（`imageAsset`）をダウンロードし、そのファイルURLを返す。
+    /// 一覧取得では本体画像を落とさないため、`PhotoImageLoader` から必要な時だけ呼ばれる。
+    func fetchImageURL(for photo: Photo) async -> URL? {
+        do {
+            let results = try await database.records(for: [photo.recordID], desiredKeys: ["imageAsset"])
+            if let record = try results[photo.recordID]?.get(),
+               let asset = record["imageAsset"] as? CKAsset {
+                return asset.fileURL
+            }
+        } catch {
+            // 旧形式（recordNameがランダム）のレコードかもしれないので、下のフィールド検索に落とす
+        }
+
+        do {
+            let predicate = NSPredicate(format: "id == %@", photo.id.uuidString)
+            let query = CKQuery(recordType: "Photo", predicate: predicate)
+            let results = try await database.records(matching: query, desiredKeys: ["imageAsset"], resultsLimit: 1)
+            if let (_, result) = results.matchResults.first,
+               let record = try? result.get(),
+               let asset = record["imageAsset"] as? CKAsset {
+                return asset.fileURL
+            }
+        } catch {
+            print("❌ 本体画像の取得に失敗 (\(photo.id)): \(error)")
+        }
+        return nil
     }
 
     /// シェアが許可された写真だけを、撮影順（古い順）に取り出す（Event Reel生成用）。
@@ -326,21 +446,20 @@ class PhotoRepository: ObservableObject {
         } catch let error as CKError where error.code == .unknownItem {
             // レコードがrecordIDで見つからない。旧形式(recordNameがランダム)の
             // 可能性があるのでフィールド検索してから削除する。
-            let predicate = NSPredicate(format: "id == %@", photo.id.uuidString)
-            let query = CKQuery(recordType: "Photo", predicate: predicate)
-            let results = try await database.records(matching: query)
-            guard let (recordID, _) = results.matchResults.first else {
-                // CloudKit上にはもう無い。ローカルのキャッシュだけ整合させて成功扱いにする。
-                removeFromCaches(photo.id)
-                return true
+            do {
+                try await deleteLegacyRecord(for: photo)
+            } catch {
+                print("❌ 写真の削除に失敗 (\(photo.id)): \(error)")
+                self.error = error
+                throw error
             }
-            _ = try await database.deleteRecord(withID: recordID)
         } catch {
             print("❌ 写真の削除に失敗 (\(photo.id)): \(error)")
             self.error = error
             throw error
         }
 
+        deletedPhotoIDs.insert(photo.id)
         removeFromCaches(photo.id)
 
         // シェアOKでEvent Reelに使われていた場合、そこからも取り除いて作り直す
@@ -355,6 +474,30 @@ class PhotoRepository: ObservableObject {
 
         print("🗑️ 写真を削除しました: \(photo.id)")
         return true
+    }
+
+    /// 旧形式（recordNameがランダム）のレコードを、フィールド検索で見つけて削除する。
+    /// 見つからない・削除しようとした時にはもう無かった場合は、すでに消えているので成功扱いにする
+    /// （クエリは結果整合なので、消えたばかりのレコードが検索に残っていることがある）。
+    private func deleteLegacyRecord(for photo: Photo) async throws {
+        let predicate = NSPredicate(format: "id == %@", photo.id.uuidString)
+        let query = CKQuery(recordType: "Photo", predicate: predicate)
+        let results = try await database.records(matching: query, desiredKeys: ["id"], resultsLimit: 1)
+        guard let (recordID, _) = results.matchResults.first else { return }
+
+        do {
+            _ = try await database.deleteRecord(withID: recordID)
+        } catch let error as CKError where error.code == .unknownItem {
+            return
+        }
+    }
+
+    /// 表示中の写真一覧を空にする（実行中の取得結果も反映させない）
+    func clearPhotos() {
+        latestRequestedEventID = nil
+        displayedEventID = nil
+        photos = []
+        allPhotos = []
     }
 
     private func removeFromCaches(_ photoID: UUID) {
@@ -404,8 +547,11 @@ class PhotoRepository: ObservableObject {
         let subscription = CKQuerySubscription(
             recordType: "Photo",
             predicate: predicate,
-            subscriptionID: "photo-added-\(eventID.uuidString)",
-            options: [.firesOnRecordCreation]
+            subscriptionID: "photo-changed-\(eventID.uuidString)",
+            // 追加だけでなく、削除・更新（タイムカプセルの解除など）も他の参加者の
+            // 端末へすぐ反映されるようにする。以前は追加でしか通知されず、誰かが消した
+            // 写真が他の端末のアルバムに残り続けていた。
+            options: [.firesOnRecordCreation, .firesOnRecordUpdate, .firesOnRecordDeletion]
         )
 
         let notificationInfo = CKSubscription.NotificationInfo()
@@ -416,6 +562,9 @@ class PhotoRepository: ObservableObject {
 
         do {
             _ = try await database.save(subscription)
+            // 以前の「追加だけ」のサブスクリプションが残っていると通知が二重に届くので消す
+            // （無ければ失敗するだけなので結果は見ない）
+            _ = try? await database.deleteSubscription(withID: "photo-added-\(eventID.uuidString)")
             print("✅ リアルタイム同期設定完了")
         } catch {
             print("❌ Subscription設定失敗: \(error)")

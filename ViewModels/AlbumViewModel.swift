@@ -38,7 +38,14 @@ class AlbumViewModel: ObservableObject {
     /// タイムカプセルでまだ公開されていない写真（参加者全員分。中身はグレーで隠す）
     @Published var locked: [Photo] = []
     @Published var isLoading = false
+    /// 写真一覧の取得に失敗したときのメッセージ
     @Published var error: String?
+    /// 写真の削除に失敗したときのメッセージ（詳細画面のアラート専用）。
+    ///
+    /// 以前は取得失敗と同じ `error` を使っていたため、アルバムの更新や
+    /// イベント切り替えで写真の取得に失敗しただけでも、写真の詳細画面を開くと
+    /// 「削除できませんでした」というアラートが出てしまっていた。
+    @Published var deleteError: String?
 
     private let photoRepository = PhotoRepository.shared
     private let eventRepository = EventRepository.shared
@@ -72,12 +79,15 @@ class AlbumViewModel: ObservableObject {
 
         do {
             try await photoRepository.fetchPhotos(for: event.id)
+            self.error = nil
             // 未公開の写真に対して公開通知を予約し直す
             await NotificationService.shared.scheduleReveals(
                 for: photoRepository.allPhotos,
                 event: event,
                 viewerID: DeviceIdentity.current
             )
+        } catch is CancellationError {
+            // 引っ張って更新を途中でやめた時など。失敗ではないので何も出さない
         } catch {
             self.error = "写真の取得に失敗しました"
             print("❌ 写真取得エラー: \(error)")
@@ -169,7 +179,7 @@ class AlbumViewModel: ObservableObject {
         do {
             return try await photoRepository.deletePhoto(photo, event: event)
         } catch {
-            self.error = AlbumViewModel.message(for: error)
+            self.deleteError = AlbumViewModel.message(for: error)
             print("❌ 写真削除エラー: \(error)")
             return false
         }
