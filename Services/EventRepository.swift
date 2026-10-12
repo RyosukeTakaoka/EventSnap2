@@ -206,27 +206,70 @@ class EventRepository: ObservableObject {
         // 撮影モードでは履歴を読み直さない（注入済みのFixtureを維持する）
         guard !ScreenshotMode.suppressesLiveServices else { return }
 
+        // 起動直後は「イベントの復元」と「ホーム画面の表示」の両方から呼ばれる。
+        // 同じ通信を二重に走らせないよう、実行中のものがあればそれを待つだけにする。
+        if let running = inFlightRecentEventsLoad {
+            await running.value
+            return
+        }
+
+        let task = Task { await self.reloadRecentEvents() }
+        inFlightRecentEventsLoad = task
+        await task.value
+        inFlightRecentEventsLoad = nil
+    }
+
+    /// 実行中の `loadRecentEvents`
+    private var inFlightRecentEventsLoad: Task<Void, Never>?
+
+    private func reloadRecentEvents() async {
         let ids = joinedEventIDs
         guard !ids.isEmpty else {
             recentEvents = []
             return
         }
 
+        // 履歴は最大20件ある。以前は1件ずつ順番に取っていたため、通信の往復が
+        // 件数分だけ直列に並び、アプリを開いてからの待ち時間を長くしていた。
+        // 互いに独立した取得なので、まとめて同時に行う。
+        enum Outcome {
+            case found(Event)
+            case absent
+            case failed
+        }
+
+        var outcomes: [String: Outcome] = [:]
+
+        await withTaskGroup(of: (String, Outcome).self) { group in
+            for id in ids {
+                group.addTask { @MainActor in
+                    do {
+                        if let event = try await self.fetchEvent(id: id) {
+                            return (id, .found(event))
+                        }
+                        return (id, .absent)
+                    } catch {
+                        // `absent` にしてはいけない。取得に失敗しただけで
+                        // 履歴から消すと、通信不良やスキーマ不備のたびに
+                        // 「グループが消えた」状態になる。次回の読み込みでやり直す。
+                        print("⚠️ 履歴イベントの取得に失敗（履歴は保持）: \(id) / \(error)")
+                        return (id, .failed)
+                    }
+                }
+            }
+            for await (id, outcome) in group {
+                outcomes[id] = outcome
+            }
+        }
+
+        // 並行して取ったので届いた順はバラバラ。履歴（最近使った順）の並びに戻す。
         var loaded: [Event] = []
         var missing: [String] = []
-
         for id in ids {
-            do {
-                if let event = try await fetchEvent(id: id) {
-                    loaded.append(event)
-                } else {
-                    missing.append(id)
-                }
-            } catch {
-                // ここで `missing` に入れてはいけない。取得に失敗しただけで
-                // 履歴から消すと、通信不良やスキーマ不備のたびに
-                // 「グループが消えた」状態になる。次回の読み込みでやり直す。
-                print("⚠️ 履歴イベントの取得に失敗（履歴は保持）: \(id) / \(error)")
+            switch outcomes[id] {
+            case .found(let event): loaded.append(event)
+            case .absent: missing.append(id)
+            case .failed, .none: break
             }
         }
 
