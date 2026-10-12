@@ -207,11 +207,19 @@ class PhotoRepository: ObservableObject {
             allPhotos = []
         }
 
+        // この取得が「初めての表示」か。まだ何も出ていない（アプリを開いた直後・
+        // イベントを切り替えた直後）なら、全ページを待たず届いた分から順に表示する。
+        // すでに同じイベントの写真が出ている更新（引っ張って更新など）では、
+        // 途中の少ない枚数で置き換えると写真が一瞬減って見えるので、最後にまとめて入れ替える。
+        let showsProgressively = displayedEventID != eventID
+
         let task: Task<[Photo], Error>
         if let running = inFlightFetch, running.eventID == eventID {
             task = running.task
         } else {
-            task = Task { try await self.queryPhotos(for: eventID) }
+            task = Task {
+                try await self.queryPhotos(for: eventID, showsProgressively: showsProgressively)
+            }
             inFlightFetch = (eventID, task)
         }
 
@@ -229,6 +237,14 @@ class PhotoRepository: ObservableObject {
         // 取得中に別のイベントへ切り替わっていたら、古い結果は捨てる
         guard latestRequestedEventID == eventID else { return }
 
+        show(fetchedPhotos, for: eventID)
+
+        let locked = allPhotos.count - photos.count
+        print("✅ 写真取得成功: 公開済み \(photos.count)枚 / 未公開 \(locked)枚")
+    }
+
+    /// 取得した写真を画面に流す（削除済みの写真は除く）。
+    private func show(_ fetchedPhotos: [Photo], for eventID: UUID) {
         let visible = fetchedPhotos.filter { !deletedPhotoIDs.contains($0.id) }
         displayedEventID = eventID
 
@@ -236,17 +252,25 @@ class PhotoRepository: ObservableObject {
         // アルバムには公開済みのものだけを流す。
         // 公開判定は revealDate との比較なので、全端末で同じ結果になる。
         self.photos = TimeCapsuleService.albumPhotos(visible)
-
-        let locked = visible.count - self.photos.count
-        print("✅ 写真取得成功: 公開済み \(self.photos.count)枚 / 未公開 \(locked)枚")
     }
+
+    /// 最初のページに取る件数。
+    ///
+    /// 小さめにしているのは、CloudKitのクエリが「このページのサムネイルを全部
+    /// ダウンロードし終えてから」結果を返すため。全件を1回で待つと、写真が多いほど
+    /// 何も出ない時間が長くなる。画面に最初に見えるのは十数枚なので、まずそれが
+    /// 埋まる分だけを速く返してもらい、残りは続きのページとして後から足す。
+    private static let firstPageSize = 30
 
     /// CloudKitから1イベント分の写真を取得する。
     ///
     /// 1回のクエリで返ってくる件数には上限があるため、カーソルをたどって
     /// 最後まで読む（以前は最初の1ページ分しか取っておらず、写真が多いイベントでは
     /// 古い写真がアルバムに出てこなかった）。
-    private func queryPhotos(for eventID: UUID) async throws -> [Photo] {
+    ///
+    /// - Parameter showsProgressively: `true` なら、ページが届くたびに画面へ流す。
+    ///   取得は新しい順なので、最初のページだけで画面の先頭が埋まる。
+    private func queryPhotos(for eventID: UUID, showsProgressively: Bool) async throws -> [Photo] {
         let predicate = NSPredicate(format: "eventID == %@", eventID.uuidString)
         let query = CKQuery(recordType: "Photo", predicate: predicate)
         query.sortDescriptors = [NSSortDescriptor(key: "uploadedAt", ascending: false)]
@@ -262,12 +286,25 @@ class PhotoRepository: ObservableObject {
             }
         }
 
-        var page = try await database.records(matching: query, desiredKeys: Self.listDesiredKeys)
+        /// 続きのページがあるときだけ、ここまでの分を先に画面へ出す。
+        /// 最後のページは呼び出し元（`fetchPhotos`）がまとめて反映するので、ここでは出さない。
+        func showSoFar(hasMorePages: Bool) {
+            guard showsProgressively, hasMorePages, latestRequestedEventID == eventID else { return }
+            show(fetchedPhotos, for: eventID)
+        }
+
+        var page = try await database.records(
+            matching: query,
+            desiredKeys: Self.listDesiredKeys,
+            resultsLimit: Self.firstPageSize
+        )
         append(page.matchResults)
+        showSoFar(hasMorePages: page.queryCursor != nil)
 
         while let cursor = page.queryCursor {
             page = try await database.records(continuingMatchFrom: cursor, desiredKeys: Self.listDesiredKeys)
             append(page.matchResults)
+            showSoFar(hasMorePages: page.queryCursor != nil)
         }
 
         return fetchedPhotos

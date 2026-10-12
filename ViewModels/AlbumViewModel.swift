@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import CloudKit
 
 /// アルバムのグリッドに並べる1枠分。
 ///
@@ -40,12 +41,21 @@ class AlbumViewModel: ObservableObject {
     @Published var isLoading = false
     /// 写真一覧の取得に失敗したときのメッセージ
     @Published var error: String?
-    /// 写真の削除に失敗したときのメッセージ（詳細画面のアラート専用）。
+    /// 写真の削除に失敗したときの内容（詳細画面のアラート専用）。
     ///
     /// 以前は取得失敗と同じ `error` を使っていたため、アルバムの更新や
     /// イベント切り替えで写真の取得に失敗しただけでも、写真の詳細画面を開くと
     /// 「削除できませんでした」というアラートが出てしまっていた。
-    @Published var deleteError: String?
+    ///
+    /// どの写真の削除に失敗したのかも持たせている。メッセージだけだと、
+    /// 失敗の通知が残っている間に別の写真を開いたとき、消そうとしていない
+    /// 写真の画面にまで「削除できませんでした」が出てしまうため。
+    @Published var deleteFailure: DeleteFailure?
+
+    struct DeleteFailure: Equatable {
+        let photoID: UUID
+        let message: String
+    }
 
     private let photoRepository = PhotoRepository.shared
     private let eventRepository = EventRepository.shared
@@ -176,19 +186,38 @@ class AlbumViewModel: ObservableObject {
     func deletePhoto(_ photo: Photo) async -> Bool {
         guard let event = eventRepository.currentEvent else { return false }
 
+        // 前回の失敗表示が残っていたら消してからやり直す
+        deleteFailure = nil
+
         do {
             return try await photoRepository.deletePhoto(photo, event: event)
         } catch {
-            self.deleteError = AlbumViewModel.message(for: error)
+            self.deleteFailure = DeleteFailure(photoID: photo.id, message: AlbumViewModel.message(for: error))
             print("❌ 写真削除エラー: \(error)")
             return false
         }
     }
 
+    /// 失敗の理由が分かる日本語にする。
+    /// 「失敗しました」だけでは、通信の問題なのか権限の問題なのか区別できない。
     private static func message(for error: Error) -> String {
         if let localized = error as? LocalizedError, let description = localized.errorDescription {
             return description
         }
-        return "写真の削除に失敗しました"
+
+        guard let ckError = error as? CKError else { return "写真の削除に失敗しました" }
+
+        switch ckError.code {
+        case .notAuthenticated:
+            return "iCloudにサインインしていません。\n「設定」アプリからサインインしてください。"
+        case .networkUnavailable, .networkFailure, .serverResponseLost:
+            return "ネットワークに接続できません。\n通信環境をご確認のうえ、もう一度お試しください。"
+        case .serviceUnavailable, .requestRateLimited, .zoneBusy:
+            return "iCloudが混み合っています。\nしばらくしてからもう一度お試しください。"
+        case .permissionFailure:
+            return "この写真を削除する権限がありません。\n撮影したときと同じiCloudアカウントか、ご確認ください。"
+        default:
+            return "写真の削除に失敗しました。\n(\(ckError.localizedDescription))"
+        }
     }
 }

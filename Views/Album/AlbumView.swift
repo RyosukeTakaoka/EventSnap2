@@ -35,7 +35,20 @@ struct AlbumView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                if viewModel.items.isEmpty {
+                if viewModel.items.isEmpty && viewModel.isLoading {
+                    // 読み込み中。ここで「まだ写真がありません」を出すと、
+                    // 写真があるのに無いように見えてしまう（アプリを開いた直後に起きていた）。
+                    VStack(spacing: 16) {
+                        Spacer()
+                        ProgressView()
+                        Text("写真を読み込み中…")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding()
+                } else if viewModel.items.isEmpty {
                     // 空の状態
                     VStack(spacing: 20) {
                         Spacer()
@@ -355,7 +368,7 @@ struct ReactionSummaryBadge: View {
 
 struct PhotoDetailView: View {
     let photo: Photo
-    // 削除失敗時のエラー（`@Published var deleteError`）をアラートで即座に反映できるよう
+    // 削除失敗時のエラー（`@Published var deleteFailure`）をアラートで即座に反映できるよう
     // 監視する。`PhotoCell`側の同名プロパティ（画像ダウンロードにしか使わない）は
     // 監視の必要が無いため、そちらは`let`のままにしている。
     @ObservedObject var viewModel: AlbumViewModel
@@ -495,12 +508,16 @@ struct PhotoDetailView: View {
         } message: {
             Text("参加者全員から見えなくなります。この操作は取り消せません。")
         }
+        // 「この写真」の削除に失敗したときだけ出す。別の写真の削除失敗が残っていても、
+        // いま開いているこの写真の画面には出さない（消そうとしていない写真で出てしまう）。
         .alert("削除できませんでした",
-               isPresented: Binding(get: { viewModel.deleteError != nil },
-                                    set: { if !$0 { viewModel.deleteError = nil } })) {
-            Button("OK", role: .cancel) { viewModel.deleteError = nil }
+               isPresented: Binding(
+                   get: { viewModel.deleteFailure?.photoID == photo.id },
+                   set: { if !$0 { viewModel.deleteFailure = nil } }
+               )) {
+            Button("OK", role: .cancel) { viewModel.deleteFailure = nil }
         } message: {
-            Text(viewModel.deleteError ?? "")
+            Text(viewModel.deleteFailure?.message ?? "")
         }
     }
     
